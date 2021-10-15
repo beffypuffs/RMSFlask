@@ -1,24 +1,20 @@
 <!DOCTYPE html>
-<html lang = "en">
-<head>
-	<link href = "style.css" rel="stylesheet" type="text/css" >
-	<title>Help Page</title>
-<head>
-
+<html>
+<style>
+    div {
+        padding = 20px;
+    }
+    a {font-size: 60px;}
+    h1 {font-size: 50px;}
+</style>
 <body>
-    <header>
-        <div style="position: relative; left: 0; top: 0;">
-            <a href="index.php"><img src="logo.png" alt="Kaiser Aluminium Logo"/></a> <!--height="150" width="300" class="logo"-->
-        </div>	
-    </header>
-
-    <nav>
-        <h2> RMS Links: </h2>
-        <ul>
-            <li><a href = "http://127.0.0.1:5000/home">Roll Management Home</a></li>
-            <li><a href = "http://127.0.0.1:5000/chocks">Chocks and Bearings forms</a></li>
-            <li><a href = "http://127.0.0.1:5000/notifications">Notification Settings</a></li>
-        </ul>
-    </nav>
+<div>
+<img src="/static/images/logo.png" style = "height = 250px; width = 500px;">
+<h1>RMS links</h1>
+<a href = "http://127.0.0.1:5000/home">Roll Management Home</a><br>
+<a href = "http://127.0.0.1:5000/chocks">Chocks and Bearings forms</a><br>
+<a href = "http://127.0.0.1:5000/notifications">Notification Settings</a><br>
+<a href = "http://127.0.0.1:5000/sql">SQL connect placeholder</a><br>
+</div>
 </body>
 </html>
