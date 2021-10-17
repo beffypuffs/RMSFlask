@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <body>
-<img src="/static/images/logo.png" style = "height = 250px; width = 500px;">
+<img src="/static/images/logo.png" style = "height: 125px; width: 250px;">
 &emsp;<h1>Options:</h1>
 <font size = "5">
 &emsp;&emsp;Please select if you:<br><br>
@@ -9,5 +9,13 @@
     &emsp;&emsp;Want to set up notifications: <button type = "button">Add Email</button> <br><br>
 &emsp;&emsp;No longer want to receive email notifications: <button type = "button">Remove Email</button> <br><br>
 </font>
+    <script>
+        function openForm() {
+            document.getElementById("popupForm").style.display = "block";
+        }
+        function closeForm() {
+            document.getElementById("popupForm").style.display = "none";
+        }
+    </script>
 </body>
 </html>
