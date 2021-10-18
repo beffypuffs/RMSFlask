@@ -5,16 +5,29 @@
 &emsp;<h1>Options:</h1>
 <font size = "5">
 &emsp;&emsp;Please select if you:<br><br>
-&emsp;&emsp;Are already receiving email notifications and want to adjust settings: <button type = "button">Edit Settings</button> <br><br>
-    &emsp;&emsp;Want to set up notifications: <button type = "button">Add Email</button> <br><br>
+&emsp;&emsp;Are already receiving email notifications and want to adjust settings: <button type = "button" onclick="openAddForm()"><strong>Edit Settings</strong></button> <br><br>
+&emsp;&emsp;Want to set up notifications: <button type = "button">Add Email</button> <br><br>
 &emsp;&emsp;No longer want to receive email notifications: <button type = "button">Remove Email</button> <br><br>
+<div class = "loginPopup"> </div>
 </font>
     <script>
-        function openForm() {
-            document.getElementById("popupForm").style.display = "block";
+        function openAddForm() {
+            document.getElementById("AddForm").style.display = "block";
         }
-        function closeForm() {
-            document.getElementById("popupForm").style.display = "none";
+        function closeAddForm() {
+            document.getElementById("AddForm").style.display = "none";
+        }
+        function openRemoveForm() {
+            document.getElementById("RemoveForm").style.display = "block";
+        }
+        function closeRemoveForm() {
+            document.getElementById("RemoveForm").style.display = "none";
+        }
+        function openSettingsForm() {
+            document.getElementById("SettingsForm").style.display = "block";
+        }
+        function openSettingsForm() {
+            document.getElementById("SettingsForm").style.display = "none";
         }
     </script>
 </body>

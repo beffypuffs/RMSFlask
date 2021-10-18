@@ -1,5 +1,6 @@
-from flask import Flask, redirect, url_for, render_template
+from flask import Flask, redirect, url_for, render_template, request
 import pypyodbc as pp
+
 
 
 app = Flask(__name__)
@@ -18,6 +19,7 @@ def chocks():
 @app.route("/notifications")
 def notification():
     return render_template('notifications.html')
+    #return render_template('temp.html')
 
 
 @app.route("/home")
@@ -28,7 +30,8 @@ def home():
 #Replace with /index when its finished
 @app.route("/queryresults")
 def query():
-    return query_results()
+    #return query_results()
+    return render_template('rollData.html')
 
 
 
@@ -54,11 +57,31 @@ def query_results(): #Displays roll information
         page += "status: " + str(row[6]) + "<br>" #also null
         page += "manufactured_date: " + str(row[7]) + "<br>"#ditto
     page += "</body></html>"
+
+    file = open("rollData.html", "w")
+    file.write(page)
+    file.close()
     return page
 
 
-    
-    #return render_template('sql.html')
+# @app.route('/save-settings', methods = ['POST'])#template for saving data from a webpage
+# def save_settings():
+#     if request.method == 'POST':
+#         badge_number = request.form['badge number']
+#         name = request.form['name']
+#         email = request.form['email']
+
+
+
+#         fieldnames = ['badge_number', 'name', 'email']
+
+#         with open('emailList.csv', 'w') as inFile:
+#             writer = csv.DictWriter(inFile, fieldnames = fieldnames)
+#             writer.writerow({'badge number': badge_number, name: 'name', email:'email' })
+
+#         return 'thing'
+
+        
 
 
 if __name__ == "__main__":
