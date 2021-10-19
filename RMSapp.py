@@ -29,7 +29,7 @@ def notification():
 
 @app.route("/")
 def home():
-    return render_template('index.html')
+    return query_results()
 
 
 #Replace with /index when its finished
@@ -101,22 +101,87 @@ def query_results(): #Displays roll information
     cur = connection.cursor() #used to execute actions, might be able do more idk
     cur.execute("Select *  From roll ORDER BY roll_num DESC")#query
     data = cur.fetchall()
-    page = "<!DOCTYPE html><html lang = \"en\"><body>"#May be a better way to have html files interact with flask, right now it just writes the html each time this runs
-    for row in data:
-        page += "=============<br>"
-        page += "roll_num: " + str(row[0]) + "<br>"
-        page += "roll_mate: " + str(row[1])+ "<br>" #always null, ask about it on monday
-        page += "current_diameter: " + str(row[2]) + "<br>"
-        page += "starting_diameter: " + str(row[3]) + "<br>"
-        page += "mill: " + str(row[4]) + "<br>"
-        page += "roll_type: " + str(row[5]) + "<br>"
-        page += "status: " + str(row[6]) + "<br>" #also null
-        page += "manufactured_date: " + str(row[7]) + "<br>"#ditto
-    page += "</body></html>"
+    # below is literally the entire first half of the html, move to text file and read from that
+    page = """
+    <!DOCTYPE html> 
+<html lang = "en">
+<head>
+	<link href = "style.css" rel="stylesheet" type="text/css" >
 
-    file = open("rollData.html", "w")
-    file.write(page)
-    file.close()
+	<title>RMS Home</title>
+
+</head>
+<body>
+	<header>
+	<!-- Help icon and links -->
+	<div id="helpOption">
+		<a href="http://127.0.0.1:5000/help">Help</a>
+		<a href="http://127.0.0.1:5000//help"><img src="static/images/helpBtn.png" height="60" width="60" class = "helpBtn" alt="Help Button" /></a>
+	</div>
+	<!-- Main Kaiser logo and page navigation links -->
+		<img src="static/images/logo.png" alt="Kaiser Aluminium Logo"/>
+		<p style="text-align: center">
+		<strong>Home Roll Management Page</strong>  |  <a href="http://127.0.0.1:5000/chocksMenu">Chocks and Bearings </a>  |  <a href="http://127.0.0.1:5000/notifications">Notification Settings</a>
+		</p>
+	</header>
+
+	<main>
+		<br>
+		<br>
+	<!-- big table with links to roll data and lots of data
+		will need to activate filtering feature
+		maybe a search bar sort of thing?-->
+	<div>
+	<table class = "center">
+	<caption><strong>General Roll Information</strong>
+	<!-- seach bar to look for any value in the roll table -->
+	<input type = "text" id = "filter_input" onkeyup ="searchFunction()" placeholder = "Search" title="Type in desired table value ">
+		<tr>
+			<th><strong>Roll ID</strong></th>
+			<th><strong>Status</strong></th> <!-- Will automatically determine red or green for not in use or in use-->
+			<th><strong>Current Diameter</strong></th>
+			<th><strong>Starting Diameter</strong></th>
+			<th><strong>Mill</strong></th>
+			<th><strong>Roll Type</strong></th>
+			<th><strong>Manufacured Date</strong></th>
+		</tr>"""
+    for row in data:
+        page += "<tr>"
+        page += "<td> " + str(row[0]) + "</td>"
+        page += "<td> " + str(row[1]) + "</td>"
+        page += "<td> " + str(row[2]) + "</td>" #always null, ask about it on monday
+        page += "<td> " + str(row[3]) + "</td>"
+        page += "<td> " + str(row[4]) + "</td>"
+        page += "<td> " + str(row[5]) + "</td>"
+        page += "<td> " + str(row[6]) + "</td>"
+        page += "</tr>"
+        
+    #below this is literally the entire second half of index.html
+    page += """
+    </table> 
+	</div>
+	</main>
+<script>
+	//Filtering function for the search function to look through entire table for the value
+	function searchFunction() {
+    let tabel, filter, input, tr, td, i;
+    input = document.getElementById("filter_input");
+    filter = input.value.toUpperCase();
+    tabel = document.getElementById("roll_table");
+    tr = document.getElementsByTagName("tr");
+    for (i = 1; i < tr.length; i++) {
+        if (tr[i].textContent.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+        } else {
+            tr[i].style.display = "none";
+			}
+		}
+	}
+
+</script>
+</body>
+</html> 
+"""
     return page
 
 
