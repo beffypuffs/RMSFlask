@@ -13,13 +13,13 @@
 	<header>
 	<!-- Help icon and links -->
 	<div id="helpOption">
-		<a href="helpPage.html">Help</a>
-		<a href="helpPage.html"><img src="helpBtn.png" height="60" width="60" class = "helpBtn" alt="Help Button" /></a>
+		<a href="http://127.0.0.1:5000/help">Help</a>
+		<a href="http://127.0.0.1:5000//help"><img src="static/images/helpBtn.png" height="60" width="60" class = "helpBtn" alt="Help Button" /></a>
 	</div>
 	<!-- Main Kaiser logo and page navigation links -->
-		<img src="logo.png" alt="Kaiser Aluminium Logo"/>
+		<img src="static/images/logo.png" alt="Kaiser Aluminium Logo"/>
 		<p style="text-align: center">
-		<strong>Home Roll Management Page</strong>  |  <a href="chocksMenu.php">Chocks and Bearings </a>  |  <a href="notifications.html">Notification Settings</a>
+		<strong>Home Roll Management Page</strong>  |  <a href="http://127.0.0.1:5000/chocksMenu">Chocks and Bearings </a>  |  <a href="http://127.0.0.1:5000/notifications">Notification Settings</a>
 		</p>
 	</header>
 
@@ -45,22 +45,7 @@
 		</tr>
 		<!-- Below are all just currently space fillers to show desired future look -->
 		<tr>
-			<?php
-				foreach ($result as $key => $rows) {
-
-			 ?>
-					<tr>
-						<td><?php echo '<a href="rollData.php?roll_number=' . $rows['roll_num'] . '">' . $rows['roll_num'] . '</a>';?></td>
-						<td><?php echo $rows['status'];?></td>
-						<td><?php echo $rows['starting_diameter'];?></td>
-						<td><?php echo $rows['current_diameter'];?></td>
-						<td><?php echo $rows['mill'];?></td>
-						<td><?php echo $rows['roll_type'];?></td>
-						<td><?php echo $rows['manufactured_date'];?></td>
-					</tr>
-            <?php
-                }
-             ?>
+			
 	</table>
 	</div>
 	</main>

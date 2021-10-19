@@ -7,10 +7,15 @@ import pypyodbc as pp
 app = Flask(__name__)
 
 
-@app.route("/")
+@app.route("/help")
 def help_page():
     return render_template('help.html')
 
+
+@app.route("/chocksMenu")
+def chocksMenu():
+    return render_template('chocksMenu.html')\
+    
 
 @app.route("/chocks")
 def chocks():
@@ -22,16 +27,16 @@ def notification():
     return render_template('notifications.html')
 
 
-@app.route("/home")
+@app.route("/")
 def home():
     return render_template('index.html')
 
 
 #Replace with /index when its finished
-@app.route("/queryresults")
+@app.route("/queryresults") #this will eventually replace home/index.html
 def query():
     #return query_results()
-    return render_template('rollData.html')
+    return render_template('rollData.html')#temporary link
 
 
 @app.route('/add-email', methods = ['GET','POST'])#template for saving data from a webpage
@@ -64,7 +69,7 @@ def remove_email():
         try: #Use this code whenever you connect to SQL server
             connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
         'uid=rmsapp;pwd=ss1RMSpw@wb02') 
-        except pp.Error as e:
+        except pp.Error as e: #eventually
             message = "error connecting to SQL Server: " + str(e) #returns error type
             return message
 
