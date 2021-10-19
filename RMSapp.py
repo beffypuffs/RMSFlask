@@ -3,6 +3,7 @@ import pypyodbc as pp
 
 
 
+
 app = Flask(__name__)
 
 
@@ -19,7 +20,6 @@ def chocks():
 @app.route("/notifications")
 def notification():
     return render_template('notifications.html')
-    #return render_template('temp.html')
 
 
 @app.route("/home")
@@ -32,6 +32,57 @@ def home():
 def query():
     #return query_results()
     return render_template('rollData.html')
+
+
+@app.route('/add-email', methods = ['GET','POST'])#template for saving data from a webpage
+def add_email():
+    if request.method == 'POST':
+        try: #Use this code whenever you connect to SQL server
+            connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
+        'uid=rmsapp;pwd=ss1RMSpw@wb02') 
+        except pp.Error as e:
+            message = "error connecting to SQL Server: " + str(e) #returns error type
+            return message
+
+        badge_number = request.form['badge_number']
+        name = request.form['nm']
+        email = request.form['email']
+
+        cur = connection.cursor()
+        #INPUT SANITATION
+        #print('INSERT INTO employee VALUES(' + badge_number + ', \'' + name + '\', \'' + email + '\')')
+        try:
+            cur.execute('INSERT INTO employee VALUES(' + badge_number + ', \'' + name + '\', \'' + email + '\')')
+        except pp.Error as e:
+            return str(e) #returns error code if query fails
+        connection.commit()
+    return 'thing'
+
+@app.route('/remove-email', methods = ['POST'])
+def remove_email():
+     if request.method == 'POST':
+        try: #Use this code whenever you connect to SQL server
+            connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
+        'uid=rmsapp;pwd=ss1RMSpw@wb02') 
+        except pp.Error as e:
+            message = "error connecting to SQL Server: " + str(e) #returns error type
+            return message
+
+        badge_number = request.form['badge_number']
+        name = request.form['nm']
+        email = request.form['email']
+
+        cur = connection.cursor()
+        #INPUT SANITATION
+        # print(f'DELETE FROM employee WHERE badge_number = {badge_number} AND name = {name} AND email = {email};')
+        try:
+            cur.execute(f'DELETE FROM employee WHERE badge_number = {badge_number} AND name = \'{name}\' AND email = \'{email}\';')
+        except pp.Error as e:
+            return str(e) #returns error code if query fails
+        connection.commit()
+        # cur.execute(f'INSERT INTO employee VALUES({badge_number}, \'{name}\', \'{email}\')')
+        return 'thing'
+
 
 
 
@@ -64,22 +115,7 @@ def query_results(): #Displays roll information
     return page
 
 
-# @app.route('/save-settings', methods = ['POST'])#template for saving data from a webpage
-# def save_settings():
-#     if request.method == 'POST':
-#         badge_number = request.form['badge number']
-#         name = request.form['name']
-#         email = request.form['email']
 
-
-
-#         fieldnames = ['badge_number', 'name', 'email']
-
-#         with open('emailList.csv', 'w') as inFile:
-#             writer = csv.DictWriter(inFile, fieldnames = fieldnames)
-#             writer.writerow({'badge number': badge_number, name: 'name', email:'email' })
-
-#         return 'thing'
 
         
 
