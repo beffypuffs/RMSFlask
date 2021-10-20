@@ -1,5 +1,5 @@
 from flask import Flask, redirect, url_for, render_template, request
-import pypyodbc as pp
+import pyodbc as pp
 
 
 
@@ -29,7 +29,9 @@ def notification():
 
 @app.route("/")
 def home():
-    return query_results()
+    headings = ("Roll ID", "Status", "Current Diameter", "Starting Diameter", "Mill", "Roll Type", "Manufacture Date")
+    data = query_results()
+    return render_template("index.html", headings=headings, data=data)
 
 
 #Replace with /index when its finished
@@ -101,90 +103,19 @@ def query_results(): #Displays roll information
     cur = connection.cursor() #used to execute actions, might be able do more idk
     cur.execute("Select *  From roll ORDER BY roll_num DESC")#query
     data = cur.fetchall()
-    # below is literally the entire first half of the html, move to text file and read from that
-    page = """
-    <!DOCTYPE html> 
-    <html lang = "en">
-    <head>
-        <link href = "style.css" rel="stylesheet" type="text/css" >
-
-        <title>RMS Home</title>
-
-    </head>
-    <body>
-        <header>
-        <!-- Help icon and links -->
-        <div id="helpOption">
-            <a href="http://127.0.0.1:5000/help">Help</a>
-            <a href="http://127.0.0.1:5000//help"><img src="static/images/helpBtn.png" height="60" width="60" class = "helpBtn" alt="Help Button" /></a>
-        </div>
-        <!-- Main Kaiser logo and page navigation links -->
-            <img src="static/images/logo.png" alt="Kaiser Aluminium Logo"/>
-            <p style="text-align: center">
-            <strong>Home Roll Management Page</strong>  |  <a href="http://127.0.0.1:5000/chocksMenu">Chocks and Bearings </a>  |  <a href="http://127.0.0.1:5000/notifications">Notification Settings</a>
-            </p>
-        </header>
-
-        <main>
-            <br>
-            <br>
-        <!-- big table with links to roll data and lots of data
-            will need to activate filtering feature
-            maybe a search bar sort of thing?-->
-        <div>
-        <table class = "center">
-        <caption><strong>General Roll Information</strong>
-        <!-- seach bar to look for any value in the roll table -->
-        <input type = "text" id = "filter_input" onkeyup ="searchFunction()" placeholder = "Search" title="Type in desired table value ">
-            <tr>
-                <th><strong>Roll ID</strong></th>
-                <th><strong>Status</strong></th> <!-- Will automatically determine red or green for not in use or in use-->
-                <th><strong>Current Diameter</strong></th>
-                <th><strong>Starting Diameter</strong></th>
-                <th><strong>Mill</strong></th>
-                <th><strong>Roll Type</strong></th>
-                <th><strong>Manufacured Date</strong></th>
-            </tr>"""
-        for row in data:
-            page += "<tr>"
-            page += "<td> " + str(row[0]) + "</td>"
-            page += "<td> " + str(row[1]) + "</td>"
-            page += "<td> " + str(row[2]) + "</td>" #always null, ask about it on monday
-            page += "<td> " + str(row[3]) + "</td>"
-            page += "<td> " + str(row[4]) + "</td>"
-            page += "<td> " + str(row[5]) + "</td>"
-            page += "<td> " + str(row[6]) + "</td>"
-            page += "</tr>"
-            
-        #below this is literally the entire second half of index.html
-        page += """
-        </table> 
-        </div>
-        </main>
-    <script>
-        //Filtering function for the search function to look through entire table for the value
-        function searchFunction() {
-        let tabel, filter, input, tr, td, i;
-        input = document.getElementById("filter_input");
-        filter = input.value.toUpperCase();
-        tabel = document.getElementById("roll_table");
-        tr = document.getElementsByTagName("tr");
-        for (i = 1; i < tr.length; i++) {
-            if (tr[i].textContent.toUpperCase().indexOf(filter) > -1) {
-                tr[i].style.display = "";
-            } else {
-                tr[i].style.display = "none";
-                }
-            }
-        }
-
-    </script>
-    </body>
-    </html> 
-    """
-    return page
-
-
+    table_data = [] # The table of data we want to display
+    # Add data into table data
+    for row in data:
+        data_row = [] # Array to hold a single data entry / Table row
+        data_row.append(str(row[0]))
+        data_row.append(str(row[1]))
+        data_row.append(str(row[2])) #always null, ask about it on monday
+        data_row.append(str(row[3]))
+        data_row.append(str(row[4]))
+        data_row.append(str(row[5]))
+        data_row.append(str(row[6]))
+        table_data.append(data_row)
+    return table_data
 
 
         

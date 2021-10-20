@@ -11,64 +11,65 @@
 </head>
 <body>
 	<header>
-	<!-- Help icon and links -->
-	<div id="helpOption">
-		<a href="http://127.0.0.1:5000/help">Help</a>
-		<a href="http://127.0.0.1:5000//help"><img src="static/images/helpBtn.png" height="60" width="60" class = "helpBtn" alt="Help Button" /></a>
-	</div>
-	<!-- Main Kaiser logo and page navigation links -->
+		<!-- Help icon and links -->
+		<div id="helpOption">
+			<a href="http://127.0.0.1:5000/help">Help</a>
+			<a href="http://127.0.0.1:5000//help"><img src="static/images/helpBtn.png" height="60" width="60" class = "helpBtn" alt="Help Button" /></a>
+		</div>
+		<!-- Main Kaiser logo and page navigation links -->
 		<img src="static/images/logo.png" alt="Kaiser Aluminium Logo"/>
 		<p style="text-align: center">
-		<strong>Home Roll Management Page</strong>  |  <a href="http://127.0.0.1:5000/chocksMenu">Chocks and Bearings </a>  |  <a href="http://127.0.0.1:5000/notifications">Notification Settings</a>
+			<strong>Home Roll Management Page</strong>  |  <a href="http://127.0.0.1:5000/chocksMenu">Chocks and Bearings </a>  |  <a href="http://127.0.0.1:5000/notifications">Notification Settings</a>
 		</p>
 	</header>
 
 	<main>
 		<br>
 		<br>
-	<!-- big table with links to roll data and lots of data
-		will need to activate filtering feature
-		maybe a search bar sort of thing?-->
-	<div>
-	<table class = "center">
-	<caption><strong>General Roll Information</strong>
-	<!-- seach bar to look for any value in the roll table -->
-	<input type = "text" id = "filter_input" onkeyup ="searchFunction()" placeholder = "Search" title="Type in desired table value ">
-		<tr>
-			{% for header in headings %}
-			<th>{{ header }}</th>
-			{% endfor %}
-		</tr>
-		
-		<!-- Display SQL server data to index.html-->
-		{% for row in data %}
-		<tr>
-			{% for cell in row %}
-				<td>{{cell}}</td>
-			{% endfor %}
-		</tr>
-		{% endfor %}
-			
-	</table>
-	</div>
+		<div>
+			<!-- big table with links to roll data and lots of data
+			will need to activate filtering feature
+			maybe a search bar sort of thing?-->
+			<table class = "center">
+			<caption><strong>General Roll Information</strong>
+			<!-- seach bar to look for any value in the roll table -->
+			<input type = "text" id = "filter_input" onkeyup ="searchFunction()" placeholder = "Search" title="Type in desired table value ">
+				<!-- Display table headings-->
+				<tr>
+					{% for header in headings %}
+						<th>{{ header }}</th>
+					{% endfor %}
+				</tr>
+				
+				<!-- Display SQL server data to index.html-->
+				{% for row in data %}
+				<tr>
+					{% for cell in row %}
+						<td>{{cell}}</td>
+					{% endfor %}
+				</tr>
+				{% endfor %}
+					
+			</table>
+		</div>
 	</main>
-<script>
-	//Filtering function for the search function to look through entire table for the value
-	function searchFunction() {
-    let tabel, filter, input, tr, td, i;
-    input = document.getElementById("filter_input");
-    filter = input.value.toUpperCase();
-    tabel = document.getElementById("roll_table");
-    tr = document.getElementsByTagName("tr");
-    for (i = 1; i < tr.length; i++) {
-        if (tr[i].textContent.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-        } else {
-            tr[i].style.display = "none";
+	<script>
+		//Filtering function for the search function to look through entire table for the value
+		function searchFunction() {
+		let tabel, filter, input, tr, td, i;
+		input = document.getElementById("filter_input");
+		filter = input.value.toUpperCase();
+		tabel = document.getElementById("roll_table");
+		tr = document.getElementsByTagName("tr");
+		for (i = 1; i < tr.length; i++) {
+			if (tr[i].textContent.toUpperCase().indexOf(filter) > -1) {
+				tr[i].style.display = "";
+			} else {
+				tr[i].style.display = "none";
+				}
 			}
 		}
-	}
 
-</script>
+	</script>
 </body>
 </html>
