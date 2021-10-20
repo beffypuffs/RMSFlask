@@ -35,42 +35,19 @@
 	<!-- seach bar to look for any value in the roll table -->
 	<input type = "text" id = "filter_input" onkeyup ="searchFunction()" placeholder = "Search" title="Type in desired table value ">
 		<tr>
-			<th><strong>Roll ID</strong></th>
-			<th><strong>Status</strong></th> <!-- Will automatically determine red or green for not in use or in use-->
-			<th><strong>Current Diameter</strong></th>
-			<th><strong>Starting Diameter</strong></th>
-			<th><strong>Mill</strong></th>
-			<th><strong>Roll Type</strong></th>
-			<th><strong>Manufacured Date</strong></th>
+			{% for header in headings %}
+			<th>{{ header }}</th>
+			{% endfor %}
 		</tr>
+		
+		<!-- Display SQL server data to index.html-->
+		{% for row in data %}
 		<tr>
-			<td>123123</td>
-			<td>Null</td>
-			<td>4.33</td>
-			<td>3.22</td>
-			<td>NULL</td>
-			<td>NULL</td>
-			<td>NULL</td>
+			{% for cell in row %}
+				<td>{{cell}}</td>
+			{% endfor %}
 		</tr>
-		<tr>
-			<td>123123</td>
-			<td>Null</td>
-			<td>4.33</td>
-			<td>3.22</td>
-			<td>NULL</td>
-			<td>NULL</td>
-			<td>NULL</td>
-		</tr>
-		<tr>
-			<td>123123</td>
-			<td>Null</td>
-			<td>4.33</td>
-			<td>3.22</td>
-			<td>NULL</td>
-			<td>NULL</td>
-			<td>NULL</td>
-		</tr>
-		<!-- Below are all just currently space fillers to show desired future look -->
+		{% endfor %}
 			
 	</table>
 	</div>
