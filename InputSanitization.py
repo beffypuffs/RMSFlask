@@ -6,5 +6,5 @@ import re
 
 # input sanitation for adding emails to the notifications list
 def email_input_sanitization(email):
-    accepted_email_chars = re.compile('[a-zA-Z0-9]*@kaisertwd.com')
+    accepted_email_chars = re.compile('[a-zA-Z0-9]*@(kaisertwd.com|KaiserTWD.com)')
     return accepted_email_chars.match(email)
