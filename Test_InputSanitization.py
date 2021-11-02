@@ -7,4 +7,4 @@ import pytest
 
 # check that a generic email from kaiser passes through sanitization
 def email_test_1():
-    assert sanitation.email_input_sanitation('exampleUser123@kaisertwd.com') == True
+    assert sanitization.email_input_sanitization('exampleUser123@kaisertwd.com') == True
