@@ -4,7 +4,7 @@ Written By - Joshua Seward
 """
 from re import T
 from typing import ValuesView
-import InputValidation as validation
+import EmailValidation as validation
 
 # check that a generic kaiser domain passes (lowercase)
 def test_valid_email_domain_1():
