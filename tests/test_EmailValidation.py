@@ -1,5 +1,5 @@
 """
-Testing file for RMS Input Sanitation
+Testing file for RMS Email Validation
 Written By - Joshua Seward
 """
 from re import T

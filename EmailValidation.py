@@ -1,5 +1,5 @@
 """
-Python file to provide input sanitation for the Kaiser RMS
+Python file to provide email validation for the Kaiser RMS
 Written By - Joshua Seward
 """
 import re # library to use regexes
