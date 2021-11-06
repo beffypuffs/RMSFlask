@@ -4,7 +4,7 @@ Written By - Joshua Seward
 """
 import pyodbc as pp
 
-# function to get the replacement date for a roll based on a given id
+# function to get the replacement date for a roll based on a given roll id
 def roll_replacement_date(roll_id):
     # connect to the RMS SQL server database
     try:
