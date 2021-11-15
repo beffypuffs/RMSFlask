@@ -25,10 +25,10 @@ def days_until_replacement(roll_id):
 
     # get the matching first row of data and use it to predict the remaining roll life
     query_results = cur.fetchall()
-    cur_diameter = query_results[0][0]
-    scrap_diameter = query_results[0][1]
-    avg_grind = query_results[0][2]
-    days_btwn_grinds = query_results[0][3]
+    cur_diameter = float(query_results[0][0])
+    scrap_diameter = float(query_results[0][1])
+    avg_grind = float(query_results[0][2])
+    days_btwn_grinds = float(query_results[0][3])
     remaining_life = remaining_roll_life(cur_diameter, scrap_diameter, avg_grind, days_btwn_grinds)
 
     return remaining_life
