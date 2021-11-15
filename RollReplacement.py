@@ -15,9 +15,9 @@ def days_until_replacement(roll_id):
         # query the database to get the required information to predict the remaining
         # roll life w/ respect to the given roll id
         try:
-            cur.execute(f'SELECT r.current_diameter, ri.scrap_diameter, ri.avg_grind_diameter, ri.days_between_rolls'
-                         'FROM roll r JOIN roll_info ri ON (r.mill = ri.mill AND r.roll_type = ri.roll_type)'
-                         'WHERE r.roll_num = {roll_id};')
+            cur.execute(f'SELECT r.current_diameter, ri.scrap_diameter, ri.avg_grind_diameter, ri.days_between_rolls \
+                         FROM roll r JOIN roll_info ri ON (r.mill = ri.mill AND r.roll_type = ri.roll_type) \
+                         WHERE r.roll_num = {roll_id};')
             # get the matching first row of data and use it to predict the remaining roll life
             query_results = cur.fetchall()
             cur_diameter = float(query_results[0][0])
