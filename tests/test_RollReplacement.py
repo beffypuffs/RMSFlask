@@ -1,6 +1,6 @@
 """
 Testing file for RMS Roll Lifespan Prediction
-(Has to be run on the Kaiser network)
+ONLY WORKS ON KAISER NETWORK (as of 11/17/2021)
 Written By - Joshua Seward
 """
 import RollReplacement as r
