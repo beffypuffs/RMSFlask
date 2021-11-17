@@ -13,6 +13,23 @@ Chocks and Bearings form
         margin: 5px 5px;
         box-sizing: border-box;
     }
+    main {
+        margin-left: 20%;
+        margin-right: 20%;
+    }
+    form {
+        text-align: center;
+    }
+    div {
+        text-align: left;
+    }
+    .right-Text {
+        text-align: right;
+        float: right;
+    }
+    input[type=text] {
+        width: 150px;
+    }
 </style>
 <script>
     var todaysDate = new Date()
@@ -35,7 +52,7 @@ Chocks and Bearings form
 </script>
 <head>
     <link href = "style.css" rel="stylesheet" type="text/css" >
-    <title>New Chocks and Bearings Form</title>
+    <title>Chocks and Bearings Form</title>
 </head>
 
 <body>	
@@ -56,247 +73,207 @@ Chocks and Bearings form
 
     </header>
     <br>
-
-    <!-- Menu for what user wants to do: fill out new form, view/edit old forms -->
-
-
-    <!-- php for form 
-    <?php
-        if(array_key_exists('submit-btn', $_POST)){
-            submit();
-        }
-        function submit(){
-            include_once(dirname(__FILE__) . '/DBC.php');
-            //Database connection information
-            $dbinfo = array( 
-                'provider' => 'sqlsrv',
-                'host' => 'localhost\\SQLEXPRESS', 
-                'user' => 'rmsapp',
-                'password' => 'ss1RMSpw@wb02',
-                'db'   => 'rms'
-                );
-    
-    
-    
-            //Open the PDO Connection
-            try {
-                $dbconn = new DBC($dbinfo);
-            }
-            catch (Exception $ex) {
-                echo '<p>Error creating database connection: ' . $ex->getMessage() . '</p>';
-                echo '</html>';
-                exit();
-            }
-            $query = array(
-                'date' => $_POST['date'],
-                'chock_number' => $_POST['chock-num'],
-                'position' => $_POST['position'],
-                'reason' => $_POST['reasons_d_and_i'],
-                'visible_chock_numbers' => $_POST['obvi'],
-                'lifiting_bolt_thread_condition' => $_POST['lifting'],
-                'cover_end_condition' => $_POST['cover'],
-                'bell_o_ring_condition' => $_POST['end-bell'],
-                'thrust_collar' => $_POST['thrust'],
-                'lockkeepers' => $_POST['locks'],
-                'liner_plates' => $_POST['liner'],
-                'inboard_radial_seals_replaced' => $_POST['num-rep'],
-                'inboard_face_seal' => $_POST['seals1'],
-                'outboard_radial_seal' => $_POST['seals2'],
-                'load_zone_from_mill' => $_POST['mill1'],
-                'load_zone_to_mill' => $_POST['mill2'],
-                'bearing_grease_condition' => $_POST['bearing-grease'],
-                'bearing_mfg' => $_POST['mfg'],
-                'bearing_serial_number' => $_POST['sn'],
-                'is_sealed' => $_POST['sealed'],
-                'seals_replaced' => $_POST['seals-rep'],
-                'cup_a' => $_POST['cupA'],
-                'cup_bd' => $_POST['cupB'],
-                'cup_e' => $_POST['cupE'],
-                'race_a' => $_POST['raceA'],
-                'race_b' => $_POST['raceB'],
-                'race_d' => $_POST['raceD'],
-                'race_e' => $_POST['raceE'],
-                'bearing_status' => $_POST['bearing-condition'],
-                'different_bearing_installed' => $_POST['diff-bearing'],
-                'bearing_mfg_new' => $_POST['textMFG'],
-                'serial_number_new' => $_POST['MFGsn'],
-                'sealed_new' => $_POST['sealed2'],
-                'chock_bore_round' => $_POST['chockBoreRound'],
-                'chock_bore' => $_POST['chockBoreOOR'],
-                'no_rust' => $_POST['wearOrRust'],
-                'grease_purged' => $_POST['purgeGrease'],
-                'spots_dings' => $_POST['spots-dings'],
-                'manual_pack' => $_POST['manual-pack'],
-                'lube_bore' => $_POST['lube-bore'],
-                'grease_packed_bearings' => $_POST['dropped'],
-                'height_shoulder' => $_POST['droppedA'],
-                'bearing_depth' => $_POST['droppedB'],
-                'shims_needed' => $_POST['droppedDifference'],
-                'was_paper_used' => $_POST['paper-used'],
-                'by_hand' => $_POST['shim'],
-                'was_torqued' => $_POST['phases'],
-                'ancillary_installed' => $_POST['ancillary'],
-                'grease_pack_sealed' => $_POST['greasePack'],
-                'chock_ready_for_installation' => $_POST['ready'],
-                'comments'  => $_POST['comments'],
-                'mill' => $_POST['roll_mill'],
-                'badge_number' => $_POST['badge_number'],
-                'roll_type' => $_POST['roll_type']
-            );
-            try{
-                $result = $dbconn->insert('dbo.report', $query);
-            }
-            catch (Exception $ex) {
-                echo 'catch entered';
-                echo '<p>Error reading data: ' . $ex->getMessage() . '</p>';
-                echo '</html>';
-                exit();
-            }
-        }
-    ?>
-        -->
-
-
-    <!-- beginning of the form!-->
-
-    <h2 style="text-align: center"> Dissasemble and Inspect (D & I) </h2>
-
-    <!-- Form will be able to populate the chock and bearings database using php -->
-    <!-- For future consideration: Way to easily view past forms in database, save a form 
-            to send to someone?  -->
-    <form method="post"> <!-- onsubmit="alert('Form sucessfully submit!');return false"> -->
-
-        Employee Badge No:
-        <input type="text" id="badge_number" name="badge_number" value=""> 
-        <br>
-
-        <!--<button onclick = "document.write(convertDate)">Add date </button> -->
-        Date: <input type="date" id="date" name="date" value=""> 
-
-        <br>
-        <h3 style="text-align: center">Dissasemble and Assemble Roll and Chock</h3>
-        <div style="float:right" >
-            <p>
-                Clean and Inspect Parts <br><br>
-                Note the Coniditions and Repairs <br><br>
-                check = Good Condition / Selection | R = Repaired / Replaced <br><br>
-            </p>
-        </div>
-
-        Mill		<input type="text" id="roll_mill" name="roll_mill" value=""> <br>
-        Type of Roll	<select name = "roll_type" id = "roll_type">
-                            <option value ="wr">Work Roll</option>
-                            <option value = "bu">Back-Up</option>
-                            <option value = "imr">IMR</option>
-                        </select>
-        <!--<input type="text" id="roll_id" name="roll-type">--> <br>		
-        Chock No.	<input type="text" id="chock-num" name="chock-num" value="" > <br>		
-        Position	<input type="text" id="position" name="position" value=""> <br>
-
-
-        <h3>Reasons for D & I </h3>
-            <pre>
+    <!-- Main contents of the chocks page -->
+    <main> 
+        <!-- Chocks form -->
+        <form action="http://127.0.0.1:5000/add_chock" method="post"> 
+            <h3>Disassemble and Inspect (D & I)</h3>
+            <div>
+                <label for="badge_number">Employee Badge No:</label>
+                <input type="text" id="badge_number" name="badge_number" value=""> 
+                
+                <!--<button onclick = "document.write(convertDate)">Add date </button> -->
+                <div class="right-Text">
+                    <label for="date">Date:</label> 
+                    <input type="date" id="date" name="date" value=""> 
+                </div>
+            </div>
+            <br>
+            
+            <h3>Dissasemble and Assemble Roll and Chock</h3>
+            <div>
+                <div class="right-Text">
+                        Clean and Inspect Parts <br><br>
+                        Note the Coniditions and Repairs <br><br>
+                        check = Good Condition | unchecked = Repaired / Replaced <br><br>
+                </div>
+        
+                <label for="roll_mill">Mill</label> &nbsp;&nbsp;
+                <input type="text" id="roll_mill" name="roll_mill" value=""> <br>
+                <label for="roll_type">Type of Roll</label>	
+                <select name = "roll_type" id = "roll_type">
+                    <option value ="wr">Work Roll</option>
+                    <option value = "bu">Back-Up</option>
+                    <option value = "imr">IMR</option>
+                </select>
+                <!--<input type="text" id="roll_id" name="roll-type">--> <br>		
+                <label for="chock-num">Chock No.</label>	
+                <input type="text" id="chock-num" name="chock-num" value="" > <br>		
+                <label for="position">Position</label>	
+                <input type="text" id="position" name="position" value=""> <br>
+            </div>
+            <br>
+            
+            <h3>Reasons for D & I</h3>
+            <div>
                 <select name = "reasons_d_and_i" id = "reasons_d_and_i">
                     <option value ="schedled">Scheduled</option>
                     <option value = "mill_damage"> Mill Damage</option>
                     <option value = "suspected_damage">Suspected Damage</option>
                 </select>
-                <input type="checkbox" id="obvi" name="obvi"><label for="obvi">Obvious and Clearly Visible Chock Numbers</label> 
-                <input type="checkbox" id="lifting" name="lifting"><label for="lifting">Lifting Bolt Holes Thread Condition</label> 
-                <input type="checkbox" id="cover" name="cover"><label for="cover">Cover and End Bell Bolts and Threaded Holes</label>
-                <input type="checkbox" id="end-bell" name="end-bell"><label for="end-bell">End Bell "O" Rings</label>
-                <input type="checkbox" id="thrust" name="thrust"><label for="thrust">Thrust Collar, Key Condition and Ancillary Equitment</label>
-                <input type="checkbox" id="locks" name="locks"><label for="locks">Locks and Keepers</label>
-                <input type="checkbox" id="liner" name="liner"><label for="liner">Liner Plates Smooth, Clean, and Bolts Tight</label>
-                Inboard Radial Seals	No. Replaced: <input type="text" id="num-rep" name="num-rep" value="">
-                Inboard Face Seal<input type="text" id="seals1" name="seals1"  value="">
-                Load Zone From Mill<input type="text" id="mill1" name="mill1"  value="">
-            </pre>	
+                <br>
+                <input type="checkbox" id="obvi" name="obvi">
+                <label for="obvi">Obvious and Clearly Visible Chock Numbers</label> <br>
+                <input type="checkbox" id="lifting" name="lifting">
+                <label for="lifting">Lifting Bolt Holes Thread Condition</label> <br>
+                <input type="checkbox" id="cover" name="cover">
+                <label for="cover">Cover and End Bell Bolts and Threaded Holes</label> <br>
+                <input type="checkbox" id="end-bell" name="end-bell">
+                <label for="end-bell">End Bell "O" Rings</label> <br>
+                <input type="checkbox" id="thrust" name="thrust">
+                <label for="thrust">Thrust Collar, Key Condition and Ancillary Equitment</label> <br>
+                <input type="checkbox" id="locks" name="locks">
+                <label for="locks">Locks and Keepers</label> <br>
+                <input type="checkbox" id="liner" name="liner">
+                <label for="liner">Liner Plates Smooth, Clean, and Bolts Tight</label> <br>
+                <br>
+                Inboard Radial Seals: &emsp; <br>
+                <label for="num-rep">No. Replaced:</label> 
+                <input type="text" id="num-rep" name="num-rep" value=""> <br>
+                <label for="seals1">Inboard Face Seal</label>
+                <input type="text" id="seals1" name="seals1"  value=""> <br>
+                <label for="mill1">Load Zone From Mill</label>
+                <input type="text" id="mill1" name="mill1"  value="">
+            
+            </div>
+            <h3>Condition of Bearing Grease</h3>
+            <div>	
+                <select name = "bearing-grease" id = "bearing-grease">
+                    <option value ="washed-out">Washed Out</option>
+                    <option value = "flakes"> Metallic Flakes</option>
+                    <option value = "water">Water</option>
+                    <option value = "n/a_grease">N/A</option>
+                </select>
+                <br>
+                <label for="mfg">Bearing MFG</label>
+                <input type="text" id="mfg" name="mfg" value=""> <br>
+                <label for="sn">S/N</label>
+                <input type="text" id="sn" name="sn" value="" > <br>
+                <label for="sealed">Sealed</label>
+                <input type="checkbox" id="sealed" name="sealed"> <br>	
+                <label for="seals-rep">No. of Seals Replaced</label>
+                <input type="text" id="seals-rep" name="seals-rep"  value=""> <br>
+            </div>
+            <h3>Bearing Condition</h3>
+            <div>
+                <div class="right-Text">
+                    <label for="raceA">Race "A"</label>
+                    <input type="text" id="raceA" name="raceA"  value=""> <br>
+                    <label for="raceB">Race "B"</label>
+                    <input type="text" id="raceB" name="raceB" value=""> <br>
+                    <label for="raceD">Race "D"</label>
+                    <input type="text" id="raceD" name="raceD" value=""> <br>
+                    <label for="raceE">Race "E"</label>
+                    <input type="text" id="raceE" name="raceE" value=""> <br>
+                </div>
+                <label for="cupA">Cup "A"</label>
+                <input type="text" id="cupA" name="cupA"  value=""> <br>
+                <label for="cupB">Cup "B - D"</label>
+                <input type="text" id="cupB" name="cupB" value=">"> <br>
+                <label for="cupE">Cup "E"</label>
+                <input type="text" id="cupE" name="cupE"  value=""> <br>
 
-        <h3>Condition of Bearing Grease</h3>	
-        <pre>
-            <select name = "bearing-grease" id = "bearing-grease">
-                <option value ="washed-out">Washed Out</option>
-                <option value = "flakes"> Metallic Flakes</option>
-                <option value = "water">Water</option>
-                <option value = "n/a_grease">N/A</option>
-            </select>
-            Bearing MFG <input type="text" id="mfg" name="mfg" value="">		S/N<input type="text" id="sn" name="sn" value="" >
-            <input type="checkbox" id="sealed" name="sealed"><label for="sealed">Sealed</label>	No. of Seals Replaced<input type="text" id="seals-rep" name="seals-rep"  value="">
-        </pre>	
-
-        <h3>Bearing Condition</h3>
-        <pre>
-            Cup "A"<input type="text" id="cupA" name="cupA"  value="">	Race "A" <input type="text" id="raceA" name="raceA"  value="">
-            Cup "B - D"<input type="text" id="cupB" name="cupB" value=">">	Race "B" <input type="text" id="raceB" name="raceB" value="">
-            Cup "E"<input type="text" id="cupE" name="cupE"  value="">	Race "D" <input type="text" id="raceD" name="raceD" value="">
-            Race "E" <input type="text" id="raceE" name="raceE" value="">
-
-            <select name = "bearing-condition" id = "bearing-condition">
-                <option value ="reinstalled">Reinstalled</option>
-                <option value = "scraped"> Scraped</option>
-                <option value = "stored">Stored</option>
-            </select>
-        </pre>
-        <br>
-            = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
-        <br>
-        <br>
-
-        <pre>
-            Different Bearing Installed <select name = "diff-bearing" id = "diff-bearing">
-                        <option value ="new-bearing">New</option>
-                        <option value = "used-bearing"<>Used</option>
-                        <option value = "other-bearing"<>N/A</option>
-                </select>		
-
-            Bearing MFG 	<input type="text" id="textMFG" name="textMFG" value="">	S/N <input type="text" id="MFGsn" name="MFGsn" value="">	<input type="checkbox" id="sealed2" name="sealed2"><label for="sealed2">Sealed</label>
-
-            <input type="checkbox" id="chockBoreRound" name="chockBoreRound"><label for="chockBoreRound">Chock Bore Round</label>	<input type="checkbox" id="chockBoreOOR" name="chockBoreOOR"><label for="chockBoreOOR">Chock Bore Out of Round</label>
-
-            <input type="checkbox" id="wearOrRust" name="wearOrRust"><label for="wearOrRust">No Excessive Wear or Heavy Rust</label>
-
-            <input type="checkbox" id="purgeGrease" name="purgeGrease"><label for="purgeGrease">Purge all Grease Channels. Use EP-2 Grease.</label>
-
-            <input type = "checkbox" id="spots-dings" name="spots-dings"><label for="spots-dings">Remove all High Spots and Dings</label>
-
-            <input type = "checkbox" id="manual-pack" name="manual-pack"><label for="manual-pack">Manually Pack Each Bearing Segment. Use EP-2 Grease</label>
-
-            <input type="checkbox" id="lube-bore" name="lube-bore"><label for="lube-bore">Lube Bore of Chock. Use EP-2 Grease</label>
-
-            <input type="checkbox" id="dropped" name="dropped"><label for="dropped">Dropped in Grease Packed Bearings.</label>
-
-            a) With a Depth Guage Measure the Height of the Shoulder on the Cover. <input type="text" id="droppedA" name="droppedA"  value="">
-
-            b) Measure the Depth of the Bearing From the Top of the Chock <input type="text" id="droppedB" name="droppedB" value="">
-
-            Subtract "b" from "a" = The amount of Shims Needed for Zero Clearance <input type="text" id="droppedDifference" name="droppedDifference" value="">
-
-            <input type="checkbox" id="paper-used" name="paper-used"><label for = "paper-used">Add 15% more Shim Material if Paper is used to allow from Compression <!-- Text entry, but can we automatiacally make the calculation appear when other values entered -->
-                The 112 Mill Work Rolls Drive Side Requires a 0.094 Clearance. </label>
-
-            <input type="checkbox" id="shim" name="shim"><label for="shim">Install Shim/Gasket and Install Cover and Evenly Snug Down all Bolts by Hand</label>
-
-            <input type="checkbox" id="phases" name="phases"><label for="phases">In Four Phases Torque all Bolts in a Crisscross Pattern.
-                After each pass, turn the cones (inner races) one and a half times to sear the rollers.
-                First Torque Light. Second Torque Medium. Third Torque Full. Forth Torque Full.</label>
-
-            <input type="checkbox" id="ancillary" name="ancillary"><label for="ancillary">Install all Ancillary Equitment</label>		
-
-            <input type="checkbox" id="greasePack" name="greasePack"><label for="greasePack">Grease Pack all Seals. Use EP-2 Grease.</label>
-
-            <input type="checkbox" id="ready" name="ready"><label for="ready">Chock is Completely Ready for installation on a roll.</label>				
-
-        </pre>	
-
-        Comments:
-        <br>
-        <!-- ToDO: Make this a text input for the form but maintain size -->
-        <textarea id="comments" name="comments" rows="15" cols="100">
-        </textarea>
-        <br>
-        
-
-    </form> <!-- END -->
+                <select name = "bearing-condition" id = "bearing-condition">
+                    <option value ="reinstalled">Reinstalled</option>
+                    <option value = "scraped"> Scraped</option>
+                    <option value = "stored">Stored</option>
+                </select>
+            </div>
+    
+            <br>
+                = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+            <br>
+            <br>
+            <h3>Roll Shop Procedures and Standards</h3>
+            <div>
+                <div>
+                    Different Bearing Installed &emsp; &emsp;
+                    <label for="new-bearing">New</label>
+                    <input type="radio" id="new-bearing" value="new-bearing" name="diff-bearing"> &nbsp;
+                    <label for="used-bearing">Used</label>
+                    <input type="radio" id="used-bearing" value="used-bearing" name="diff-bearing"> &nbsp;
+                    <label for="other-bearing">N/A</label>
+                    <input type="radio" id="other-bearing" value="other-bearing" name="diff-bearing"> &nbsp;
+                </div>	
+    
+                <label for="textMFG">Bearing MFG</label>
+                <input type="text" id="textMFG" name="textMFG" value="">
+                <label for="MFGsn">S/N</label>
+                <input type="text" id="MFGsn" name="MFGsn" value="">
+                <label for="sealed2">Sealed</label>	
+                <input type="checkbox" id="sealed2" name="sealed2"> <br>
+                
+                <label for="chockBoreRound">Chock Bore Round</label>	
+                <input type="checkbox" id="chockBoreRound" name="chockBoreRound"> &emsp; &emsp;
+                <label for="chockBoreOOR">Chock Bore Out of Round</label>
+                <input type="checkbox" id="chockBoreOOR" name="chockBoreOOR"> <br>
+    
+                <input type="checkbox" id="wearOrRust" name="wearOrRust"> &nbsp;
+                <label for="wearOrRust">No Excessive Wear or Heavy Rust</label> <br>
+    
+                <input type="checkbox" id="purgeGrease" name="purgeGrease"> &nbsp;
+                <label for="purgeGrease">Purge all Grease Channels. Use EP-2 Grease.</label> <br>
+    
+                <input type = "checkbox" id="spots-dings" name="spots-dings"> &nbsp;
+                <label for="spots-dings">Remove all High Spots and Dings</label> <br>
+    
+                <input type = "checkbox" id="manual-pack" name="manual-pack"> &nbsp;
+                <label for="manual-pack">Manually Pack Each Bearing Segment. Use EP-2 Grease</label> <br>
+    
+                <input type="checkbox" id="lube-bore" name="lube-bore"> &nbsp;
+                <label for="lube-bore">Lube Bore of Chock. Use EP-2 Grease</label> <br>
+    
+                <input type="checkbox" id="dropped" name="dropped"> &nbsp;
+                <label for="dropped">Dropped in Grease Packed Bearings.</label> <br>
+    
+                a) With a Depth Guage Measure the Height of the Shoulder on the Cover. 
+                <input type="text" id="droppedA" name="droppedA"  value=""> <br>
+    
+                b) Measure the Depth of the Bearing From the Top of the Chock 
+                <input type="text" id="droppedB" name="droppedB" value=""> <br>
+    
+                Subtract "b" from "a" = The amount of Shims Needed for Zero Clearance 
+                <input type="text" id="droppedDifference" name="droppedDifference" value=""> <br>
+    
+                <input type="checkbox" id="paper-used" name="paper-used"> &nbsp;
+                <label for = "paper-used">Add 15% more Shim Material if Paper is used to allow from Compression <!-- Text entry, but can we automatiacally make the calculation appear when other values entered -->
+                    The 112 Mill Work Rolls Drive Side Requires a 0.094 Clearance. </label> <br>
+    
+                <input type="checkbox" id="shim" name="shim"> &nbsp;
+                <label for="shim">Install Shim/Gasket and Install Cover and Evenly Snug Down all Bolts by Hand</label> <br>
+    
+                <input type="checkbox" id="phases" name="phases"> &nbsp;
+                <label for="phases">In Four Phases Torque all Bolts in a Crisscross Pattern.
+                    After each pass, turn the cones (inner races) one and a half times to sear the rollers.
+                    First Torque Light. Second Torque Medium. Third Torque Full. Forth Torque Full.</label> <br>
+    
+                <input type="checkbox" id="ancillary" name="ancillary"> &nbsp;
+                <label for="ancillary">Install all Ancillary Equitment</label> <br>	
+    
+                <input type="checkbox" id="greasePack" name="greasePack"> &nbsp;
+                <label for="greasePack">Grease Pack all Seals. Use EP-2 Grease.</label> <br>
+    
+                <input type="checkbox" id="ready" name="ready"> &nbsp;
+                <label for="ready">Chock is Completely Ready for installation on a roll.</label> <br>			
+            </div>
+            <br>
+            <h4 style="text-align: left;">Comments:</h4>
+            <textarea id="comments" name="comments" rows="15" cols="100">
+            </textarea>
+            <br>
+            <br>
+            <input type="submit" value="Submit Form" id="submitResponse">
+        </form> <!-- END of form-->
+    </main>
 </body>
 </html> 
