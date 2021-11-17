@@ -1,6 +1,5 @@
 """
 Testing file for RMS Roll Lifespan Prediction
-ONLY WORKS ON KAISER NETWORK (as of 11/17/2021)
 Written By - Joshua Seward
 """
 import RollReplacement as r
@@ -18,6 +17,7 @@ def test_remaining_roll_life():
 
 # test that the values are properly taken from the database and used in the
 # predictive function
+# ONLY WORKS ON KAISER NETWORK (as of 11/17/2021)
 def test_days_until_replacement():
     remaining_roll_life = r.days_until_replacement(1001)
     assert remaining_roll_life == 6000
