@@ -2,8 +2,6 @@
 Testing file for RMS Email Validation
 Written By - Joshua Seward
 """
-from re import T
-from typing import ValuesView
 import EmailValidation as validation
 
 # check that a generic kaiser domain passes (lowercase)
