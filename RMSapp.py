@@ -3,8 +3,6 @@ from flask import Flask, redirect, url_for, render_template, request
 import pyodbc as pp
 
 
-
-
 app = Flask(__name__)
 
 
@@ -15,7 +13,14 @@ def help_page():
 
 @app.route("/chocksMenu")
 def chocksMenu():
-    return render_template('chocksMenu.html')\
+    return render_template('chocksMenu.html')
+
+
+@app.route("/chocksView")
+def chocksView():
+    headings = ("Roll ID", "Status", "Current Diameter", "Starting Diameter", "Mill", "Roll Type", "Manufacture Date")
+    data = query_results("Select *  FROM report ORDER BY date DESC", 7)
+    return render_template('chocksView.html', headings=headings, data=data)
     
 
 @app.route("/chocks")
@@ -31,9 +36,9 @@ def notification():
 @app.route("/")
 def home():
     headings = ("Roll ID", "Status", "Current Diameter", "Starting Diameter", "Mill", "Roll Type", "Manufacture Date")
-    #data = query_results()
-    #return render_template("index.html", headings=headings, data=data)
-    return render_template("chocks.html")
+    data = query_results("Select *  FROM roll ORDER BY roll_num DESC", 7)
+    return render_template("index.html", headings=headings, data=data)
+
 
 
 #Replace with /index when its finished
@@ -178,27 +183,23 @@ def remove_email():
 
 
 
-def query_results(): #Displays roll information
+def query_results(query, cols): #Displays roll information
     try: #Use this code whenever you connect to SQL server
         connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
         'uid=rmsapp;pwd=ss1RMSpw@wb02') 
     except pp.Error as e:
         message = "error connecting to SQL Server: " + str(e) #returns error type
         return message
-    cur = connection.cursor() #used to execute actions, might be able do more idk
-    cur.execute("Select *  From roll ORDER BY roll_num DESC")#query
+    cur = connection.cursor() # Used to execute actions, might be able do more idk
+    cur.execute(query) # Query
     data = cur.fetchall()
     table_data = [] # The table of data we want to display
     # Add data into table data
     for row in data:
-        data_row = [] # Array to hold a single data entry / Table row
-        data_row.append(str(row[0]))
-        data_row.append(str(row[1]))
-        data_row.append(str(row[2])) #always null, ask about it on monday
-        data_row.append(str(row[3]))
-        data_row.append(str(row[4]))
-        data_row.append(str(row[5]))
-        data_row.append(str(row[6]))
+        data_row = []
+        for col in range(cols):
+            data_row.append(str(row[col]))
+        # Array to hold a single data entry / Table row
         table_data.append(data_row)
     return table_data
 
