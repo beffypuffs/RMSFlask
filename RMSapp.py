@@ -1,6 +1,6 @@
 from flask import Flask, redirect, url_for, render_template, request
 from flask_mail import Mail, Message
-from . import Connections
+import Connections
 
 
 app = Flask(__name__)
@@ -42,7 +42,7 @@ def chocks():
 
 @app.route("/notifications")
 def notifications():
-    send_notification_email(1001) # RELOCATE THIS TO SEND EMAIL WHEN REPLACEMENT SHOULD BE ORDERED
+    # send_notification_email(1001) # RELOCATE THIS TO SEND EMAIL WHEN REPLACEMENT SHOULD BE ORDERED
     return render_template('notifications.html')
 
 
