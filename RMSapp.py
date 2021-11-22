@@ -3,6 +3,7 @@ from flask import Flask, redirect, url_for, render_template, request
 from flask_mail import Mail, Message
 import pyodbc as pp
 import RollReplacement as rollRep
+import EmailValidation as eVal
 
 
 app = Flask(__name__)
@@ -151,7 +152,13 @@ def add_email():
         email = request.form['email']
 
         cur = connection.cursor()
-        #INPUT SANITATION
+
+        # INPUT VALIDATION - ONLY ALLOWS KAISER DOMAIN EMAILS FOR NOW
+        #email_username = email[0:(email.index('@')-1)]
+        #email_domain = email[email.index('@'):len(email)]
+        #if(eVal.username_validation(email_username) == False or eVal.domain_validation(email_domain) == False):
+        #    return 'invalid email'
+
         #print('INSERT INTO employee VALUES(' + badge_number + ', \'' + name + '\', \'' + email + '\')')
         try:
             cur.execute('INSERT INTO employee VALUES(' + badge_number + ', \'' + name + '\', \'' + email + '\')')
@@ -216,11 +223,32 @@ def query_results(): #Displays roll information
 def send_notification_email(roll_id):
     mail = Mail(app)
     message = Message('TEST MESSAGE', sender='RMSNotifications1@gmail.com')
+
+#    # ONLY WORKS WHEN CONNECTED TO KAISER NETWORK
+#    try: # connect to RMS database
+#        connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
+#    'uid=rmsapp;pwd=ss1RMSpw@wb02') 
+#    except pp.Error as e: # couldn't connect to 
+#        error_message = "error connecting to SQL Server: " + str(e) #returns error type
+#        return error_message
+
     # NEED TO REFORMAT THIS WITH HTML - include something about the recipient being on
     # the notifications list and how to get off of it
+    # INFO TO INCLUDE IN THE EMAIL - 
     message.body = f'This email should say something about a new roll needing to be ordered\
     (and include the roll_num: {roll_id} that is being replaced)'
-    # USING MY EMAIL FOR NOW - should add all recipients on notifications list
+
+#    # ONLY WORKS WHEN CONNECTED TO KAISER NETWORK
+#    cur = connection.cursor()
+#    try: # query database to get emails we need to notify
+#        cur.execute(f'SELECT e.email FROM employe e')
+#        emails = cur.fetchall()
+#        for row in emails: # add emails to the message as recipients
+#            message.add_recipient(row[0])
+#    except pp.Error as e: # the SQL query fails
+#        return 'error getting emails: ' + str(e)
+
+    # USING TEST EMAIL FOR NOW - should query database and add all registered recipients
     message.add_recipient('rmsnotirecipient@gmail.com')
     mail.send(message)
     return 'Notification Email Sent'
