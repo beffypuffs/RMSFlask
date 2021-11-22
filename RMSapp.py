@@ -1,11 +1,20 @@
 from datetime import date
 from flask import Flask, redirect, url_for, render_template, request
+from flask_mail import Mail, Message
 import pyodbc as pp
-
-
+import RollReplacement as rollRep
 
 
 app = Flask(__name__)
+
+# settings for sending email notifications - NOT FINAL VALUES
+# (should be changed when switching to use a Kaiser domain email)
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'RMSNotifications1@gmail.com'
+app.config['MAIL_PASSWORD'] = 'Rm$aPp01'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
 
 
 @app.route("/help")
@@ -25,6 +34,7 @@ def chocks():
 
 @app.route("/notifications")
 def notification():
+    send_notification_email(1001) # RELOCATE THIS TO SEND EMAIL WHEN REPLACEMENT SHOULD BE ORDERED
     return render_template('notifications.html')
 
 
@@ -202,8 +212,18 @@ def query_results(): #Displays roll information
         table_data.append(data_row)
     return table_data
 
-
-        
+# function to send a notification email to the registered users in the RMS
+def send_notification_email(roll_id):
+    mail = Mail(app)
+    message = Message('TEST MESSAGE', sender='RMSNotifications1@gmail.com')
+    # NEED TO REFORMAT THIS WITH HTML - include something about the recipient being on
+    # the notifications list and how to get off of it
+    message.body = f'This email should say something about a new roll needing to be ordered\
+    (and include the roll_num: {roll_id} that is being replaced)'
+    # USING MY EMAIL FOR NOW - should add all recipients on notifications list
+    message.add_recipient('rmsnotirecipient@gmail.com')
+    mail.send(message)
+    return 'Notification Email Sent'
 
 
 if __name__ == "__main__":
