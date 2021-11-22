@@ -153,7 +153,7 @@ def add_email():
 
         cur = connection.cursor()
 
-        # INPUT VALIDATION - ONLY ALLOWS KAISER DOMAIN EMAILS FOR NOW
+        # INPUT VALIDATION - ONLY ALLOWS KAISER DOMAIN EMAILS (can be changed if need be)
         #email_username = email[0:(email.index('@')-1)]
         #email_domain = email[email.index('@'):len(email)]
         #if(eVal.username_validation(email_username) == False or eVal.domain_validation(email_domain) == False):
