@@ -10,10 +10,10 @@ app = Flask(__name__)
 
 # settings for sending email notifications - NOT FINAL VALUES
 # (should be changed when switching to use a Kaiser domain email)
-app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_SERVER']='smtp.gmail.com' # change for Kaiser email
 app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'RMSNotifications1@gmail.com'
-app.config['MAIL_PASSWORD'] = 'Rm$aPp01'
+app.config['MAIL_USERNAME'] = 'RMSNotifications1@gmail.com' # change for Kaiser email
+app.config['MAIL_PASSWORD'] = 'Rm$aPp01' # change for Kaiser email
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
