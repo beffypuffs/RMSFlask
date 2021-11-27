@@ -36,6 +36,7 @@ def chocks():
 @app.route("/notifications")
 def notification():
     send_notification_email(1001) # RELOCATE THIS TO SEND EMAIL WHEN REPLACEMENT SHOULD BE ORDERED
+    # DOES NOT WORK ON KAISER REMOTE DESKTOP
     return render_template('notifications.html')
 
 
@@ -153,17 +154,13 @@ def add_email():
 
         cur = connection.cursor()
 
-        # INPUT VALIDATION - ONLY ALLOWS KAISER DOMAIN EMAILS (can be changed if need be)
-        #email_username = email[0:(email.index('@')-1)]
-        #email_domain = email[email.index('@'):len(email)]
-        #if(eVal.username_validation(email_username) == False or eVal.domain_validation(email_domain) == False):
-        #    return 'invalid email'
+        # INPUT VALIDATION - NOT COMPLETE
 
         #print('INSERT INTO employee VALUES(' + badge_number + ', \'' + name + '\', \'' + email + '\')')
         try:
             cur.execute('INSERT INTO employee VALUES(' + badge_number + ', \'' + name + '\', \'' + email + '\')')
         except pp.Error as e:
-            return str(e) #returns error code if query fails
+            return 'Error adding email - ' + str(e) #returns error code if query fails
         connection.commit()
     return 'thing'
 
@@ -224,13 +221,13 @@ def send_notification_email(roll_id):
     mail = Mail(app)
     message = Message('TEST MESSAGE', sender='RMSNotifications1@gmail.com')
 
-#    # ONLY WORKS WHEN CONNECTED TO KAISER NETWORK
-#    try: # connect to RMS database
-#        connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
-#    'uid=rmsapp;pwd=ss1RMSpw@wb02') 
-#    except pp.Error as e: # couldn't connect to 
-#        error_message = "error connecting to SQL Server: " + str(e) #returns error type
-#        return error_message
+    # ONLY WORKS WHEN CONNECTED TO KAISER NETWORK
+    try: # connect to RMS database
+       connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
+    'uid=rmsapp;pwd=ss1RMSpw@wb02') 
+    except pp.Error as e: # couldn't connect to 
+        error_message = "error connecting to SQL Server: " + str(e) #returns error type
+        return error_message
 
     # NEED TO REFORMAT THIS WITH HTML - include something about the recipient being on
     # the notifications list and how to get off of it
@@ -238,15 +235,15 @@ def send_notification_email(roll_id):
     message.body = f'This email should say something about a new roll needing to be ordered\
     (and include the roll_num: {roll_id} that is being replaced)'
 
-#    # ONLY WORKS WHEN CONNECTED TO KAISER NETWORK
-#    cur = connection.cursor()
-#    try: # query database to get emails we need to notify
-#        cur.execute(f'SELECT e.email FROM employe e')
-#        emails = cur.fetchall()
-#        for row in emails: # add emails to the message as recipients
-#            message.add_recipient(row[0])
-#    except pp.Error as e: # the SQL query fails
-#        return 'error getting emails: ' + str(e)
+    # ONLY WORKS WHEN CONNECTED TO KAISER NETWORK
+    cur = connection.cursor()
+    try: # query database to get emails we need to notify
+        cur.execute(f'SELECT e.email FROM employe e')
+        emails = cur.fetchall()
+        for row in emails: # add emails to the message as recipients
+            message.add_recipient(row[0])
+    except pp.Error as e: # the SQL query fails
+        return 'error getting emails: ' + str(e)
 
     # USING TEST EMAIL FOR NOW - should query database and add all registered recipients
     message.add_recipient('rmsnotirecipient@gmail.com')
