@@ -222,6 +222,12 @@ def send_notification_email(roll_id):
     mail = Mail(app)
     message = Message('TEST MESSAGE', sender='RMSNotifications1@gmail.com')
 
+    # NEED TO REFORMAT THIS WITH HTML - include something about the recipient being on
+    # the notifications list and how to get off of it
+    # INFO TO INCLUDE IN THE EMAIL - 
+    message.body = f'This email should say something about a new roll needing to be ordered\
+    (and include the roll_num: {roll_id} that is being replaced)'
+
     # ONLY WORKS WHEN CONNECTED TO KAISER NETWORK
     # try: # connect to RMS database
     #     connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
@@ -237,12 +243,6 @@ def send_notification_email(roll_id):
     # except pp.Error as e: # couldn't connect to 
     #     error_message = "error connecting to SQL Server: " + str(e) #returns error type
     #     return error_message
-
-    # NEED TO REFORMAT THIS WITH HTML - include something about the recipient being on
-    # the notifications list and how to get off of it
-    # INFO TO INCLUDE IN THE EMAIL - 
-    message.body = f'This email should say something about a new roll needing to be ordered\
-    (and include the roll_num: {roll_id} that is being replaced)'
     
     # USING TEST EMAIL FOR NOW - should query database and add all registered recipients
     message.add_recipient('rmsnotirecipient@gmail.com')
