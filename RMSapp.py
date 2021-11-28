@@ -35,7 +35,8 @@ def chocks():
 
 @app.route("/notifications")
 def notification():
-    send_notification_email(1001) # RELOCATE THIS TO SEND EMAIL WHEN REPLACEMENT SHOULD BE ORDERED
+    # RELOCATE THIS TO SEND EMAIL WHEN REPLACEMENT SHOULD BE ORDERED
+    send_notification_email(1001) 
     # DOES NOT WORK ON KAISER REMOTE DESKTOP
     return render_template('notifications.html')
 
@@ -242,9 +243,7 @@ def send_notification_email(roll_id):
     # INFO TO INCLUDE IN THE EMAIL - 
     message.body = f'This email should say something about a new roll needing to be ordered\
     (and include the roll_num: {roll_id} that is being replaced)'
-
-    # ONLY WORKS WHEN CONNECTED TO KAISER NETWORK
-
+    
     # USING TEST EMAIL FOR NOW - should query database and add all registered recipients
     message.add_recipient('rmsnotirecipient@gmail.com')
     message.add_recipient('Joshua.Seward@kaisertwd.com')
