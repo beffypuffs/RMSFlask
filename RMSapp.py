@@ -230,20 +230,21 @@ def send_notification_email(roll_id):
     (and include the roll_num: {roll_id} that is being replaced)'
 
     # ONLY WORKS WHEN CONNECTED TO KAISER NETWORK
-    # try: # connect to RMS database
-    #     connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
-    # 'uid=rmsapp;pwd=ss1RMSpw@wb02') 
-    #     cur = connection.cursor()
-    #     try: # query database to get emails we need to notify
-    #         cur.execute('SELECT email FROM employee;')
-    #         emails = cur.fetchall()
-    #         for row in emails: # add emails to the message as recipients
-    #             message.add_recipient(row[0])
-    #     except pp.Error as e: # the SQL query fails
-    #         return 'error getting emails: ' + str(e)
-    # except pp.Error as e: # couldn't connect to 
-    #     error_message = "error connecting to SQL Server: " + str(e) #returns error type
-    #     return error_message
+    try: # connect to RMS database
+        connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
+    'uid=rmsapp;pwd=ss1RMSpw@wb02') 
+        cur = connection.cursor()
+    except pp.Error as e: # couldn't connect to 
+        error_message = "error connecting to SQL Server: " + str(e) #returns error type
+        return error_message
+
+    try: # query database to get emails we need to notify
+        cur.execute('SELECT email FROM employee;')
+        emails = cur.fetchall()
+        for row in emails: # add emails to the message as recipients
+            message.add_recipient(row[0])
+    except pp.Error as e: # the SQL query fails
+        return 'error getting emails: ' + str(e)
     
     # USING TEST EMAIL FOR NOW - should query database and add all registered recipients
     message.add_recipient('rmsnotirecipient@gmail.com')
