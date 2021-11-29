@@ -234,7 +234,7 @@ def send_notification_email(roll_id):
     # 'uid=rmsapp;pwd=ss1RMSpw@wb02') 
     #     cur = connection.cursor()
     #     try: # query database to get emails we need to notify
-    #         cur.execute('SELECT e.email FROM employee e')
+    #         cur.execute('SELECT email FROM employee;')
     #         emails = cur.fetchall()
     #         for row in emails: # add emails to the message as recipients
     #             message.add_recipient(row[0])
