@@ -246,7 +246,6 @@ def send_notification_email(roll_id):
     
     # USING TEST EMAIL FOR NOW - should query database and add all registered recipients
     message.add_recipient('rmsnotirecipient@gmail.com')
-    message.add_recipient('Joshua.Seward@kaisertwd.com')
     mail.send(message)
     return 'Notification Email Sent'
 
