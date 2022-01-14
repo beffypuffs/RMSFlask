@@ -1,0 +1,66 @@
+<!-- 
+    Notification Email Template
+    Author: Joshua Seward
+    Date Created: 13 January 2022
+    Last Modified: 13 January 2022
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Title and CSS link -->
+        <link href="style.css" rel="stylesheet" type="text/css"/>
+        <title>RMS Notification Email</title>
+    </head>
+
+    <body>
+        <header>
+            <!-- Kaiser Logo and Title -->
+            <img src="static/images/logo.png" alt="Kaiser Aluminum Logo"/>
+        </header>
+
+        <main>
+            <div id="rollsAtEOLDiv" name="rollsAtEOLDiv">
+                <!-- Rolls that have reached End of Life REPLACE IMMEDIATELY -->
+                <table class="center">
+                    <caption><strong>ROLLS AT END OF LIFE</strong></caption>
+                    <!-- Table Headings -->
+                    <tr>
+                        {% for heading in headings %}
+                            <th>{{ heading }}</th>
+                        {% endfor %}
+                    </tr>
+                    <!-- Table Data -->
+                    {% for roll in rolls_at_EOL %}
+                        <tr>
+                            {% for roll_data in roll %}
+                                <td>{{ roll_data }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            
+            <div id="rollsNearEOLDiv" name="rollsNearEOLDiv">
+                <!-- Rolls that are nearing End of Life REPLACE SOON -->
+                <table class="center">
+                    <caption><strong>Rolls Near End Of Life</strong></caption>
+                    <!-- Table Headings -->
+                    <tr>
+                        {% for heading in headings %}
+                            <th>{{ heading }}</th>
+                        {% endfor %}
+                    </tr>
+                    <!-- Table Data -->
+                    {% for roll in rolls_near_EOL %}
+                        <tr>
+                            {% for roll_data in roll %}
+                                <td>{{ roll_data }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </main>
+    </body>
+</html>

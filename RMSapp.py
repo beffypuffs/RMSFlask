@@ -37,7 +37,7 @@ def chocks():
 @app.route("/notifications")
 def notification():
     # RELOCATE THIS TO SEND EMAIL WHEN REPLACEMENT SHOULD BE ORDERED
-    send_notification_email(1001) 
+    send_notification_email(1001)
     # DOES NOT WORK ON KAISER REMOTE DESKTOP
     return render_template('notifications.html')
 
@@ -230,7 +230,7 @@ def send_notification_email(roll_id):
     (and include the roll_num: {roll_id} that is being replaced)'
 
     # ONLY WORKS WHEN CONNECTED TO KAISER NETWORK
-    try: # connect to RMS database
+    try: # connect to RMS database REPLACE WITH Connections.py
         connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
     'uid=rmsapp;pwd=ss1RMSpw@wb02') 
         cur = connection.cursor()
