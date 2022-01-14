@@ -14,6 +14,8 @@ def send_noti_email(rolls_at_EOL, rolls_near_EOL, sender, recipients, mail):
 
     # render the HTML template using the given rolls and correct headings
     headings = ()
+    message.html = render_template("noti_email.html", headings=headings, 
+    rolls_at_EOL=rolls_at_EOL, rolls_near_EOL=rolls_near_EOL)
 
     # send notification email
     mail.send(message)
