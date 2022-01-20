@@ -20,10 +20,16 @@
         </header>
 
         <main>
+            <!-- Notification Message -->
+            <div id="notiTextDiv" name="notiTextDiv">
+                <h3>This is a Notification from the Roll Management System</h3>
+                <h3>The following rolls need attention</h3>
+            </div>
+
             <div id="rollsAtEOLDiv" name="rollsAtEOLDiv">
                 <!-- Rolls that have reached End of Life REPLACE IMMEDIATELY -->
                 <table class="center">
-                    <caption><strong>ROLLS AT END OF LIFE</strong></caption>
+                    <caption><strong>ROLLS AT END OF LIFE - REPLACE IMMEDIATELY</strong></caption>
                     <!-- Table Headings -->
                     <tr>
                         {% for heading in headings %}
@@ -44,7 +50,7 @@
             <div id="rollsNearEOLDiv" name="rollsNearEOLDiv">
                 <!-- Rolls that are nearing End of Life REPLACE SOON -->
                 <table class="center">
-                    <caption><strong>Rolls Near End Of Life</strong></caption>
+                    <caption><strong>Rolls Near End Of Life - Replace Soon</strong></caption>
                     <!-- Table Headings -->
                     <tr>
                         {% for heading in headings %}
