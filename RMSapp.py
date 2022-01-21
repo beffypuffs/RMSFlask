@@ -15,6 +15,7 @@ app.config['MAIL_USERNAME'] =  RMS_EMAIL
 app.config['MAIL_PASSWORD'] = 'Rm$aPp01' # change for Kaiser email
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
+
 @app.route("/help")
 def help_page():
     return render_template('help.html')
