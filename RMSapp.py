@@ -1,9 +1,6 @@
-from datetime import date
 from flask import Flask, redirect, url_for, render_template, request
 from flask_mail import Mail, Message
-import pyodbc as pp
-import RollReplacement as rollRep
-import EmailValidation as eVal
+import Connections
 import Notifications as notif
 
 app = Flask(__name__)
@@ -18,8 +15,6 @@ app.config['MAIL_USERNAME'] =  RMS_EMAIL
 app.config['MAIL_PASSWORD'] = 'Rm$aPp01' # change for Kaiser email
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
-
-
 @app.route("/help")
 def help_page():
     return render_template('help.html')
@@ -27,7 +22,17 @@ def help_page():
 
 @app.route("/chocksMenu")
 def chocksMenu():
-    return render_template('chocksMenu.html')\
+    return render_template('chocksMenu.html')
+
+
+@app.route("/chocksView")
+def chocksView():
+    headings = ("Roll ID", "Status", "Current Diameter", "Starting Diameter", "Mill", "Roll Type", "Manufacture Date")
+    data, committed, message = Connections.query_results("Select *  FROM report ORDER BY date DESC", 7)
+    if committed is True:
+        return render_template('chocksView.html', headings=headings, data=data)
+    else:
+        return message #error message, needs an html page
     
 
 @app.route("/chocks")
@@ -36,19 +41,20 @@ def chocks():
 
 
 @app.route("/notifications")
-def notification():
-    # RELOCATE THIS TO SEND EMAIL WHEN REPLACEMENT SHOULD BE ORDERED
-    send_notification_email(1001)
-    # DOES NOT WORK ON KAISER REMOTE DESKTOP
+def notifications():
+    # send_notification_email(1001) # RELOCATE THIS TO SEND EMAIL WHEN REPLACEMENT SHOULD BE ORDERED
     return render_template('notifications.html')
 
 
 @app.route("/")
 def home():
     headings = ("Roll ID", "Status", "Current Diameter", "Starting Diameter", "Mill", "Roll Type", "Manufacture Date")
-    #data = query_results()
-    #return render_template("index.html", headings=headings, data=data)
-    return render_template("chocks.html")
+    data, committed, message = Connections.query_results("Select *  FROM roll ORDER BY roll_num DESC", 7)
+    if committed is True:
+        return render_template("index.html", headings=headings, data=data)
+    else:
+        return message #display error message, needs an html page
+
 
 
 #Replace with /index when its finished
@@ -61,163 +67,32 @@ def query():
 @app.route('/add-chock', methods = ['GET','POST'])
 def add_chock():
     if request.method == 'POST':
-        try: #Use this code whenever you connect to SQL server
-            connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
-        'uid=rmsapp;pwd=ss1RMSpw@wb02') 
-        except pp.Error as e:
-            message = "error connecting to SQL Server: " + str(e) #returns error type
-            return message
-
-        date = request.form['date'],
-        chock_number = request.form['chock-num'],
-        position = request.form['position'],
-        reason = request.form['reasons_d_and_i'],
-        visible_chock_numbers = request.form['obvi'],
-        lifiting_bolt_thread_condition = request.form['lifting'],
-        cover_end_condition = request.form['cover'],
-        bell_o_ring_condition = request.form['end-bell'],
-        thrust_collar = request.form['thrust'],
-        lockkeepers = request.form['locks'],
-        liner_plates = request.form['liner'],
-        inboard_radial_seals_replaced = request.form['num-rep'],
-        inboard_face_seal = request.form['seals1'],
-        outboard_radial_seal = request.form['seals2'],
-        load_zone_from_mill = request.form['mill1'],
-        load_zone_to_mill = request.form['mill2'],
-        bearing_grease_condition = request.form['bearing-grease'],
-        bearing_mfg = request.form['mfg'],
-        bearing_serial_number = request.form['sn'],
-        is_sealed = request.form['sealed'],
-        seals_replaced = request.form['seals-rep'],
-        cup_a = request.form['cupA'],
-        cup_bd = request.form['cupB'],
-        cup_e = request.form['cupE'],
-        race_a = request.form['raceA'],
-        race_b = request.form['raceB'],
-        race_d = request.form['raceD'],
-        race_e = request.form['raceE'],
-        bearing_status = request.form['bearing-condition'],
-        different_bearing_installed = request.form['diff-bearing'],
-        bearing_mfg_new = request.form['textMFG'],
-        serial_number_new = request.form['MFGsn'],
-        sealed_new = request.form['sealed2'],
-        chock_bore_round = request.form['chockBoreRound'],
-        chock_bore = request.form['chockBoreOOR'],
-        no_rust = request.form['wearOrRust'],
-        grease_purged = request.form['purgeGrease'],
-        spots_dings = request.form['spots-dings'],
-        manual_pack = request.form['manual-pack'],
-        lube_bore = request.form['lube-bore'],
-        grease_packed_bearings = request.form['dropped'],
-        height_shoulder = request.form['droppedA'],
-        bearing_depth = request.form['droppedB'],
-        shims_needed = request.form['droppedDifference'],
-        was_paper_used = request.form['paper-used'],
-        by_hand = request.form['shim'],
-        was_torqued = request.form['phases'],
-        ancillary_installed = request.form['ancillary'],
-        grease_pack_sealed = request.form['greasePack'],
-        chock_ready_for_installation = request.form['ready'],
-        comments  = request.form['comments'],
-        mill = request.form['roll_mill'],
-        badge_number = request.form['badge_number'],
-        roll_type = request.form['roll_type']
-        cur = connection.cursor()
-        #INPUT SANITATION
-        #print('INSERT INTO employee VALUES(' + badge_number + ', \'' + name + '\', \'' + email + '\')')
-        try:
-            # first draft of this! I need to ask jeff what some values should be and check which ones are numbers since I'm assuming most of these are being interpreted as strings
-            cur.execute('INSERT INTO report VALUES(' + date + ', ' + chock_number + ', \'' + position + '\', \'' + reason + '\', \'' + visible_chock_numbers + '\', \'' + lifiting_bolt_thread_condition + 
-            '\', \'' + cover_end_condition + '\', \'' + bell_o_ring_condition + '\', \'' + thrust_collar + '\', \'' + '\', \'' + lockkeepers + '\', \'' + liner_plates + '\', \'' + inboard_radial_seals_replaced +
-            '\', \'' + inboard_face_seal + '\', \'' + outboard_radial_seal + '\', \'' + load_zone_from_mill + '\', \'' + load_zone_to_mill + '\', \'' + bearing_grease_condition + '\', \'' + bearing_mfg +
-            '\', \'' + bearing_serial_number + '\', \'' + is_sealed + '\', \'' + seals_replaced + '\', \'' + cup_a + '\', \'' + cup_bd + '\', \'' + cup_e + '\', \'' + race_a + '\', \'' + race_b +
-            '\', \'' + race_d + '\', \'' + race_e + '\', \'' + bearing_status + '\', \'' + different_bearing_installed + '\', \'' + bearing_mfg_new + '\', \'' + serial_number_new + '\', \'' + sealed_new +
-            '\', \'' + chock_bore_round + '\', \'' + chock_bore + '\', \'' + no_rust + '\', \'' + grease_purged + '\', \'' + spots_dings + '\', \'' + manual_pack + '\', \'' + lube_bore + '\', \'' + grease_packed_bearings + 
-            '\', \'' + height_shoulder + '\', \'' + bearing_depth + '\', \'' + shims_needed + '\', \'' + was_paper_used + '\', \'' + by_hand + '\', \'' + was_torqued + '\', \'' + ancillary_installed +
-            '\', \'' + grease_pack_sealed + '\', \'' + chock_ready_for_installation + '\', \'' + comments + '\', \'' + mill + '\', \'' + badge_number + '\', \'' + roll_type + 
-            '\')')
-        except pp.Error as e:
-            return str(e) #returns error code if query fails
-        connection.commit()
+        committed, message = Connections.add_chock(request)
+        if (committed is True):
+            return 'succesfully added chock' #maybe option to view all chocks forms after submitting
+        else:
+            return message #error message
     return 'thing'
 
 @app.route('/add-email', methods = ['GET','POST'])#template for saving data from a webpage
 def add_email():
     if request.method == 'POST':
-        try: #Use this code whenever you connect to SQL server
-            connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
-        'uid=rmsapp;pwd=ss1RMSpw@wb02') 
-        except pp.Error as e:
-            message = "error connecting to SQL Server: " + str(e) #returns error type
-            return message
-
-        badge_number = request.form['badge_number']
-        name = request.form['nm']
-        email = request.form['email']
-
-        cur = connection.cursor()
-
-        # INPUT VALIDATION - NOT COMPLETE
-
-        #print('INSERT INTO employee VALUES(' + badge_number + ', \'' + name + '\', \'' + email + '\')')
-        try:
-            cur.execute('INSERT INTO employee VALUES(' + badge_number + ', \'' + name + '\', \'' + email + '\')')
-        except pp.Error as e:
-            return 'Error adding email - ' + str(e) #returns error code if query fails
-        connection.commit()
+        committed, message = Connections.add_email(request)
+        if committed is True:
+            return 'email succesfully added'
+        else:
+            return message #error message
     return 'thing'
 
 @app.route('/remove-email', methods = ['POST'])
 def remove_email():
-     if request.method == 'POST':
-        try: #Use this code whenever you connect to SQL server
-            connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
-        'uid=rmsapp;pwd=ss1RMSpw@wb02') 
-        except pp.Error as e: #eventually
-            message = "error connecting to SQL Server: " + str(e) #returns error type
-            return message
-
-        badge_number = request.form['badge_number']
-        name = request.form['nm']
-        email = request.form['email']
-
-        cur = connection.cursor()
-        #INPUT SANITATION
-        # print(f'DELETE FROM employee WHERE badge_number = {badge_number} AND name = {name} AND email = {email};')
-        try:
-            cur.execute(f'DELETE FROM employee WHERE badge_number = {badge_number} AND name = \'{name}\' AND email = \'{email}\';')
-        except pp.Error as e:
-            return str(e) #returns error code if query fails
-        connection.commit()
-        # cur.execute(f'INSERT INTO employee VALUES({badge_number}, \'{name}\', \'{email}\')')
-        return 'thing'
-
-
-
-
-def query_results(): #Displays roll information
-    try: #Use this code whenever you connect to SQL server
-        connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
-        'uid=rmsapp;pwd=ss1RMSpw@wb02') 
-    except pp.Error as e:
-        message = "error connecting to SQL Server: " + str(e) #returns error type
-        return message
-    cur = connection.cursor() #used to execute actions, might be able do more idk
-    cur.execute("Select *  From roll ORDER BY roll_num DESC")#query
-    data = cur.fetchall()
-    table_data = [] # The table of data we want to display
-    # Add data into table data
-    for row in data:
-        data_row = [] # Array to hold a single data entry / Table row
-        data_row.append(str(row[0]))
-        data_row.append(str(row[1]))
-        data_row.append(str(row[2])) #always null, ask about it on monday
-        data_row.append(str(row[3]))
-        data_row.append(str(row[4]))
-        data_row.append(str(row[5]))
-        data_row.append(str(row[6]))
-        table_data.append(data_row)
-    return table_data
+    if request.method == 'POST':
+        committed, message = Connections.remove_email(request)
+        if committed is True:
+            return 'email succesfully removed'
+        else:
+            return message #error message
+    return 'thing'
 
 # function to send a notification email to the registered users in the RMS
 def send_notification_email():
