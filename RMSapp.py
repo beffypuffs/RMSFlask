@@ -95,21 +95,30 @@ def remove_email():
             return message #error message
     return 'thing'
 
-# function to send a notification email to the registered users in the RMS
+# function to send a notification email to registered users in the RMS
 def send_notification_email():
     # SAMPLE DATA TO TEST NOTI EMAIL RENDERING
     rolls_at_EOL = [[]]
     rolls_near_EOL = [[]]
 
     # get rolls at (or past) the end of their lifespan
+    rolls_at_EOL, at_EOL_committed, message = Connections.query_results('TODO')
+    if not at_EOL_committed:
+        return message
 
     # get rolls near the end of their lifespan
+    rolls_near_EOL, near_EOL_committed, message = Connections.query_results('TODO')
+    if not near_EOL_committed:
+        return message
 
     # get notification recipients from the RMS database
-    recipients = []
+    recipients, recipients_committed, message = Connections.query_results('TODO')
+    if not recipients_committed:
+        return message
 
     # send the notification email
-    notif.send_noti_email(rolls_at_EOL, rolls_near_EOL, RMS_EMAIL, recipients, rms_mail)
+    notif.send_noti_email(rolls_at_EOL, rolls_near_EOL, RMS_EMAIL, 
+        recipients, rms_mail)
 
     # OLD WAY OF SENDING NOTIFICATION EMAILS
     # mail = Mail(app)
