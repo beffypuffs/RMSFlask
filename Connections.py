@@ -172,8 +172,8 @@ def sql_connect(): #not used, eventually will return current sql connection or s
     # connection = psycopg2.connect(dbname='RMS',user='rmsAdmin',password='1029384756', host '')  #change to your ip
     message = "connected"
     try: #Use this code whenever you connect to SQL server
-        connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
-    'uid=rmsapp;pwd=ss1RMSpw@wb02') 
+        connection = pp.connect('Driver={SQL Server};Server=rmssql.database.windows.net;Database=RMSSQL;'
+    'uid=RMS;pwd=trpJ63iGY4F7mRj') 
     except pp.Error as e:
         message = "error connecting to SQL Server: " + str(e) #returns error type
         print(message)

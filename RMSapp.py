@@ -65,11 +65,14 @@ def notifications():
 def home():
     headings = ("Roll ID", "Diameter", "Scrap Diameter", "Approx. Scrap Date", "Grinds Left", "Mill", "Roll Type")
     connection, message = Connections.sql_connect()
-    data, committed, message = Connections.query_results(connection, "Select *  FROM roll_new ORDER BY approx_scrap_date ASC", 7)
-    if committed is True:
-        return render_template("index.html", headings=headings, data=data)
+    if message == "connected":
+        data, committed, message = Connections.query_results(connection, "Select *  FROM roll_new ORDER BY approx_scrap_date ASC", 7)
+        if committed is True:
+            return render_template("index.html", headings=headings, data=data)
+        else:
+            return message #display error message, needs an html page
     else:
-        return message #display error message, needs an html page
+        return message
 
 
 
