@@ -97,19 +97,15 @@ def remove_email():
 
 # function to send a notification email to registered users in the RMS
 def send_notification_email():
-    # SAMPLE DATA TO TEST NOTI EMAIL RENDERING
-    rolls_at_EOL = [[]]
-    rolls_near_EOL = [[]]
-
-    # get rolls at (or past) the end of their lifespan
-    rolls_at_EOL_query = 'TODO'
-    rolls_at_EOL, at_EOL_committed, message = Connections.query_results(rolls_at_EOL_query)
+    # get rolls to order IMMEDIATELY (1 year in advance)
+    order_now_query = 'SELECT * FROM roll_new WHERE approx_scrap_date > DATEADD(year, -1, GETDATE());' 
+    order_now, at_EOL_committed, message = Connections.query_results(order_now_query)
     if not at_EOL_committed:
         return message
 
-    # get rolls near the end of their lifespan
-    rolls_near_EOL_query = 'TODO'
-    rolls_near_EOL, near_EOL_committed, message = Connections.query_results(rolls_near_EOL_query)
+    # get rolls to order SOON (15 months in advance)
+    order_soon_query = 'SELECT * FROM roll_new WHERE (approx_scrap_date > DATEADD(month, -15, GETDATE())) AND (approx_scrap_date < DATEADD(year, -1, GETDATE()))'
+    order_soon, near_EOL_committed, message = Connections.query_results(order_soon_query)
     if not near_EOL_committed:
         return message
 
@@ -120,7 +116,7 @@ def send_notification_email():
         return message
 
     # send the notification email
-    notif.send_noti_email(rolls_at_EOL, rolls_near_EOL, RMS_EMAIL, 
+    notif.send_noti_email(order_now, order_soon, RMS_EMAIL, 
         recipients, rms_mail)
 
     # OLD WAY OF SENDING NOTIFICATION EMAILS
