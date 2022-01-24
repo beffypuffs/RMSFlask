@@ -102,17 +102,20 @@ def send_notification_email():
     rolls_near_EOL = [[]]
 
     # get rolls at (or past) the end of their lifespan
-    rolls_at_EOL, at_EOL_committed, message = Connections.query_results('TODO')
+    rolls_at_EOL_query = 'TODO'
+    rolls_at_EOL, at_EOL_committed, message = Connections.query_results(rolls_at_EOL_query)
     if not at_EOL_committed:
         return message
 
     # get rolls near the end of their lifespan
-    rolls_near_EOL, near_EOL_committed, message = Connections.query_results('TODO')
+    rolls_near_EOL_query = 'TODO'
+    rolls_near_EOL, near_EOL_committed, message = Connections.query_results(rolls_near_EOL_query)
     if not near_EOL_committed:
         return message
 
     # get notification recipients from the RMS database
-    recipients, recipients_committed, message = Connections.query_results('TODO')
+    recipients_query = 'SELECT email FROM employee;'
+    recipients, recipients_committed, message = Connections.query_results(recipients_query)
     if not recipients_committed:
         return message
 
