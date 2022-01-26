@@ -8,8 +8,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <!-- Title and CSS link -->
-        <link href="style.css" rel="stylesheet" type="text/css"/>
+        <!-- Title -->
         <title>RMS Notification Email</title>
     </head>
 
@@ -22,46 +21,52 @@
         <main>
             <!-- Notification Message -->
             <div id="notiTextDiv" name="notiTextDiv">
-                <h3>This is a Notification from the Roll Management System</h3>
-                <h3>The following rolls need attention</h3>
+                <h3 style="text-align: center">This is a Notification from the Roll Management System</h3>
+                <h3 style="text-align: center">The following rolls need attention</h3>
             </div>
 
             <div id="rollsAtEOLDiv" name="rollsAtEOLDiv">
                 <!-- Rolls that have reached End of Life REPLACE IMMEDIATELY -->
-                <table class="center">
-                    <caption><strong>ROLLS AT END OF LIFE - REPLACE IMMEDIATELY</strong></caption>
+                <table style="border: 1px solid black;  margin-left: auto; margin-right: auto;" class="center">
+                    <caption>
+                        <strong>REPLACE THESE ROLLS IMMEDIATELY</strong><br/>
+                        The following rolls are 12 months (or less) away from being scrapped
+                    </caption>
                     <!-- Table Headings -->
                     <tr>
                         {% for heading in headings %}
-                            <th>{{ heading }}</th>
+                            <th style="border: 1px solid black;">{{ heading }}</th>
                         {% endfor %}
                     </tr>
                     <!-- Table Data -->
                     {% for roll in rolls_at_EOL %}
                         <tr>
                             {% for roll_data in roll %}
-                                <td>{{ roll_data }}</td>
+                                <td style="border: 1px solid black;">{{ roll_data }}</td>
                             {% endfor %}
                         </tr>
                     {% endfor %}
                 </table>
             </div>
-            
+            <br/>
             <div id="rollsNearEOLDiv" name="rollsNearEOLDiv">
                 <!-- Rolls that are nearing End of Life REPLACE SOON -->
-                <table class="center">
-                    <caption><strong>Rolls Near End Of Life - Replace Soon</strong></caption>
+                <table style="border: 1px solid black; margin-left: auto; margin-right: auto;" class="center">
+                    <caption>
+                        <strong>Replace These Rolls Soon</strong><br/>
+                        The following rolls are 12-15 months away from being scrapped
+                    </caption>
                     <!-- Table Headings -->
                     <tr>
                         {% for heading in headings %}
-                            <th>{{ heading }}</th>
+                            <th style="border: 1px solid black;">{{ heading }}</th>
                         {% endfor %}
                     </tr>
                     <!-- Table Data -->
                     {% for roll in rolls_near_EOL %}
                         <tr>
                             {% for roll_data in roll %}
-                                <td>{{ roll_data }}</td>
+                                <td style="border: 1px solid black;">{{ roll_data }}</td>
                             {% endfor %}
                         </tr>
                     {% endfor %}
