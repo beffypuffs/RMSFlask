@@ -1,6 +1,7 @@
-from flask import Flask, redirect, url_for, render_template, request
+from flask import Flask, redirect, url_for, render_template, request, g
 from flask_mail import Mail, Message
 import Connections
+import Requests
 import Notifications as notif
 
 app = Flask(__name__)
@@ -16,6 +17,7 @@ app.config['MAIL_PASSWORD'] = 'Rm$aPp01' # change for Kaiser email
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
+
 @app.route("/help")
 def help_page():
     return render_template('help.html')
@@ -23,18 +25,32 @@ def help_page():
 
 @app.route("/chocksMenu")
 def chocksMenu():
-    return render_template('chocksMenu.html')
+    return render_template('chocks.html')
 
 
-@app.route("/chocksView")
+@app.route("/chocksView", methods = ['GET','POST']) 
 def chocksView():
-    headings = ("Roll ID", "Status", "Current Diameter", "Starting Diameter", "Mill", "Roll Type", "Manufacture Date")
-    data, committed, message = Connections.query_results("Select *  FROM report ORDER BY date DESC", 7)
-    if committed is True:
-        return render_template('chocksView.html', headings=headings, data=data)
+    if request.method == 'POST':
+        i = int(request.form['form_num'])
+        next_or_prev = request.form['submitResponse']
+        if next_or_prev == "Next form":
+            i -= 1
+        else:
+            i += 1
+        connection, message = Connections.sql_connect()
+        data, committed, message = Connections.query_results(connection, "Select *  FROM report ORDER BY date DESC", 54)
+        if committed is True:
+                return render_template('chocksview2.html', data = data, i = i, length = len(data)) #right now it sends every form which i'll fix later
+        else:
+            return message
     else:
-        return message #error message, needs an html page
-    
+        connection, message = Connections.sql_connect()
+        data, committed, message = Connections.query_results(connection, "Select *  FROM report ORDER BY date DESC", 54)
+        if committed is True:
+            return render_template('chocksView2.html', data = data, i = 0, length = len(data)) #see above
+        else:
+            return message #error message, needs an html page
+
 
 @app.route("/chocks")
 def chocks():
@@ -43,18 +59,22 @@ def chocks():
 
 @app.route("/notifications")
 def notifications():
-    # send_notification_email(1001) # RELOCATE THIS TO SEND EMAIL WHEN REPLACEMENT SHOULD BE ORDERED
     return render_template('notifications.html')
 
 
 @app.route("/")
 def home():
-    headings = ("Roll ID", "Status", "Current Diameter", "Starting Diameter", "Mill", "Roll Type", "Manufacture Date")
-    data, committed, message = Connections.query_results("Select *  FROM roll ORDER BY roll_num DESC", 7)
-    if committed is True:
-        return render_template("index.html", headings=headings, data=data)
+    send_notification_email() # RELOCATE THIS TO SEND EMAIL WHEN REPLACEMENT SHOULD BE ORDERED
+    headings = ("Roll ID", "Diameter", "Scrap Diameter", "Approx. Scrap Date", "Grinds Left", "Mill", "Roll Type")
+    connection, message = Connections.sql_connect()
+    if message == "connected":
+        data, committed, message = Connections.query_results(connection, "Select *  FROM roll_new ORDER BY approx_scrap_date ASC", 7)
+        if committed is True:
+            return render_template("index.html", headings=headings, data=data)
+        else:
+            return message #display error message, needs an html page
     else:
-        return message #display error message, needs an html page
+        return message
 
 
 
@@ -65,20 +85,38 @@ def query():
     return render_template('rollData.html')#temporary link
 
 #Add chock function
-@app.route('/add-chock', methods = ['GET','POST'])
+@app.route('/add_chock', methods = ['GET','POST'])
 def add_chock():
+    connection, message = Connections.sql_connect()
     if request.method == 'POST':
-        committed, message = Connections.add_chock(request)
-        if (committed is True):
-            return 'succesfully added chock' #maybe option to view all chocks forms after submitting
+        if (request.form['submitResponse'] == 'Submit Form'):
+            data = Requests.chock_request_data(request)
+            committed, message = Connections.add_chock(connection, data)
+            if (committed is True):
+                return render_template('successfulAdd.html') #maybe option to view all chocks forms after submitting
+            else:
+                return message #error message
+        elif (request.form['submitResponse'] == 'Remove Form'):
+            data = Requests.chock_request_data(request)
+            committed, message = Connections.remove_chock(connection, data)
+            if (committed is True):
+                return render_template('successfulRemove.html')
+            else:
+                return message
         else:
-            return message #error message
-    return 'thing'
+            data = Requests.chock_request_data(request)
+            committed, message = Connections.edit_chock(connection, data)
+            if (committed is True):
+                return render_template('successfulEdit.html')
+            else:
+                return message
 
 @app.route('/add-email', methods = ['GET','POST'])#template for saving data from a webpage
 def add_email():
     if request.method == 'POST':
-        committed, message = Connections.add_email(request)
+        connection = Connections.sql_connect()
+        data = Requests.email_request_data(request)
+        committed, message = Connections.add_email(connection, data)
         if committed is True:
             return 'email succesfully added'
         else:
@@ -88,36 +126,51 @@ def add_email():
 @app.route('/remove-email', methods = ['POST'])
 def remove_email():
     if request.method == 'POST':
-        committed, message = Connections.remove_email(request)
+        connection = Connections.sql_connect()
+        data = Requests.email_request_data(request)
+        committed, message = Connections.remove_email(connection, data)
         if committed is True:
             return 'email succesfully removed'
         else:
             return message #error message
     return 'thing'
 
+@app.route('/roll-view', methods = ['POST'])
+def roll_view():
+    if request.method == 'POST':
+        roll_num = request.form['roll_clicked']
+        Connections.generate_graphs(roll_num)
+        return render_template('rollView.html', graph=Connections.generate_graphs, roll_num = roll_num)
+
 # function to send a notification email to registered users in the RMS
 def send_notification_email():
-    # get rolls to order IMMEDIATELY (1 year in advance)
-    order_now_query = 'SELECT * FROM roll_new WHERE approx_scrap_date > DATEADD(year, -1, GETDATE());' 
-    order_now, at_EOL_committed, message = Connections.query_results(order_now_query)
-    if not at_EOL_committed:
-        return message
+    # create a connection w/ the database
+    connection, conn_message = Connections.sql_connect()
 
-    # get rolls to order SOON (15 months in advance)
-    order_soon_query = 'SELECT * FROM roll_new WHERE (approx_scrap_date > DATEADD(month, -15, GETDATE())) AND (approx_scrap_date < DATEADD(year, -1, GETDATE()))'
-    order_soon, near_EOL_committed, message = Connections.query_results(order_soon_query)
-    if not near_EOL_committed:
-        return message
+    if conn_message == "connected":
+        # get rolls to order IMMEDIATELY (1 year in advance)
+        order_now_query = 'SELECT * FROM roll_new WHERE approx_scrap_date > DATEADD(year, -1, GETDATE());' 
+        order_now, order_now_committed, message = Connections.query_results(connection, order_now_query)
+        if not order_now_committed:
+            return message
 
-    # get notification recipients from the RMS database
-    recipients_query = 'SELECT email FROM employee;'
-    recipients, recipients_committed, message = Connections.query_results(recipients_query)
-    if not recipients_committed:
-        return message
+        # get rolls to order SOON (15 months in advance)
+        order_soon_query = 'SELECT * FROM roll_new WHERE (approx_scrap_date > DATEADD(month, -15, GETDATE())) AND (approx_scrap_date < DATEADD(year, -1, GETDATE()))'
+        order_soon, order_soon_committed, message = Connections.query_results(connection, order_soon_query)
+        if not order_soon_committed:
+            return message
 
-    # send the notification email
-    notif.send_noti_email(order_now, order_soon, RMS_EMAIL, 
-        recipients, rms_mail)
+        # get notification recipients from the RMS database
+        recipients_query = 'SELECT email FROM employee;'
+        recipients, recipients_committed, message = Connections.query_results(connection, recipients_query)
+        if not recipients_committed:
+            return message
+
+        # send the notification email
+        notif.send_noti_email(order_now, order_soon, RMS_EMAIL, 
+            recipients, rms_mail)
+    else:
+        return conn_message
 
     # OLD WAY OF SENDING NOTIFICATION EMAILS
     # mail = Mail(app)
