@@ -5,7 +5,6 @@ import Requests
 import Notifications as notif
 
 app = Flask(__name__)
-rms_mail = Mail(app)
 
 RMS_EMAIL = 'RMSNotifications1@gmail.com' # change for Kaiser email
 # settings for sending email notifications - NOT FINAL VALUES
@@ -17,9 +16,11 @@ app.config['MAIL_PASSWORD'] = 'Rm$aPp01' # change for Kaiser email
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
+rms_mail = Mail(app)
 
 @app.route("/help")
 def help_page():
+    send_notification_email() # RELOCATE THIS TO SEND EMAIL WHEN REPLACEMENT SHOULD BE ORDERED
     return render_template('help.html')
 
 
@@ -64,7 +65,6 @@ def notifications():
 
 @app.route("/")
 def home():
-    send_notification_email() # RELOCATE THIS TO SEND EMAIL WHEN REPLACEMENT SHOULD BE ORDERED
     headings = ("Roll ID", "Diameter", "Scrap Diameter", "Approx. Scrap Date", "Grinds Left", "Mill", "Roll Type")
     connection, message = Connections.sql_connect()
     if message == "connected":
@@ -148,27 +148,23 @@ def send_notification_email():
     connection, conn_message = Connections.sql_connect()
 
     if conn_message == "connected":
-        # get rolls to order IMMEDIATELY (1 year in advance)
-        order_now_query = 'SELECT * FROM roll_new WHERE approx_scrap_date > DATEADD(year, -1, GETDATE());' 
-        order_now, order_now_committed, message = Connections.query_results(connection, order_now_query)
+        # get rolls to order IMMEDIATELY (1 year in advance) 
+        order_now, order_now_committed, message = Connections.rolls_order_now(connection)
         if not order_now_committed:
             return message
 
         # get rolls to order SOON (15 months in advance)
-        order_soon_query = 'SELECT * FROM roll_new WHERE (approx_scrap_date > DATEADD(month, -15, GETDATE())) AND (approx_scrap_date < DATEADD(year, -1, GETDATE()))'
-        order_soon, order_soon_committed, message = Connections.query_results(connection, order_soon_query)
+        order_soon, order_soon_committed, message = Connections.rolls_order_soon(connection)
         if not order_soon_committed:
             return message
 
         # get notification recipients from the RMS database
-        recipients_query = 'SELECT email FROM employee;'
-        recipients, recipients_committed, message = Connections.query_results(connection, recipients_query)
+        recipients, recipients_committed, message = Connections.email_notification_recipients(connection)
         if not recipients_committed:
             return message
 
         # send the notification email
-        notif.send_noti_email(order_now, order_soon, RMS_EMAIL, 
-            recipients, rms_mail)
+        notif.send_noti_email(order_now, order_soon, RMS_EMAIL, recipients, rms_mail)
     else:
         return conn_message
 

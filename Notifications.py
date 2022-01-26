@@ -10,6 +10,10 @@ from flask_mail import Message
 def send_noti_email(order_now, order_soon, sender, recipients, 
     mail):
     subject = 'RMS Roll Status Notification'
+
+    # test recipient - REMOVE THIS BEFORE PRODUCTION
+    recipients.append('rmsnotirecipient@gmail.com')
+
     # create the message using the given sender and recipients
     message = Message(subject=subject, recipients=recipients, 
     sender=sender)
