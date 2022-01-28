@@ -39,7 +39,7 @@
                         {% endfor %}
                     </tr>
                     <!-- Table Data -->
-                    {% for roll in rolls_at_EOL %}
+                    {% for roll in order_now %}
                         <tr>
                             {% for roll_data in roll %}
                                 <td style="border: 1px solid black;">{{ roll_data }}</td>
@@ -63,7 +63,7 @@
                         {% endfor %}
                     </tr>
                     <!-- Table Data -->
-                    {% for roll in rolls_near_EOL %}
+                    {% for roll in order_soon %}
                         <tr>
                             {% for roll_data in roll %}
                                 <td style="border: 1px solid black;">{{ roll_data }}</td>
