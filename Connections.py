@@ -235,45 +235,45 @@ def rolls_order_now(connection):
     """
     executed = False
     message = ""
-    query = 'SELECT * FROM roll_new WHERE approx_scrap_date > DATEADD(year, -1, GETDATE());' 
+    query = 'SELECT * FROM roll_new WHERE approx_scrap_date < DATEADD(year, 1, GETDATE());' 
     cur = connection.cursor()
     try:
         cur.execute(query)
+        data = cur.fetchall()
+        table_data = []
+        for row in data:
+            data_row = []
+            for col in range(7):
+                data_row.append(str(row[col]))
+            table_data.append(data_row)
+        executed = True
+        return table_data, executed, message
     except pp.Error as e:
         message = "error executing query: " + str(e)
         return None, executed, message
-    data = cur.fetchall()
-    table_data = []
-    for row in data:
-        data_row = []
-        for col in range(7):
-            data_row.append(str(row[col]))
-        table_data.append(data_row)
-    executed = True
-    return table_data, executed, message
-
+        
 def rolls_order_soon(connection):
     """Gets a table of rolls whose replacements must be ordered soon (They are within 15 
     months of needing to be replaced). 
     """
     executed = False
     message = ""
-    query = 'SELECT * FROM roll_new WHERE (approx_scrap_date > DATEADD(month, -15, GETDATE())) AND (approx_scrap_date < DATEADD(year, -1, GETDATE()))'
+    query = 'SELECT * FROM roll_new WHERE (approx_scrap_date < DATEADD(month, 15, GETDATE())) AND (approx_scrap_date > DATEADD(YEAR, 1, GETDATE()));'
     cur = connection.cursor()
     try:
         cur.execute(query)
+        data = cur.fetchall()
+        table_data = []
+        for row in data:
+            data_row = []
+            for col in range(7):
+                data_row.append(str(row[col]))
+            table_data.append(data_row)
+        executed = True
+        return table_data, executed, message
     except pp.Error as e:
         message = "error executing query: " + str(e)
         return None, executed, message
-    data = cur.fetchall()
-    table_data = []
-    for row in data:
-        data_row = []
-        for col in range(7):
-            data_row.append(str(row[col]))
-        table_data.append(data_row)
-    executed = True
-    return table_data, executed, message
     
 def email_notification_recipients(connection):
     """Gets a list of the emails registered to receive notification emails from the RMS
@@ -285,9 +285,9 @@ def email_notification_recipients(connection):
     cur = connection.cursor()
     try:
         cur.execute(query)
+        data = cur.fetchall()
+        executed = True
+        return data, executed, message
     except pp.Error as e:
         message = "error executing query: " + str(e)
         return None, executed, message
-    data = cur.fetchall()
-    executed = True
-    return data, executed, message
