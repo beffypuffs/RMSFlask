@@ -4,17 +4,24 @@ import Connections
 import Requests
 import Notifications as notif
 
-app = Flask(__name__)
-
 RMS_EMAIL = 'RMSNotifications1@gmail.com' # change for Kaiser email
-# settings for sending email notifications - NOT FINAL VALUES
-# (should be changed when switching to use a Kaiser domain email)
-app.config['MAIL_SERVER']='smtp.gmail.com' # change for Kaiser email
-app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] =  RMS_EMAIL
-app.config['MAIL_PASSWORD'] = 'Rm$aPp01' # change for Kaiser email
-app.config['MAIL_USE_TLS'] = False
-app.config['MAIL_USE_SSL'] = True
+
+class RMSConfig():
+    """Class for Flask configuration (needed to send scheduled 
+    notification emails)
+    """
+    # Flask-mail config settings - NOT FINAL VALUES
+    MAIL_SERVER = 'smtp.gmail.com' # change for Kaiser email
+    MAIL_PORT = 465
+    MAIL_USERNAME = RMS_EMAIL
+    MAIL_PASSWORD = 'Rm$aPp01'
+    MAIL_USE_TLS = False
+    MAIL_USE_SSL = True
+    # Flask-APScheduler config settings
+    SCHEDULER_API_ENABLED = True
+
+app = Flask(__name__)
+app.config.from_object(RMSConfig())
 
 rms_mail = Mail(app)
 
