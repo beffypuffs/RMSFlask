@@ -1,5 +1,6 @@
-from flask import Flask, redirect, url_for, render_template, request, g
-from flask_mail import Mail, Message
+from flask import Flask, redirect, url_for, render_template, request
+from flask_mail import Mail
+from flask_apscheduler import APScheduler
 import Connections
 import Requests
 import Notifications as notif
@@ -23,7 +24,40 @@ class RMSConfig():
 app = Flask(__name__)
 app.config.from_object(RMSConfig())
 
+# initialize flask-mail
 rms_mail = Mail(app)
+
+# initialize scheduler
+scheduler = APScheduler()
+scheduler.init_app(app)
+
+@scheduler.task('cron', id='send_notification_email', week='*', day_of_week='*')
+# @scheduler.task('interval', id='send_notification_email', seconds=30, misfire_grace_time=10)
+def send_notification_email():
+    with scheduler.app.app_context():
+        # function to send a notification email to registered users in the RMS
+        # create a connection w/ the database
+        connection, conn_message = Connections.sql_connect()
+
+        if conn_message == "connected":
+            # get rolls to order IMMEDIATELY (1 year in advance) 
+            order_now, order_now_committed, message = Connections.rolls_order_now(connection)
+            if not order_now_committed:
+                return message
+            # get rolls to order SOON (15 months in advance)
+            order_soon, order_soon_committed, message = Connections.rolls_order_soon(connection)
+            if not order_soon_committed:
+                return message
+            # get notification recipients from the RMS database
+            recipients, recipients_committed, message = Connections.email_notification_recipients(connection)
+            if not recipients_committed:
+                return message
+            notif.send_noti_email(order_now, order_soon, RMS_EMAIL, recipients, rms_mail)
+            print('Email Sent')
+        else:
+            return conn_message
+
+scheduler.start()
 
 @app.route("/help")
 def help_page():
@@ -148,64 +182,6 @@ def roll_view():
         roll_num = request.form['roll_clicked']
         Connections.generate_graphs(roll_num)
         return render_template('rollView.html', graph=Connections.generate_graphs, roll_num = roll_num)
-
-# function to send a notification email to registered users in the RMS
-def send_notification_email():
-    # create a connection w/ the database
-    connection, conn_message = Connections.sql_connect()
-
-    if conn_message == "connected":
-        # get rolls to order IMMEDIATELY (1 year in advance) 
-        order_now, order_now_committed, message = Connections.rolls_order_now(connection)
-        if not order_now_committed:
-            return message
-
-        # get rolls to order SOON (15 months in advance)
-        order_soon, order_soon_committed, message = Connections.rolls_order_soon(connection)
-        if not order_soon_committed:
-            return message
-
-        # get notification recipients from the RMS database
-        recipients, recipients_committed, message = Connections.email_notification_recipients(connection)
-        if not recipients_committed:
-            return message
-
-        # send the notification email
-        notif.send_noti_email(order_now, order_soon, RMS_EMAIL, recipients, rms_mail)
-    else:
-        return conn_message
-
-    # OLD WAY OF SENDING NOTIFICATION EMAILS
-    # mail = Mail(app)
-    # message = Message('TEST MESSAGE', sender='RMSNotifications1@gmail.com')
-
-    # # NEED TO REFORMAT THIS WITH HTML - include something about the recipient being on
-    # # the notifications list and how to get off of it
-    # # INFO TO INCLUDE IN THE EMAIL - 
-    # message.body = f'This email should say something about a new roll needing to be ordered\
-    # (and include the roll_num: {roll_id} that is being replaced)'
-
-    # # ONLY WORKS WHEN CONNECTED TO KAISER NETWORK
-    # try: # connect to RMS database REPLACE WITH Connections.py
-    #     connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
-    # 'uid=rmsapp;pwd=ss1RMSpw@wb02') 
-    #     cur = connection.cursor()
-    # except pp.Error as e: # couldn't connect to 
-    #     error_message = "error connecting to SQL Server: " + str(e) #returns error type
-    #     return error_message
-
-    # try: # query database to get emails we need to notify
-    #     cur.execute('SELECT email FROM employee;')
-    #     emails = cur.fetchall()
-    #     for row in emails: # add emails to the message as recipients
-    #         message.add_recipient(row[0])
-    # except pp.Error as e: # the SQL query fails
-    #     return 'error getting emails: ' + str(e)
-    
-    # # USING TEST EMAIL FOR NOW - should query database and add all registered recipients
-    # # TEST EMAIL RECIPIENT CREDENTIALS - rmsnotirecipient@gmail.com / Rm$noT1s
-    # message.add_recipient('rmsnotirecipient@gmail.com')
-    # mail.send(message)
 
 if __name__ == "__main__":
     app.run()
