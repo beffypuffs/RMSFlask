@@ -53,7 +53,6 @@ def send_notification_email():
             if not recipients_committed:
                 return message
             notif.send_noti_email(order_now, order_soon, RMS_EMAIL, recipients, rms_mail)
-            print('Email Sent')
         else:
             return conn_message
 
