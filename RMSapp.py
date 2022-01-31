@@ -56,6 +56,7 @@ def send_notification_email():
         else:
             return conn_message
 
+# begin the scheduler to send notification emails
 scheduler.start()
 
 @app.route("/help")
