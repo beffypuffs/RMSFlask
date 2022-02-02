@@ -235,7 +235,8 @@ def rolls_order_now(connection):
     """
     executed = False
     message = ""
-    query = 'SELECT * FROM roll_new WHERE approx_scrap_date < DATEADD(year, 1, GETDATE()) ORDER BY approx_scrap_date;' 
+    query = 'SELECT * FROM roll_new WHERE (approx_scrap_date < DATEADD(year, 1, GETDATE()) AND approx_scrap_date > GETDATE()) \
+         ORDER BY approx_scrap_date;' 
     cur = connection.cursor()
     try:
         cur.execute(query)
@@ -243,7 +244,7 @@ def rolls_order_now(connection):
         table_data = []
         for row in data:
             data_row = []
-            for col in range(7):
+            for col in range(len(row)):
                 data_row.append(str(row[col]))
             table_data.append(data_row)
         executed = True
@@ -258,7 +259,8 @@ def rolls_order_soon(connection):
     """
     executed = False
     message = ""
-    query = 'SELECT * FROM roll_new WHERE (approx_scrap_date < DATEADD(month, 15, GETDATE())) AND (approx_scrap_date > DATEADD(YEAR, 1, GETDATE())) ORDER BY approx_scrap_date;'
+    query = 'SELECT * FROM roll_new WHERE (approx_scrap_date < DATEADD(month, 15, GETDATE())) AND approx_scrap_date > GETDATE() AND \
+        (approx_scrap_date > DATEADD(YEAR, 1, GETDATE())) ORDER BY approx_scrap_date;'
     cur = connection.cursor()
     try:
         cur.execute(query)
@@ -266,7 +268,7 @@ def rolls_order_soon(connection):
         table_data = []
         for row in data:
             data_row = []
-            for col in range(7):
+            for col in range(len(row)):
                 data_row.append(str(row[col]))
             table_data.append(data_row)
         executed = True

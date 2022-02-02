@@ -52,7 +52,8 @@ def send_notification_email():
             recipients, recipients_committed, message = Connections.email_notification_recipients(connection)
             if not recipients_committed:
                 return message
-            notif.send_noti_email(order_now, order_soon, RMS_EMAIL, recipients, rms_mail)
+            if order_now != [] or order_soon != []:
+                notif.send_noti_email(order_now, order_soon, RMS_EMAIL, recipients, rms_mail)
         else:
             return conn_message
 

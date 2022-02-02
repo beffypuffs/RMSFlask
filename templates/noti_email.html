@@ -27,50 +27,54 @@
 
             <div id="rollsAtEOLDiv" name="rollsAtEOLDiv">
                 <!-- Rolls that have reached End of Life REPLACE IMMEDIATELY -->
-                <table style="border: 1px solid black;  margin-left: auto; margin-right: auto;" class="center">
-                    <caption>
-                        <strong>REPLACE THESE ROLLS IMMEDIATELY</strong><br/>
-                        The following rolls are 12 months (or less) away from being scrapped
-                    </caption>
-                    <!-- Table Headings -->
-                    <tr>
-                        {% for heading in headings %}
-                            <th style="border: 1px solid black;">{{ heading }}</th>
-                        {% endfor %}
-                    </tr>
-                    <!-- Table Data -->
-                    {% for roll in order_now %}
+                {% if order_now != [] %}
+                    <table style="border: 1px solid black;  margin-left: auto; margin-right: auto;" class="center">
+                        <caption>
+                            <strong>REPLACE THESE ROLLS IMMEDIATELY</strong><br/>
+                            The following rolls are 12 months (or less) away from being scrapped
+                        </caption>
+                        <!-- Table Headings -->
                         <tr>
-                            {% for roll_data in roll %}
-                                <td style="border: 1px solid black; background-color: rgb(255, 127, 127);">{{ roll_data }}</td>
+                            {% for heading in headings %}
+                                <th style="border: 1px solid black;">{{ heading }}</th>
                             {% endfor %}
                         </tr>
-                    {% endfor %}
-                </table>
+                        <!-- Table Data -->
+                        {% for roll in order_now %}
+                            <tr>
+                                {% for roll_data in roll %}
+                                    <td style="border: 1px solid black; background-color: rgb(255, 127, 127);">{{ roll_data }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}    
             </div>
             <br/>
             <div id="rollsNearEOLDiv" name="rollsNearEOLDiv">
                 <!-- Rolls that are nearing End of Life REPLACE SOON -->
-                <table style="border: 1px solid black; margin-left: auto; margin-right: auto;" class="center">
-                    <caption>
-                        <strong>Replace These Rolls Soon</strong><br/>
-                        The following rolls are 12-15 months away from being scrapped
-                    </caption>
-                    <!-- Table Headings -->
-                    <tr>
-                        {% for heading in headings %}
-                            <th style="border: 1px solid black;">{{ heading }}</th>
-                        {% endfor %}
-                    </tr>
-                    <!-- Table Data -->
-                    {% for roll in order_soon %}
+                {% if order_soon != [] %}
+                    <table style="border: 1px solid black; margin-left: auto; margin-right: auto;" class="center">
+                        <caption>
+                            <strong>Replace These Rolls Soon</strong><br/>
+                            The following rolls are 12-15 months away from being scrapped
+                        </caption>
+                        <!-- Table Headings -->
                         <tr>
-                            {% for roll_data in roll %}
-                                <td style="border: 1px solid black; background-color: rgb(255, 255, 224);">{{ roll_data }}</td>
+                            {% for heading in headings %}
+                                <th style="border: 1px solid black;">{{ heading }}</th>
                             {% endfor %}
                         </tr>
-                    {% endfor %}
-                </table>
+                        <!-- Table Data -->
+                        {% for roll in order_soon %}
+                            <tr>
+                                {% for roll_data in roll %}
+                                    <td style="border: 1px solid black; background-color: rgb(255, 255, 224);">{{ roll_data }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
             </div>
         </main>
     </body>
