@@ -61,7 +61,7 @@ scheduler.start()
 
 @app.route("/help")
 def help_page():
-    send_notification_email() # RELOCATE THIS TO SEND EMAIL WHEN REPLACEMENT SHOULD BE ORDERED
+    send_notification_email()
     return render_template('help.html')
 
 
@@ -102,7 +102,6 @@ def chocks():
 @app.route("/notifications")
 def notifications():
     return render_template('notifications.html')
-
 
 @app.route("/")
 def home():

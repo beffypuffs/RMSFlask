@@ -3,6 +3,24 @@
 
 <!DOCTYPE html>
 <html lang = "en">
+<style>
+table, th, td {
+  border:1px solid black;
+  margin-left: auto; 
+  margin-right: auto;
+}
+.btn-link {
+    border: none;
+    outline: none;
+    background: none;
+    cursor: pointer;
+    color: #0000EE;
+    padding: 0;
+    text-decoration: underline;
+    font-family: inherit;
+    font-size: inherit;
+}
+</style>
 <head>
 	<link href = "style.css" rel="stylesheet" type="text/css" >
 
@@ -12,15 +30,12 @@
 <body>
 	<header>
 		<!-- Help icon and links -->
-		<div id="helpOption">
-			<a href="http://127.0.0.1:5000/help">Help</a>
-			<a href="http://127.0.0.1:5000//help"><img src="static/images/helpBtn.png" height="60" width="60" class = "helpBtn" alt="Help Button" /></a>
-		</div>
 		<!-- Main Kaiser logo and page navigation links -->
 		<img src="static/images/logo.png" alt="Kaiser Aluminium Logo"/>
 		<p style="text-align: center">
-			<strong>Home Roll Management Page</strong>  |  <a href="http://127.0.0.1:5000/chocksMenu">Chocks and Bearings </a>  |  <a href="http://127.0.0.1:5000/notifications">Notification Settings</a>
+			<strong>Home Roll Management Page</strong>  |  <a href="http://127.0.0.1:5000/chocksMenu">Chocks and Bearings </a>  |  <a href="http://127.0.0.1:5000/notifications">Notification Settings</a>  |  <a href="http://127.0.0.1:5000/help">Help</a>
 		</p>
+		<hr>
 	</header>
 
 	<main>
@@ -30,10 +45,13 @@
 			<!-- big table with links to roll data and lots of data
 			will need to activate filtering feature
 			maybe a search bar sort of thing?-->
-			<table class = "center">
+		<form method="post" action="http://127.0.0.1:5000/roll-view">
+			<table class = "center" style="width:60%">
 			<caption><strong>General Roll Information</strong>
 			<!-- seach bar to look for any value in the roll table -->
 			<input type = "text" id = "filter_input" onkeyup ="searchFunction()" placeholder = "Search" title="Type in desired table value ">
+			
+			<br><br>
 				<!-- Display table headings-->
 				<tr>
 					{% for header in headings %}
@@ -43,14 +61,44 @@
 				
 				<!-- Display SQL server data to index.html-->
 				{% for row in data %}
-				<tr>
+				{% if row[3] < '2022-12-08' %}
+				<tr bgcolor="#FF7F7F">
 					{% for cell in row %}
-						<td>{{cell}}</td>
+						<!-- I just need to pass the data -->
+						{% if cell == row[0] %}
+						<td style="text-align:center"><button type="submit" name="roll_clicked" value = {{cell}} class="btn-link">{{cell}}</button></td>
+						{% else %}
+						<td style="text-align:center">{{cell}}</td>
+						{% endif %}
 					{% endfor %}
 				</tr>
+				{% elif row[3] < '2023-06-08' %}
+				<tr bgcolor="#FFFFE0">
+					{% for cell in row %}
+						<!-- I just need to pass the data -->
+						{% if cell == row[0] %}
+						<td style="text-align:center"><button type="submit" name="roll_clicked" value = {{cell}} class="btn-link">{{cell}}</button></td>
+						{% else %}
+						<td style="text-align:center">{{cell}}</td>
+						{% endif %}
+					{% endfor %}
+				</tr>
+				{% elif row[3] < '2027-12-31' %}
+				<tr bgcolor="#90EE90">
+					{% for cell in row %}
+						<!-- I just need to pass the data -->
+						{% if cell == row[0] %}
+						<td style="text-align:center"><button type="submit" name="roll_clicked" value = {{cell}} class="btn-link">{{cell}}</button></td>
+						{% else %}
+						<td style="text-align:center">{{cell}}</td>
+						{% endif %}
+					{% endfor %}
+				</tr>
+				{% endif %}
 				{% endfor %}
 					
 			</table>
+		</form>
 		</div>
 	</main>
 	<script>

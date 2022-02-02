@@ -21,7 +21,7 @@
         <main>
             <!-- Notification Message -->
             <div id="notiTextDiv" name="notiTextDiv">
-                <h3 style="text-align: center">This is a Notification from the Roll Management System</h3>
+                <h3 style="text-align: center">This is a Notification from the <a href={{ url_for('home') }}>Roll Management System</a></h3>
                 <h3 style="text-align: center">The following rolls need attention</h3>
             </div>
 
@@ -42,7 +42,7 @@
                     {% for roll in order_now %}
                         <tr>
                             {% for roll_data in roll %}
-                                <td style="border: 1px solid black;">{{ roll_data }}</td>
+                                <td style="border: 1px solid black; background-color: rgb(255, 127, 127);">{{ roll_data }}</td>
                             {% endfor %}
                         </tr>
                     {% endfor %}
@@ -66,7 +66,7 @@
                     {% for roll in order_soon %}
                         <tr>
                             {% for roll_data in roll %}
-                                <td style="border: 1px solid black;">{{ roll_data }}</td>
+                                <td style="border: 1px solid black; background-color: rgb(255, 255, 224);">{{ roll_data }}</td>
                             {% endfor %}
                         </tr>
                     {% endfor %}
