@@ -1,7 +1,7 @@
 # File for sending notification emails as a part of the RMS system
 # Author: Joshua Seward
 # Date Created: 13 January 2022
-# Last Modified: 13 January 2022
+# Last Modified: 1 February 2022
 
 from flask import render_template
 from flask_mail import Message
