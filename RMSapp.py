@@ -32,30 +32,33 @@ scheduler = APScheduler()
 scheduler.init_app(app)
 
 @scheduler.task('cron', id='send_notification_email', week='*', day_of_week='*')
-# @scheduler.task('interval', id='send_notification_email', seconds=30, misfire_grace_time=10)
 def send_notification_email():
+    """Sends a notification email using flask-mail. Move to within the RMSApp 
+    Flask context. Connect to the database and check the connection. Query the 
+    RMS database for the rolls that need to be reordered immediately (less 
+    than a year from now) and the rolls that need to be reordered within the 
+    next 3 months (12-15 months from now). Query the database for recipients 
+    of the notification emails. Chek if there is any notification data to send 
+    and if there are any recipients. Send a notification email if there one 
+    needs to be sent.
+    """
     with scheduler.app.app_context():
-        # function to send a notification email to registered users in the RMS
-        # create a connection w/ the database
         connection, conn_message = Connections.sql_connect()
-
         if conn_message == "connected":
-            # get rolls to order IMMEDIATELY (1 year in advance) 
             order_now, order_now_committed, message = Connections.rolls_order_now(connection)
             if not order_now_committed:
                 return message
-            # get rolls to order SOON (15 months in advance)
             order_soon, order_soon_committed, message = Connections.rolls_order_soon(connection)
             if not order_soon_committed:
                 return message
-            # get notification recipients from the RMS database
             recipients, recipients_committed, message = Connections.email_notification_recipients(connection)
             if not recipients_committed:
                 return message
-            if order_now != [] or order_soon != []:
+            recipients.append('rmsnotirecipient@gmail.com') # TEST EMAIL - REMOVE IN PRODUCTION
+            if recipients != [] and (order_now != [] or order_soon != []):
                 notif.send_noti_email(order_now, order_soon, RMS_EMAIL, recipients, rms_mail)
         else:
-            return conn_message
+            return conn_message # CHANGE TO A LOGGING STATEMENT
 
 # begin the scheduler to send notification emails
 scheduler.start()

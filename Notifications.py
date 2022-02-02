@@ -6,24 +6,23 @@
 from flask import render_template
 from flask_mail import Message
 
-# method to send a notification email using a rendered HTML template
-def send_noti_email(order_now, order_soon, sender, recipients, 
-    mail):
-    subject = 'RMS Roll Status Notification'
+# subject for the RMS email notification
+SUBJECT = 'RMS Roll Status Notification'
 
-    # TEST RECIPIENT FOR EMAIL
-    recipients.append('rmsnotirecipient@gmail.com')
+# headings for the roll grind data table in the HTML template
+HEADINGS = ("Roll ID", "Current Diameter", "Scrap Diameter", 
+"Approx Scrap Date", "Grinds Remaining", "Mill", "Roll Type")
 
-    # create the message using the given sender and recipients
-    message = Message(subject=subject, recipients=recipients, 
+def send_noti_email(order_now, order_soon, sender, recipients, mail):
+    """Creates and sends a notification email using given data. 
+    Creates a message from the constant subject, the given list of 
+    recipients, and the given sender. Render the noti_email.html 
+    template using the constant headings, and the given lists of rolls 
+    to order now and soon. Then send the notification email using 
+    flask-mail.
+    """
+    message = Message(subject=SUBJECT, recipients=recipients, 
     sender=sender)
-
-    # headings for the roll grind data table in the HTML template
-    headings = ("Roll ID", "Current Diameter", "Scrap Diameter", 
-    "Approx Scrap Date", "Grinds Remaining", "Mill", "Roll Type")
-    # render the HTML template using the given rolls
-    message.html = render_template("noti_email.html", headings=headings, 
+    message.html = render_template("noti_email.html", headings=HEADINGS, 
     order_now=order_now, order_soon=order_soon)
-
-    # send notification email
     mail.send(message)
