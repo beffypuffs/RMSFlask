@@ -231,7 +231,10 @@ def generate_graphs(roll_num): #not useful rn just messing around with matplotli
 
 def rolls_order_now(connection):
     """Gets a table of rolls whose replacements must be ordered immediately (They are within 
-    a year of needing to be replaced).
+    a year of needing to be replaced). Query RMS database for rolls that are less than 12 
+    months (1 year) from their approximate scrap date. Put this data in a list and return the
+    list aling with a boolean value representing whether the query was executed successfully 
+    and a connection results message
     """
     executed = False
     message = ""
@@ -254,8 +257,11 @@ def rolls_order_now(connection):
         return None, executed, message
 
 def rolls_order_soon(connection):
-    """Gets a table of rolls whose replacements must be ordered soon (They are within 15 
-    months of needing to be replaced). 
+    """Gets a table of rolls whose replacements must be ordered soon (They are 12 - 15 
+    months of needing to be replaced). Query RMS database for rolls that are between 12 
+    and 15 months from their approximate scrap date. Put this data in a list and return the
+    list aling with a boolean value representing whether the query was executed successfully 
+    and a connection results message.
     """
     executed = False
     message = ""
@@ -279,7 +285,9 @@ def rolls_order_soon(connection):
     
 def email_notification_recipients(connection):
     """Gets a list of the emails registered to receive notification emails from the RMS
-    database.
+    database. Query the database for the registered employee emails . Put this data in a 
+    list and return the list aling with a boolean value representing whether the query 
+    was executed successfully and a connection results message.
     """
     executed = False
     message = ""
