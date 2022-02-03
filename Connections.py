@@ -237,9 +237,8 @@ def rolls_order_now(connection):
     and a connection results message
     """
     executed = False
-    message = ""
-    query = 'SELECT * FROM roll_new WHERE (approx_scrap_date < DATEADD(year, 1, GETDATE()) AND approx_scrap_date > GETDATE()) \
-         ORDER BY approx_scrap_date;' 
+    query = 'SELECT * FROM roll_new WHERE (approx_scrap_date < DATEADD(year, 1, GETDATE()) \
+        AND approx_scrap_date > GETDATE()) ORDER BY approx_scrap_date;' 
     cur = connection.cursor()
     try:
         cur.execute(query)
@@ -251,7 +250,7 @@ def rolls_order_now(connection):
                 data_row.append(str(row[col]))
             table_data.append(data_row)
         executed = True
-        return table_data, executed, message
+        return table_data, executed, "Database Queried Successfully - Connections.rolls_order_now()"
     except pp.Error as e:
         message = "error executing query: " + str(e)
         return None, executed, message
@@ -265,8 +264,9 @@ def rolls_order_soon(connection):
     """
     executed = False
     message = ""
-    query = 'SELECT * FROM roll_new WHERE (approx_scrap_date < DATEADD(month, 15, GETDATE())) AND approx_scrap_date > GETDATE() AND \
-        (approx_scrap_date > DATEADD(YEAR, 1, GETDATE())) ORDER BY approx_scrap_date;'
+    query = 'SELECT * FROM roll_new WHERE (approx_scrap_date < DATEADD(month, 15, GETDATE())) \
+        AND approx_scrap_date > GETDATE() AND (approx_scrap_date > DATEADD(YEAR, 1, GETDATE())) \
+        ORDER BY approx_scrap_date;'
     cur = connection.cursor()
     try:
         cur.execute(query)
@@ -278,7 +278,7 @@ def rolls_order_soon(connection):
                 data_row.append(str(row[col]))
             table_data.append(data_row)
         executed = True
-        return table_data, executed, message
+        return table_data, executed, "Database Queried Successfully - Connections.rolls_order_soon()"
     except pp.Error as e:
         message = "error executing query: " + str(e)
         return None, executed, message
@@ -297,7 +297,7 @@ def email_notification_recipients(connection):
         cur.execute(query)
         data = cur.fetchall()
         executed = True
-        return data, executed, message
+        return data, executed, "Database Queried Successfully - Connections.email_notification_recipients()"
     except pp.Error as e:
         message = "error executing query: " + str(e)
         return None, executed, message
