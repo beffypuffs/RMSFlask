@@ -64,7 +64,6 @@ scheduler.start()
 
 @app.route("/help")
 def help_page():
-    send_notification_email()
     return render_template('help.html')
 
 
