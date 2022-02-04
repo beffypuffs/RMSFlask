@@ -290,14 +290,13 @@ def email_notification_recipients(connection):
     was executed successfully and a connection results message.
     """
     executed = False
-    message = ""
     query = 'SELECT email FROM employee;'
     cur = connection.cursor()
     try:
         cur.execute(query)
-        data = cur.fetchall()
+        email_recipients = [employee[0] for employee in cur.fetchall()]
         executed = True
-        return data, executed, "Database Queried Successfully - Connections.email_notification_recipients()"
+        return email_recipients, executed, "Database Queried Successfully - Connections.email_notification_recipients()"
     except pp.Error as e:
         message = "error executing query: " + str(e)
         return None, executed, message
