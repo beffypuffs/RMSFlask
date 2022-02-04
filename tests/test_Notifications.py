@@ -22,7 +22,8 @@ GET_ROLLS_SOON_RESULTS = [['2327', '37.493', '37.0', '2023-03-06', 'None', '132'
                          ['2328', '37.493', '37.0', '2023-03-06', 'None', '132', 'WORK']]
 
 # correct data that should be retrieved by email_notification_recipients()
-EMAIL_NOTIFICATION_RECIPIENTS_RESULTS = ['rmsnotirecipient@gmail.com']
+EMAIL_NOTIFICATION_RECIPIENTS_RESULTS = ['rmsnotirecipient@gmail.com',
+                                         'RMSNotifications1@gmail.com']
 
 def test_get_rolls_now():
     """Test the rolls_order_now() function to make sure the correct data is retrieved 
