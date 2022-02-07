@@ -1,10 +1,18 @@
 # anything connecting to SQL or access will be here for now
 
 import datetime
+from dateutil import relativedelta
+import numpy as np
+import math
 import pyodbc as pp
+import psycopg2
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 
-def access_connect():
+def access_connect(): #irrelevant now
     try:
         conn = pp.connect('Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=E:\\RMS\\Access\\RSMS_IF.NET.mdb;')
     except pp.Error as e:
@@ -24,11 +32,11 @@ def access_connect():
         # print(insert)
         cur.execute(insert)
     delete_dups(S_conn)
-    remove_fake_data(S_conn)
+    #remove_fake_data(S_conn)
     S_conn.commit()
 
 
-#Some of the data gets changed from access into python, this cleans it up for SQL. Only tested on Grind_Raw
+#Some of the data gets changed from access into python, this cleans it up for SQL.
 def sql_insert(table, values):
     exec_message = 'INSERT INTO ' + table + ' VALUES ('
     first = True
@@ -52,29 +60,28 @@ def sql_insert(table, values):
     return exec_message
 
 
-def delete_dups(connection):#deletes duplicates using CTE. Can be simplified if we get admin priveleges
+def delete_dups(connection):#deletes duplicates using CTE. Can be simplified if we get admin priveleges.
     cur = connection.cursor()
     cur.execute('WITH CTE([Entry_Time], dups) AS (SELECT [Entry_Time], ROW_NUMBER() OVER (PARTITION BY [Entry_Time] ORDER BY Id) AS dups FROM Grind_Raw) DELETE FROM CTE WHERE dups > 1')
 
 
-def remove_fake_data(connection):#SQL data has some fake entries, won't need this function once we are getting live data
-    cur = connection.cursor()
-    cur.execute('DELETE FROM Grind_Raw WHERE Entry_Time > \'2020-09-16 8:00:00\'')
+# def remove_fake_data(connection):#SQL data has some fake entries, won't need this function once we are getting live data
+#     cur = connection.cursor()
+#     cur.execute('DELETE FROM Grind_Raw WHERE Entry_Time > \'2020-09-16 8:00:00\'')
 
 
-def remove_email(request):
+def remove_email(connection, data):
     committed = False
     message = ""
-    try: #Use this code whenever you connect to SQL server
-        connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
-            'uid=rmsapp;pwd=ss1RMSpw@wb02') 
-    except pp.Error as e: 
-        message = ('error connecting to SQL server: ' + str(e))
-        return committed, message
+    # try: #Use this code whenever you connect to SQL server
+    #     connection, message = sql_connect()
+    # except pp.Error as e: 
+    #     message = ('error connecting to SQL server: ' + str(e))
+    #     return committed, message
 
-    badge_number = request.form['badge_number']
-    name = request.form['nm']
-    email = request.form['email']
+    badge_number = data[0]
+    name = data[1]
+    email = data[2]
 
     cur = connection.cursor()
     try:
@@ -87,20 +94,12 @@ def remove_email(request):
     return committed, message
 
 
-def add_email(request):
+def add_email(connection, data):
     committed = False
     message = ""
-    try: #Use this code whenever you connect to SQL server
-        connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
-            'uid=rmsapp;pwd=ss1RMSpw@wb02') 
-    except pp.Error as e:
-        message = ("error connecting to SQL Server: " + str(e)) #returns error type
-        return committed, message
-
-    badge_number = request.form['badge_number']
-    name = request.form['nm']
-    email = request.form['email']
-
+    badge_number = data[0]
+    name = data[1]
+    email = data[2]
     cur = connection.cursor()
     try:
         cur.execute('INSERT INTO employee VALUES(' + badge_number + ', \'' + name + '\', \'' + email + '\')')
@@ -112,15 +111,9 @@ def add_email(request):
     return committed, message
         
 
-def query_results(query, cols): #Displays roll information
+def query_results(connection, query, cols): #Displays roll information
     executed = False
     message = ""
-    try: #Use this code whenever you connect to SQL server
-        connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
-            'uid=rmsapp;pwd=ss1RMSpw@wb02') 
-    except pp.Error as e:
-        message = "error connecting to SQL Server: " + str(e) #returns error type
-        return None, executed, message
     cur = connection.cursor() # Used to execute actions, might be able do more idk
     try:
         cur.execute(query) # Query
@@ -139,87 +132,229 @@ def query_results(query, cols): #Displays roll information
     executed = True
     return table_data, executed, message
 
-def add_chock(request):
+def add_chock(connection, data):
     committed = False
     message = ""
-    try: #Use this code whenever you connect to SQL server
-        connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
-    'uid=rmsapp;pwd=ss1RMSpw@wb02') 
-    except pp.Error as e:
-        message = "error connecting to SQL Server: " + str(e) #returns error type
-        return committed, message
-
-    date = request.form['date'],
-    chock_number = request.form['chock-num'],
-    position = request.form['position'],
-    reason = request.form['reasons_d_and_i'],
-    visible_chock_numbers = request.form['obvi'],
-    lifiting_bolt_thread_condition = request.form['lifting'],
-    cover_end_condition = request.form['cover'],
-    bell_o_ring_condition = request.form['end-bell'],
-    thrust_collar = request.form['thrust'],
-    lockkeepers = request.form['locks'],
-    liner_plates = request.form['liner'],
-    inboard_radial_seals_replaced = request.form['num-rep'],
-    inboard_face_seal = request.form['seals1'],
-    outboard_radial_seal = request.form['seals2'],
-    load_zone_from_mill = request.form['mill1'],
-    load_zone_to_mill = request.form['mill2'],
-    bearing_grease_condition = request.form['bearing-grease'],
-    bearing_mfg = request.form['mfg'],
-    bearing_serial_number = request.form['sn'],
-    is_sealed = request.form['sealed'],
-    seals_replaced = request.form['seals-rep'],
-    cup_a = request.form['cupA'],
-    cup_bd = request.form['cupB'],
-    cup_e = request.form['cupE'],
-    race_a = request.form['raceA'],
-    race_b = request.form['raceB'],
-    race_d = request.form['raceD'],
-    race_e = request.form['raceE'],
-    bearing_status = request.form['bearing-condition'],
-    different_bearing_installed = request.form['diff-bearing'],
-    bearing_mfg_new = request.form['textMFG'],
-    serial_number_new = request.form['MFGsn'],
-    sealed_new = request.form['sealed2'],
-    chock_bore_round = request.form['chockBoreRound'],
-    chock_bore = request.form['chockBoreOOR'],
-    no_rust = request.form['wearOrRust'],
-    grease_purged = request.form['purgeGrease'],
-    spots_dings = request.form['spots-dings'],
-    manual_pack = request.form['manual-pack'],
-    lube_bore = request.form['lube-bore'],
-    grease_packed_bearings = request.form['dropped'],
-    height_shoulder = request.form['droppedA'],
-    bearing_depth = request.form['droppedB'],
-    shims_needed = request.form['droppedDifference'],
-    was_paper_used = request.form['paper-used'],
-    by_hand = request.form['shim'],
-    was_torqued = request.form['phases'],
-    ancillary_installed = request.form['ancillary'],
-    grease_pack_sealed = request.form['greasePack'],
-    chock_ready_for_installation = request.form['ready'],
-    comments  = request.form['comments'],
-    mill = request.form['roll_mill'],
-    badge_number = request.form['badge_number'],
-    roll_type = request.form['roll_type']
     cur = connection.cursor()
     #INPUT SANITATION
-    #print('INSERT INTO employee VALUES(' + badge_number + ', \'' + name + '\', \'' + email + '\')')
     try:
-        # first draft of this! I need to ask jeff what some values should be and check which ones are numbers since I'm assuming most of these are being interpreted as strings
-        cur.execute('INSERT INTO report VALUES(' + date + ', ' + chock_number + ', \'' + position + '\', \'' + reason + '\', \'' + visible_chock_numbers + '\', \'' + lifiting_bolt_thread_condition + 
-        '\', \'' + cover_end_condition + '\', \'' + bell_o_ring_condition + '\', \'' + thrust_collar + '\', \'' + '\', \'' + lockkeepers + '\', \'' + liner_plates + '\', \'' + inboard_radial_seals_replaced +
-        '\', \'' + inboard_face_seal + '\', \'' + outboard_radial_seal + '\', \'' + load_zone_from_mill + '\', \'' + load_zone_to_mill + '\', \'' + bearing_grease_condition + '\', \'' + bearing_mfg +
-        '\', \'' + bearing_serial_number + '\', \'' + is_sealed + '\', \'' + seals_replaced + '\', \'' + cup_a + '\', \'' + cup_bd + '\', \'' + cup_e + '\', \'' + race_a + '\', \'' + race_b +
-        '\', \'' + race_d + '\', \'' + race_e + '\', \'' + bearing_status + '\', \'' + different_bearing_installed + '\', \'' + bearing_mfg_new + '\', \'' + serial_number_new + '\', \'' + sealed_new +
-        '\', \'' + chock_bore_round + '\', \'' + chock_bore + '\', \'' + no_rust + '\', \'' + grease_purged + '\', \'' + spots_dings + '\', \'' + manual_pack + '\', \'' + lube_bore + '\', \'' + grease_packed_bearings + 
-        '\', \'' + height_shoulder + '\', \'' + bearing_depth + '\', \'' + shims_needed + '\', \'' + was_paper_used + '\', \'' + by_hand + '\', \'' + was_torqued + '\', \'' + ancillary_installed +
-        '\', \'' + grease_pack_sealed + '\', \'' + chock_ready_for_installation + '\', \'' + comments + '\', \'' + mill + '\', \'' + badge_number + '\', \'' + roll_type + 
-        '\')')
+        message = sql_insert('report', data)
+        cur.execute(message)
+       #  cur.execute(f'INSERT INTO report VALUES({date}, {chock_nu')
     except pp.Error as e:
-        return str(e) #returns error code if query fails
+        return committed, str(e) #returns error code if query fails
     connection.commit()
     committed = True
     return committed, message
+
+def remove_chock(connection, data):
+    committed = False
+    message = ""
+    cur = connection.cursor()
+    date = data[0]
+    badge_num = data[52]
+
+    # comments = request.form['comments']
+    cur.execute(f'DELETE FROM report WHERE date = \'{date}\' AND badge_number = \'{badge_num}\'')
+    connection.commit()
+    return True, "Successfully removed"
+
+def edit_chock(connection, data): #only works when date and bage_number are not changed, needs work in the future
+    committed, message = remove_chock(connection, data)
+    if (committed is True):
+        committed, message = add_chock(connection, data)
+    else:
+        print (committed)
+        print(message)
+    return committed, message
+
+def sql_connect(): #not used, eventually will return current sql connection or start a new one if it hasn't been called
+    # connection = psycopg2.connect(dbname='RMS',user='rmsAdmin',password='1029384756', host '')  #change to your ip
+    message = "connected"
+    try: #Use this code whenever you connect to SQL server
+        connection = pp.connect('Driver={SQL Server};Server=rmssql.database.windows.net;Database=RMSSQL;'
+    'uid=RMS;pwd=trpJ63iGY4F7mRj') 
+    except pp.Error as e:
+        message = "error connecting to SQL Server: " + str(e) #returns error type
+        print(message)
+        return None, message
+    return connection, message
+
+def generate_graphs(roll_num): #not useful rn just messing around with matplotlib, we need a dataset for multiple rolls that we can use until we have enough data
+    connection, message = sql_connect()
+    cur = connection.cursor()
+    # scrap_date = datetime.date()
+    scrap_diameter = None
+    mill = None
+    type = None
+    y = []
+    x = []
+    dates = []
+
+    cur.execute(f'SELECT * FROM roll_new WHERE roll_num={roll_num}')
+    roll_data = cur.fetchall()
+    for row in roll_data:
+        scrap_diameter = row[2]
+        mill = row[5]
+        type = row[6]
+        diameter = row[1]
+
+    cur.execute(f'SELECT * FROM roll_info WHERE mill = \'{mill}\' AND roll_type = \'{type}\'')
+    roll_info = cur.fetchall()
+
+
+    for row in roll_info:
+        avg_grind = row[3]
+        days_between = row[4]
+
+    cur.execute(f'SELECT * FROM grind_new WHERE roll_num={roll_num} ORDER BY min_diameter DESC')
+    grind_data = cur.fetchall()
+
+    for row in grind_data:
+        date = datetime.datetime.strptime(row[2], '%Y-%m-%d')
+        print(date.time())
+        dates.append(date)
+        x.append(date)
+        y.append(row[1])
+
+    other_diameter = calculate_12mo_diameter(scrap_diameter, days_between, avg_grind)
+    fig, ax = plt.subplots()
+    
+
+    cur_day = datetime.datetime(x[-1].year, x[-1].month, x[-1].day)
+    trend_x = [cur_day]
+    trend_y = [diameter]
+    diameter_proj = diameter
+    
+    while diameter_proj > scrap_diameter:
+        diameter_proj = diameter_proj - avg_grind
+        cur_day = cur_day + datetime.timedelta(days=days_between)
+        trend_y.append(diameter_proj)
+        trend_x.append(cur_day)
+
+    print(trend_y)
+    print(trend_x)
+    ax.plot_date(x, y, markerfacecolor = 'CornflowerBlue', markeredgecolor = 'Red', zorder=10)
+    plt.axhline(y=other_diameter, color='y', linestyle='-')
+    plt.axhline(y=scrap_diameter, color='r', linestyle='-')
+    plt.plot_date(trend_x,trend_y,'b-')
+        
+        
+
+    #ax.xaxis.set_major_formatter(
+    # mdates.ConciseDateFormatter(ax.xaxis.get_major_locator()))
+    #ax.set_xlim([datetime.date(2020, 12, 25), datetime.date(2030, 2, 1)])
+    # ax.set_xlim([datetime.date(2020, 1, 26), datetime.date(2025, 2, 1)])
+    fig.autofmt_xdate()
+    ax.title.set_text(f'Diameter Over Time: Roll {roll_num}')
+    
+    plt.xlabel('Date')
+    plt.ylabel('Diameter (in.)')
+    plt.savefig('static\\images\\Sample Graph.png')
+
+def update_roll_info(roll_num):
+    connection, message = sql_connect()
+    cur = connection.cursor()
+    cur.execute()
+
+def calculate_12mo_diameter(scrap_diameter, days_between, avg_grind):
+    if days_between > 180 and days_between < 250:
+        return scrap_diameter + (avg_grind * 2)
+    else:
+        thing = math.ceil(365 / days_between)
+        return scrap_diameter + (avg_grind * thing)
+
+def trendline(roll_num, mill, type):
+    pass
+
+def populate_data(): # dont run this on kaiser's server, its just to make fake data
+    connection, message = sql_connect()
+    cur = connection.cursor()
+    cur.execute(f'SELECT * FROM roll_new')
+    roll_data = cur.fetchall()
+    for row in roll_data:
+            roll_num = row[0]
+            diameter = row[1]
+            scrap_diameter = row[2]
+            mill = row[5]
+            roll_type = row[6]
+
+            cur.execute(f'SELECT * FROM roll_info WHERE mill = \'{mill}\' AND roll_type = \'{roll_type}\'')
+            roll_info = cur.fetchall()
+            avg_grind = roll_info[0][3]
+            days_between = roll_info[0][4]
+            cur_day = datetime.date.today()
+
+            while cur_day > datetime.date(2019, 1, 21):
+            #   cur.execute(f'INSERT INTO grind_new VALUES(roll_num = {roll_num}, min_diameter = {diameter}, grind_date = TO_DATE(\'{cur_day.year}-{cur_day.month}-{cur_day.year}\', \'YYYY-MM-DD\'), min_diameter_change = {avg_grind})')
+                print(f'types: {type(roll_num)}, {type(diameter)},  {type(cur_day)},  {type(avg_grind)}')
+                message = f'INSERT INTO grind_new VALUES({roll_num}, {diameter}, \'{cur_day}\', {avg_grind})'
+                print(message)
+                cur.execute(message)
+                cur_day = cur_day - datetime.timedelta(days=days_between)
+                diameter = diameter + avg_grind
+    connection.commit()
+
+def update_scrap_date():
+    connection, message = sql_connect()
+    cur = connection.cursor()
+    cur.execute(f'SELECT * FROM roll_new')
+    roll_data = cur.fetchall()
+    for row in roll_data:
+        roll_num = row[0]
+        diameter = row[1]
+        scrap_diameter = row[2]
+        mill = row[5]
+        roll_type = row[6]
+
+        cur.execute(f'SELECT * FROM roll_info WHERE mill = \'{mill}\' AND roll_type = \'{roll_type}\'')
+        roll_info = cur.fetchall()
+        avg_grind = roll_info[0][3]
+        days_between = roll_info[0][4]
+
+        cur.execute(f'SELECT * FROM grind_new WHERE roll_num = {roll_num} ORDER BY grind_date ASC')
+        grind_data = cur.fetchall()
+        print(grind_data[-1])
+        cur_day = datetime.datetime.strptime(grind_data[-1][2], '%Y-%m-%d').date()
+        
+        while diameter > scrap_diameter:
+            cur_day = cur_day + datetime.timedelta(days=days_between)
+            diameter = diameter - avg_grind
+
+        message = f'UPDATE roll_new SET approx_scrap_date = \'{cur_day}\' WHERE roll_num = {roll_num}'
+        print(cur_day)
+        print(message)
+        cur.execute(message)
+# populate_data()
+    connection.commit()
+
+# update_scrap_date()
+        
+        
+        
+        
+    
+
+            
+
+   
+
+
+        
+
+        
+    
+    
+
+    
+
+
+# generate_graphs()
+
+
+
+
+
+
+    
     
