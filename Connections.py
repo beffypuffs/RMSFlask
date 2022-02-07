@@ -229,7 +229,74 @@ def generate_graphs(roll_num): #not useful rn just messing around with matplotli
 
 # generate_graphs()
 
+def rolls_order_now(connection):
+    """Gets a table of rolls whose replacements must be ordered immediately (They are within 
+    a year of needing to be replaced). Query RMS database for rolls that are less than 12 
+    months (1 year) from their approximate scrap date. Put this data in a list and return the
+    list aling with a boolean value representing whether the query was executed successfully 
+    and a connection results message
+    """
+    executed = False
+    query = 'SELECT * FROM roll_new WHERE (approx_scrap_date < DATEADD(year, 1, GETDATE()) \
+        AND approx_scrap_date > GETDATE()) ORDER BY approx_scrap_date;' 
+    cur = connection.cursor()
+    try:
+        cur.execute(query)
+        data = cur.fetchall()
+        table_data = []
+        for row in data:
+            data_row = []
+            for col in range(len(row)):
+                data_row.append(str(row[col]))
+            table_data.append(data_row)
+        executed = True
+        return table_data, executed, "Database Queried Successfully - Connections.rolls_order_now()"
+    except pp.Error as e:
+        message = "error executing query: " + str(e)
+        return None, executed, message
 
-
+def rolls_order_soon(connection):
+    """Gets a table of rolls whose replacements must be ordered soon (They are 12 - 15 
+    months of needing to be replaced). Query RMS database for rolls that are between 12 
+    and 15 months from their approximate scrap date. Put this data in a list and return the
+    list aling with a boolean value representing whether the query was executed successfully 
+    and a connection results message.
+    """
+    executed = False
+    message = ""
+    query = 'SELECT * FROM roll_new WHERE (approx_scrap_date < DATEADD(month, 15, GETDATE())) \
+        AND approx_scrap_date > GETDATE() AND (approx_scrap_date > DATEADD(YEAR, 1, GETDATE())) \
+        ORDER BY approx_scrap_date;'
+    cur = connection.cursor()
+    try:
+        cur.execute(query)
+        data = cur.fetchall()
+        table_data = []
+        for row in data:
+            data_row = []
+            for col in range(len(row)):
+                data_row.append(str(row[col]))
+            table_data.append(data_row)
+        executed = True
+        return table_data, executed, "Database Queried Successfully - Connections.rolls_order_soon()"
+    except pp.Error as e:
+        message = "error executing query: " + str(e)
+        return None, executed, message
     
-    
+def email_notification_recipients(connection):
+    """Gets a list of the emails registered to receive notification emails from the RMS
+    database. Query the database for the registered employee emails . Put this data in a 
+    list and return the list aling with a boolean value representing whether the query 
+    was executed successfully and a connection results message.
+    """
+    executed = False
+    query = 'SELECT email FROM employee;'
+    cur = connection.cursor()
+    try:
+        cur.execute(query)
+        email_recipients = [employee[0] for employee in cur.fetchall()]
+        executed = True
+        return email_recipients, executed, "Database Queried Successfully - Connections.email_notification_recipients()"
+    except pp.Error as e:
+        message = "error executing query: " + str(e)
+        return None, executed, message

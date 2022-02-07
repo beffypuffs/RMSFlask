@@ -1,0 +1,84 @@
+<!-- 
+    Notification Email Template
+    Author: Joshua Seward
+    Date Created: 13 January 2022
+    Last Modified: 13 January 2022
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Title -->
+        <title>RMS Notification Email</title>
+    </head>
+
+    <body>
+        <header>
+            <!-- Kaiser Logo and Title -->
+            <img src="static/images/logo.png" alt="Kaiser Aluminum Logo"/>
+        </header>
+
+        <main>
+            <!-- Notification Message -->
+            <div id="notiTextDiv" name="notiTextDiv">
+                <h3 style="text-align: center">This is a Notification from the <a href={{ url_for('home') }}>Roll Management System</a></h3>
+                <h3 style="text-align: center">The following rolls need attention</h3>
+            </div>
+
+            <div id="rollsAtEOLDiv" name="rollsAtEOLDiv">
+                <!-- Rolls that have reached End of Life REPLACE IMMEDIATELY -->
+                {% if order_now != [] %}
+                    <table style="border: 1px solid black;  margin-left: auto; margin-right: auto;">
+                        <caption>
+                            <strong>REPLACE THESE ROLLS IMMEDIATELY</strong><br/>
+                            The following rolls are 12 months (or less) away from being scrapped
+                        </caption>
+                        <!-- Table Headings -->
+                        <tr>
+                            {% for heading in headings %}
+                                <th style="border: 1px solid black; text-align: center;">{{ heading }}</th>
+                            {% endfor %}
+                        </tr>
+                        <!-- Table Data -->
+                        {% for roll in order_now %}
+                            <tr>
+                                {% for roll_data in roll %}
+                                    <td style="border: 1px solid black; background-color: rgb(255, 127, 127); text-align: center;">
+                                        {{ roll_data }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}    
+            </div>
+            <br/>
+            <div id="rollsNearEOLDiv" name="rollsNearEOLDiv">
+                <!-- Rolls that are nearing End of Life REPLACE SOON -->
+                {% if order_soon != [] %}
+                    <table style="border: 1px solid black; margin-left: auto; margin-right: auto;">
+                        <caption>
+                            <strong>Replace These Rolls Soon</strong><br/>
+                            The following rolls are 12-15 months away from being scrapped
+                        </caption>
+                        <!-- Table Headings -->
+                        <tr>
+                            {% for heading in headings %}
+                                <th style="border: 1px solid black; text-align: center;">{{ heading }}</th>
+                            {% endfor %}
+                        </tr>
+                        <!-- Table Data -->
+                        {% for roll in order_soon %}
+                            <tr>
+                                {% for roll_data in roll %}
+                                    <td style="border: 1px solid black; background-color: rgb(255, 255, 224); text-align: center;">
+                                        {{ roll_data }}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
+            </div>
+        </main>
+    </body>
+</html>
