@@ -40,14 +40,14 @@ def chocksView():
         if committed is True:
                 return render_template('chocksview2.html', data = data, i = i, length = len(data)) #right now it sends every form which i'll fix later
         else:
-            return render_template('error.html', message = message) #error message
+            return message
     else:
         connection, message = Connections.sql_connect()
         data, committed, message = Connections.query_results(connection, "Select *  FROM report ORDER BY date DESC", 54)
         if committed is True:
             return render_template('chocksView2.html', data = data, i = 0, length = len(data)) #see above
         else:
-            return render_template('error.html', message = message) #error message
+            return message #error message, needs an html page
 
 
 @app.route("/chocks")
@@ -70,10 +70,9 @@ def home():
         if committed is True:
             return render_template("index.html", headings=headings, data=data)
         else:
-            return render_template('error.html', message = message) #error message
+            return message #display error message, needs an html page
     else:
-        print("hi")
-        return render_template('error.html', message = message) #error message
+        return message
 
 
 
@@ -94,21 +93,21 @@ def add_chock():
             if (committed is True):
                 return render_template('successfulAdd.html') #maybe option to view all chocks forms after submitting
             else:
-                return render_template('error.html', message = message) #error message
+                return message #error message
         elif (request.form['submitResponse'] == 'Remove Form'):
             data = Requests.chock_request_data(request)
             committed, message = Connections.remove_chock(connection, data)
             if (committed is True):
                 return render_template('successfulRemove.html')
             else:
-                return render_template('error.html', message = message) #error message
+                return message
         else:
             data = Requests.chock_request_data(request)
             committed, message = Connections.edit_chock(connection, data)
             if (committed is True):
                 return render_template('successfulEdit.html')
             else:
-                return render_template('error.html', message = message) #error message
+                return message
 
 @app.route('/add-email', methods = ['GET','POST'])#template for saving data from a webpage
 def add_email():
@@ -119,7 +118,7 @@ def add_email():
         if committed is True:
             return 'email succesfully added'
         else:
-            return render_template('error.html', message = message) #error message
+            return message #error message
     return 'thing'
 
 @app.route('/remove-email', methods = ['POST'])
@@ -131,7 +130,7 @@ def remove_email():
         if committed is True:
             return 'email succesfully removed'
         else:
-            return render_template('error.html', message = message) #error message
+            return message #error message
     return 'thing'
 
 @app.route('/roll-view', methods = ['POST'])

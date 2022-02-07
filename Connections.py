@@ -1,7 +1,9 @@
 # anything connecting to SQL or access will be here for now
 
 import datetime
+from dateutil import relativedelta
 import numpy as np
+import math
 import pyodbc as pp
 import psycopg2
 import matplotlib
@@ -34,7 +36,7 @@ def access_connect(): #irrelevant now
     S_conn.commit()
 
 
-#Some of the data gets changed from access into python, this cleans it up for SQL. Only tested on Grind_Raw
+#Some of the data gets changed from access into python, this cleans it up for SQL.
 def sql_insert(table, values):
     exec_message = 'INSERT INTO ' + table + ' VALUES ('
     first = True
@@ -58,7 +60,7 @@ def sql_insert(table, values):
     return exec_message
 
 
-def delete_dups(connection):#deletes duplicates using CTE. Can be simplified if we get admin priveleges
+def delete_dups(connection):#deletes duplicates using CTE. Can be simplified if we get admin priveleges.
     cur = connection.cursor()
     cur.execute('WITH CTE([Entry_Time], dups) AS (SELECT [Entry_Time], ROW_NUMBER() OVER (PARTITION BY [Entry_Time] ORDER BY Id) AS dups FROM Grind_Raw) DELETE FROM CTE WHERE dups > 1')
 
@@ -71,12 +73,11 @@ def delete_dups(connection):#deletes duplicates using CTE. Can be simplified if 
 def remove_email(connection, data):
     committed = False
     message = ""
-    try: #Use this code whenever you connect to SQL server
-        connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
-            'uid=rmsapp;pwd=ss1RMSpw@wb02') 
-    except pp.Error as e: 
-        message = ('error connecting to SQL server: ' + str(e))
-        return committed, message
+    # try: #Use this code whenever you connect to SQL server
+    #     connection, message = sql_connect()
+    # except pp.Error as e: 
+    #     message = ('error connecting to SQL server: ' + str(e))
+    #     return committed, message
 
     badge_number = data[0]
     name = data[1]
@@ -136,7 +137,6 @@ def add_chock(connection, data):
     message = ""
     cur = connection.cursor()
     #INPUT SANITATION
-    #print('INSERT INTO employee VALUES(' + badge_number + ', \'' + name + '\', \'' + email + '\')')
     try:
         message = sql_insert('report', data)
         cur.execute(message)
@@ -181,55 +181,244 @@ def sql_connect(): #not used, eventually will return current sql connection or s
     return connection, message
 
 def generate_graphs(roll_num): #not useful rn just messing around with matplotlib, we need a dataset for multiple rolls that we can use until we have enough data
-    #connection, message = sql_connect()
-    #cur = connection.cursor()
-    # roll_num = 1619
-    # cur.execute(f'SELECT Roll_diameter_HS_After, Entry_Time FROM Grind_Raw WHERE Roll_Number={roll_num} ORDER BY Entry_Time')
-    # data = cur.fetchall()
-    y1 = [130.60,130.54, 130.48, 130.4, 130.32, 129.4, 129.32, 129.24, 129.16, 129.08, 129, 128.9, 128.8, 128.7, 128.6, 128.5, 128.4, 128.3, 128.2, 128.1, 128, 127.9, 127.8, 127.7, 127.6, 127.5]
-    x = [datetime.datetime(2021, 3, 10, 12, 12, 12), datetime.datetime(2021, 4, 12, 12, 12, 12), datetime.datetime(2021, 5, 14, 12, 12, 12),
-        datetime.datetime(2021, 6, 17, 12, 12, 12), datetime.datetime(2021, 7, 20, 12, 12, 12), datetime.datetime(2021,8, 23, 12, 12, 12),
-        datetime.datetime(2021, 9, 24, 12, 12, 12), datetime.datetime(2021, 10, 28, 12, 12, 12), datetime.datetime(2021, 12, 1, 12, 12, 12),
-        datetime.datetime(2022, 1, 1, 12, 12, 12), datetime.datetime(2022, 2, 1, 12, 12, 12), datetime.datetime(2022, 3, 1, 12, 12, 12), datetime.datetime(2022, 4, 1, 12, 12, 12),
-        datetime.datetime(2022, 5, 1, 12, 12, 12), datetime.datetime(2022, 6, 1, 12, 12, 12), datetime.datetime(2022, 7, 1, 12, 12, 12), datetime.datetime(2022, 8, 1, 12, 12, 12), 
-        datetime.datetime(2022, 9, 1, 12, 12, 12), datetime.datetime(2022, 10, 1, 12, 12, 12), datetime.datetime(2022, 11, 1, 12, 12, 12), datetime.datetime(2022, 12, 1, 12, 12, 12),
-        datetime.datetime(2023, 1, 1, 12, 12, 12), datetime.datetime(2023, 2, 1, 12, 12, 12), datetime.datetime(2023, 3, 1, 12, 12, 12), datetime.datetime(2023, 4, 1, 12, 12, 12),
-        datetime.datetime(2023, 5, 1, 12, 12, 12)]
-    # for row in data:
-    #     x.append(row[1])
-    #     y.append(row[0])
+    connection, message = sql_connect()
+    cur = connection.cursor()
+    # scrap_date = datetime.date()
+    scrap_diameter = None
+    mill = None
+    type = None
+    y = []
+    x = []
+    dates = []
+
+    cur.execute(f'SELECT * FROM roll_new WHERE roll_num={roll_num}')
+    roll_data = cur.fetchall()
+    for row in roll_data:
+        scrap_diameter = row[2]
+        mill = row[5]
+        type = row[6]
+        diameter = row[1]
+
+    cur.execute(f'SELECT * FROM roll_info WHERE mill = \'{mill}\' AND roll_type = \'{type}\'')
+    roll_info = cur.fetchall()
+
+
+    for row in roll_info:
+        avg_grind = row[3]
+        days_between = row[4]
+
+    cur.execute(f'SELECT * FROM grind_new WHERE roll_num={roll_num} ORDER BY min_diameter DESC')
+    grind_data = cur.fetchall()
+
+    for row in grind_data:
+        date = datetime.datetime.strptime(row[2], '%Y-%m-%d')
+        print(date.time())
+        dates.append(date)
+        x.append(date)
+        y.append(row[1])
+
+    other_diameter = calculate_12mo_diameter(scrap_diameter, days_between, avg_grind)
     fig, ax = plt.subplots()
-    ax.plot_date(x, y1, markerfacecolor = 'CornflowerBlue', markeredgecolor = 'Red', zorder=10)
-    plt.axhline(y=120, color='y', linestyle='-')
-    plt.axhline(y=117, color='r', linestyle='-')
+    
+
+    cur_day = datetime.datetime(x[-1].year, x[-1].month, x[-1].day)
+    trend_x = [cur_day]
+    trend_y = [diameter]
+    diameter_proj = diameter
+    
+    while diameter_proj > scrap_diameter:
+        diameter_proj = diameter_proj - avg_grind
+        cur_day = cur_day + datetime.timedelta(days=days_between)
+        trend_y.append(diameter_proj)
+        trend_x.append(cur_day)
+
+    print(trend_y)
+    print(trend_x)
+    ax.plot_date(x, y, markerfacecolor = 'CornflowerBlue', markeredgecolor = 'Red', zorder=10)
+    plt.axhline(y=other_diameter, color='y', linestyle='-')
+    plt.axhline(y=scrap_diameter, color='r', linestyle='-')
+    plt.plot_date(trend_x,trend_y,'b-')
+        
+        
+
+    #ax.xaxis.set_major_formatter(
+    # mdates.ConciseDateFormatter(ax.xaxis.get_major_locator()))
+    #ax.set_xlim([datetime.date(2020, 12, 25), datetime.date(2030, 2, 1)])
+    # ax.set_xlim([datetime.date(2020, 1, 26), datetime.date(2025, 2, 1)])
     fig.autofmt_xdate()
-    ax.set_xlim([datetime.date(2020, 12, 25), datetime.date(2030, 2, 1)])
-    ax.set_ylim(100, 140)
-    x2 = np.array([datetime.date(2020, 12, 25), datetime.date(2030, 2, 1)])
-    y2 = np.array([130.60, 118])
-    plt.plot(x2, y2, color='g', zorder=0)
     ax.title.set_text(f'Diameter Over Time: Roll {roll_num}')
-    plt.legend(['Grinds', 'Needs Replacement', 'Scrapped', 'Projection'])
+    
     plt.xlabel('Date')
     plt.ylabel('Diameter (in.)')
     plt.savefig('static\\images\\Sample Graph.png')
-    
-    
-    # fig.title('Diameter Over Time')
-    
-    # plt.scatter(x,y)
 
-    # # plt.xaxis.set_major_locator(mdates.MonthLocator(bymonthday=(1, 15)))
-    # plt.xlabel('Grind Date/Time')
-    # plt.ylabel('Diameter')
-    # plt.title('Diameter over time')
-    # plt.savefig('static\\images\\Sample Graph.png')
+def update_roll_info(roll_num):
+    connection, message = sql_connect()
+    cur = connection.cursor()
+    cur.execute()
+
+def calculate_12mo_diameter(scrap_diameter, days_between, avg_grind):
+    if days_between > 180 and days_between < 250:
+        return scrap_diameter + (avg_grind * 2)
+    else:
+        thing = math.ceil(365 / days_between)
+        return scrap_diameter + (avg_grind * thing)
+
+def trendline(roll_num, mill, type):
+    pass
+
+def populate_data(): # dont run this on kaiser's server, its just to make fake data
+    connection, message = sql_connect()
+    cur = connection.cursor()
+    cur.execute(f'SELECT * FROM roll_new')
+    roll_data = cur.fetchall()
+    for row in roll_data:
+            roll_num = row[0]
+            diameter = row[1]
+            scrap_diameter = row[2]
+            mill = row[5]
+            roll_type = row[6]
+
+            cur.execute(f'SELECT * FROM roll_info WHERE mill = \'{mill}\' AND roll_type = \'{roll_type}\'')
+            roll_info = cur.fetchall()
+            avg_grind = roll_info[0][3]
+            days_between = roll_info[0][4]
+            cur_day = datetime.date.today()
+
+            while cur_day > datetime.date(2019, 1, 21):
+            #   cur.execute(f'INSERT INTO grind_new VALUES(roll_num = {roll_num}, min_diameter = {diameter}, grind_date = TO_DATE(\'{cur_day.year}-{cur_day.month}-{cur_day.year}\', \'YYYY-MM-DD\'), min_diameter_change = {avg_grind})')
+                print(f'types: {type(roll_num)}, {type(diameter)},  {type(cur_day)},  {type(avg_grind)}')
+                message = f'INSERT INTO grind_new VALUES({roll_num}, {diameter}, \'{cur_day}\', {avg_grind})'
+                print(message)
+                cur.execute(message)
+                cur_day = cur_day - datetime.timedelta(days=days_between)
+                diameter = diameter + avg_grind
+    connection.commit()
+
+def update_scrap_date():
+    connection, message = sql_connect()
+    cur = connection.cursor()
+    cur.execute(f'SELECT * FROM roll_new')
+    roll_data = cur.fetchall()
+    for row in roll_data:
+        roll_num = row[0]
+        diameter = row[1]
+        scrap_diameter = row[2]
+        mill = row[5]
+        roll_type = row[6]
+
+        cur.execute(f'SELECT * FROM roll_info WHERE mill = \'{mill}\' AND roll_type = \'{roll_type}\'')
+        roll_info = cur.fetchall()
+        avg_grind = roll_info[0][3]
+        days_between = roll_info[0][4]
+
+        cur.execute(f'SELECT * FROM grind_new WHERE roll_num = {roll_num} ORDER BY grind_date ASC')
+        grind_data = cur.fetchall()
+        print(grind_data[-1])
+        cur_day = datetime.datetime.strptime(grind_data[-1][2], '%Y-%m-%d').date()
+        
+        while diameter > scrap_diameter:
+            cur_day = cur_day + datetime.timedelta(days=days_between)
+            diameter = diameter - avg_grind
+
+        message = f'UPDATE roll_new SET approx_scrap_date = \'{cur_day}\' WHERE roll_num = {roll_num}'
+        print(cur_day)
+        print(message)
+        cur.execute(message)
+# populate_data()
+    connection.commit()
+
+# update_scrap_date()
+        
+        
+        
+        
     
-    # return plt
+
+            
+
+   
+
+
+        
+
+        
+    
+    
+
+    
+
 
 # generate_graphs()
 
+def rolls_order_now(connection):
+    """Gets a table of rolls whose replacements must be ordered immediately (They are within 
+    a year of needing to be replaced). Query RMS database for rolls that are less than 12 
+    months (1 year) from their approximate scrap date. Put this data in a list and return the
+    list aling with a boolean value representing whether the query was executed successfully 
+    and a connection results message
+    """
+    executed = False
+    query = 'SELECT * FROM roll_new WHERE (approx_scrap_date < DATEADD(year, 1, GETDATE()) \
+        AND approx_scrap_date > GETDATE()) ORDER BY approx_scrap_date;' 
+    cur = connection.cursor()
+    try:
+        cur.execute(query)
+        data = cur.fetchall()
+        table_data = []
+        for row in data:
+            data_row = []
+            for col in range(len(row)):
+                data_row.append(str(row[col]))
+            table_data.append(data_row)
+        executed = True
+        return table_data, executed, "Database Queried Successfully - Connections.rolls_order_now()"
+    except pp.Error as e:
+        message = "error executing query: " + str(e)
+        return None, executed, message
 
-
+def rolls_order_soon(connection):
+    """Gets a table of rolls whose replacements must be ordered soon (They are 12 - 15 
+    months of needing to be replaced). Query RMS database for rolls that are between 12 
+    and 15 months from their approximate scrap date. Put this data in a list and return the
+    list aling with a boolean value representing whether the query was executed successfully 
+    and a connection results message.
+    """
+    executed = False
+    message = ""
+    query = 'SELECT * FROM roll_new WHERE (approx_scrap_date < DATEADD(month, 15, GETDATE())) \
+        AND approx_scrap_date > GETDATE() AND (approx_scrap_date > DATEADD(YEAR, 1, GETDATE())) \
+        ORDER BY approx_scrap_date;'
+    cur = connection.cursor()
+    try:
+        cur.execute(query)
+        data = cur.fetchall()
+        table_data = []
+        for row in data:
+            data_row = []
+            for col in range(len(row)):
+                data_row.append(str(row[col]))
+            table_data.append(data_row)
+        executed = True
+        return table_data, executed, "Database Queried Successfully - Connections.rolls_order_soon()"
+    except pp.Error as e:
+        message = "error executing query: " + str(e)
+        return None, executed, message
     
-    
+def email_notification_recipients(connection):
+    """Gets a list of the emails registered to receive notification emails from the RMS
+    database. Query the database for the registered employee emails . Put this data in a 
+    list and return the list aling with a boolean value representing whether the query 
+    was executed successfully and a connection results message.
+    """
+    executed = False
+    query = 'SELECT email FROM employee;'
+    cur = connection.cursor()
+    try:
+        cur.execute(query)
+        email_recipients = [employee[0] for employee in cur.fetchall()]
+        executed = True
+        return email_recipients, executed, "Database Queried Successfully - Connections.email_notification_recipients()"
+    except pp.Error as e:
+        message = "error executing query: " + str(e)
+        return None, executed, message
