@@ -137,8 +137,12 @@ def remove_email():
 def roll_view():
     if request.method == 'POST':
         roll_num = request.form['roll_clicked']
+        connection, message = Connections.sql_connect()
+        cur = connection.cursor()
+        cur.execute(f'SELECT * FROM grind_new WHERE roll_num = {roll_num} ORDER BY min_diameter ASC')
+        last_grinds = cur.fetchall()
         Connections.generate_graphs(roll_num)
-        return render_template('rollView.html', graph=Connections.generate_graphs, roll_num = roll_num)
+        return render_template('rollView.html', graph=Connections.generate_graphs, roll_num = roll_num, last_grinds=last_grinds, num_grinds=len(last_grinds))
 
 def send_notification_email(roll_id):
     mail = Mail(app)

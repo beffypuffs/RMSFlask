@@ -168,8 +168,17 @@ def edit_chock(connection, data): #only works when date and bage_number are not 
         print(message)
     return committed, message
 
-def sql_connect(): #not used, eventually will return current sql connection or start a new one if it hasn't been called
-    # connection = psycopg2.connect(dbname='RMS',user='rmsAdmin',password='1029384756', host '')  #change to your ip
+# def sql_connect(): #not used, eventually will return current sql connection or start a new one if it hasn't been called
+#     message = "connected"
+#     try: #Use this code whenever you connect to SQL server
+#         connection = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;')
+#     except pp.Error as e:
+#         message = "error connecting to SQL Server: " + str(e) #returns error type
+#         print(message)
+#         return None, message
+#     return connection, message
+
+def sql_connect(): #Use on your own machine, other one is for kaiser
     message = "connected"
     try: #Use this code whenever you connect to SQL server
         connection = pp.connect('Driver={SQL Server};Server=rmssql.database.windows.net;Database=RMSSQL;'
@@ -186,7 +195,7 @@ def generate_graphs(roll_num): #not useful rn just messing around with matplotli
     # scrap_date = datetime.date()
     scrap_diameter = None
     mill = None
-    type = None
+    roll_type = None
     y = []
     x = []
     dates = []
@@ -196,11 +205,13 @@ def generate_graphs(roll_num): #not useful rn just messing around with matplotli
     for row in roll_data:
         scrap_diameter = row[2]
         mill = row[5]
-        type = row[6]
+        roll_type = row[6]
         diameter = row[1]
 
-    cur.execute(f'SELECT * FROM roll_info WHERE mill = \'{mill}\' AND roll_type = \'{type}\'')
+    cur.execute(f'SELECT * FROM roll_info WHERE mill = \'{mill}\' AND roll_type = \'{roll_type}\'')
     roll_info = cur.fetchall()
+    print(mill)
+    print(roll_type)
 
 
     for row in roll_info:
@@ -209,35 +220,43 @@ def generate_graphs(roll_num): #not useful rn just messing around with matplotli
 
     cur.execute(f'SELECT * FROM grind_new WHERE roll_num={roll_num} ORDER BY min_diameter DESC')
     grind_data = cur.fetchall()
-
+    data_exists = False
     for row in grind_data:
+        data_exists = True
         date = datetime.datetime.strptime(row[2], '%Y-%m-%d')
-        print(date.time())
         dates.append(date)
         x.append(date)
         y.append(row[1])
 
-    other_diameter = calculate_12mo_diameter(scrap_diameter, days_between, avg_grind)
+
     fig, ax = plt.subplots()
-    
+    other_diameter = calculate_12mo_diameter(scrap_diameter, days_between, avg_grind)
 
-    cur_day = datetime.datetime(x[-1].year, x[-1].month, x[-1].day)
-    trend_x = [cur_day]
-    trend_y = [diameter]
-    diameter_proj = diameter
+    if data_exists is True:
+        cur_day = datetime.datetime(x[-1].year, x[-1].month, x[-1].day)
+        trend_x = []
+        trend_y = []
+        diameter_proj = diameter
     
-    while diameter_proj > scrap_diameter:
-        diameter_proj = diameter_proj - avg_grind
-        cur_day = cur_day + datetime.timedelta(days=days_between)
-        trend_y.append(diameter_proj)
+        while diameter_proj > scrap_diameter:
+            trend_y.append(diameter_proj)
+            trend_x.append(cur_day)
+            diameter_proj = diameter_proj - avg_grind
+            cur_day = cur_day + datetime.timedelta(days=days_between)
+        trend_y.append(scrap_diameter)
         trend_x.append(cur_day)
+            
 
-    print(trend_y)
-    print(trend_x)
+        plt.plot_date(trend_x,trend_y,'b-')
+    
+
+    
+
+    
     ax.plot_date(x, y, markerfacecolor = 'CornflowerBlue', markeredgecolor = 'Red', zorder=10)
     plt.axhline(y=other_diameter, color='y', linestyle='-')
     plt.axhline(y=scrap_diameter, color='r', linestyle='-')
-    plt.plot_date(trend_x,trend_y,'b-')
+    
         
         
 
@@ -306,32 +325,57 @@ def update_scrap_date():
         scrap_diameter = row[2]
         mill = row[5]
         roll_type = row[6]
-
+        print(mill)
+        print(roll_type)
         cur.execute(f'SELECT * FROM roll_info WHERE mill = \'{mill}\' AND roll_type = \'{roll_type}\'')
         roll_info = cur.fetchall()
+        print(roll_info)
         avg_grind = roll_info[0][3]
         days_between = roll_info[0][4]
 
         cur.execute(f'SELECT * FROM grind_new WHERE roll_num = {roll_num} ORDER BY grind_date ASC')
         grind_data = cur.fetchall()
-        print(grind_data[-1])
-        cur_day = datetime.datetime.strptime(grind_data[-1][2], '%Y-%m-%d').date()
+        if len(grind_data) != 0:
+            cur_day = datetime.datetime.strptime(grind_data[-1][2], '%Y-%m-%d').date()
         
-        while diameter > scrap_diameter:
-            cur_day = cur_day + datetime.timedelta(days=days_between)
-            diameter = diameter - avg_grind
+            while diameter > scrap_diameter:
+                cur_day = cur_day + datetime.timedelta(days=days_between)
+                diameter = diameter - avg_grind
 
-        message = f'UPDATE roll_new SET approx_scrap_date = \'{cur_day}\' WHERE roll_num = {roll_num}'
-        print(cur_day)
-        print(message)
-        cur.execute(message)
+            message = f'UPDATE roll_new SET approx_scrap_date = \'{cur_day}\' WHERE roll_num = {roll_num}'
+            print(cur_day)
+            print(message)
+            cur.execute(message)
 # populate_data()
     connection.commit()
 
-# update_scrap_date()
+def update_diameter():
+    connection, message = sql_connect()
+    cur = connection.cursor()
+    cur.execute(f'SELECT * FROM roll_new')
+    roll_data = cur.fetchall()
+    for row in roll_data:
+        roll_num = row[0]
+        print(roll_num)
+        cur.execute(f'SELECT * FROM grind_new WHERE roll_num = {roll_num} ORDER BY min_diameter ASC')
+        grind_data = cur.fetchall()
+        if len(grind_data) > 0:
+            #print(grind_data[0][0])
+            #print(grind_data[0][3])
+            diameter = grind_data[0][1]
+
+            #print(diameter)
+            message = f'UPDATE roll_new SET diameter = {diameter} WHERE roll_num = {roll_num}'
+            print(message)
+            cur.execute(message)
+    connection.commit()
+
+#update_diameter()
+
+#update_scrap_date()
         
         
-        
+    
         
     
 
