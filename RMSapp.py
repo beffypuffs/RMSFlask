@@ -3,21 +3,72 @@ from flask_mail import Mail, Message
 import Connections
 import Requests
 
+import Notifications as notif
+from flask_apscheduler import APScheduler
+
 
 app = Flask(__name__)
 
+RMS_EMAIL = 'RMSNotifications1@gmail.com' # change for Kaiser email
 
-# settings for sending email notifications - NOT FINAL VALUES
-# (should be changed when switching to use a Kaiser domain email)
-app.config['MAIL_SERVER']='smtp.gmail.com'
-app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'RMSNotifications1@gmail.com'
-app.config['MAIL_PASSWORD'] = 'Rm$aPp01'
-app.config['MAIL_USE_TLS'] = False
-app.config['MAIL_USE_SSL'] = True
+class RMSConfig():
+    """Class for Flask configuration (needed to send scheduled 
+    notification emails)
+    """
+    # Flask-mail config settings - NOT FINAL VALUES
+    MAIL_SERVER = 'smtp.gmail.com' # change for Kaiser email
+    MAIL_PORT = 465
+    MAIL_USERNAME = RMS_EMAIL
+    MAIL_PASSWORD = 'Rm$aPp01'
+    MAIL_USE_TLS = False
+    MAIL_USE_SSL = True
+    # Flask-APScheduler config settings
+    SCHEDULER_API_ENABLED = True
+
+app = Flask(__name__)
+app.config.from_object(RMSConfig())
+
+# initialize flask-mail
+rms_mail = Mail(app)
+
+# initialize scheduler
+scheduler = APScheduler()
+scheduler.init_app(app)
+
+@scheduler.task('cron', id='send_notification_email', week='*', day_of_week='*')
+def send_notification_email():
+    """Sends a notification email using flask-mail. Move to within the RMSApp 
+    Flask context. Connect to the database and check the connection. Query the 
+    RMS database for the rolls that need to be reordered immediately (less 
+    than a year from now) and the rolls that need to be reordered within the 
+    next 3 months (12-15 months from now). Query the database for recipients 
+    of the notification emails. Chek if there is any notification data to send 
+    and if there are any recipients. Send a notification email if there one 
+    needs to be sent.
+    """
+    with scheduler.app.app_context():
+        connection, conn_message = Connections.sql_connect()
+        if conn_message == "connected":
+            order_now, order_now_committed, message = Connections.rolls_order_now(connection)
+            if not order_now_committed:
+                return message
+            order_soon, order_soon_committed, message = Connections.rolls_order_soon(connection)
+            if not order_soon_committed:
+                return message
+            recipients, recipients_committed, message = Connections.email_notification_recipients(connection)
+            if not recipients_committed:
+                return message
+            if recipients != [] and (order_now != [] or order_soon != []):
+                notif.send_noti_email(order_now, order_soon, RMS_EMAIL, recipients, rms_mail)
+        else:
+            return conn_message # CHANGE TO A LOGGING STATEMENT
+
+# begin the scheduler to send notification emails
+scheduler.start()
 
 @app.route("/help")
 def help_page():
+    send_notification_email()
     return render_template('help.html')
 
 
@@ -57,7 +108,6 @@ def chocks():
 
 @app.route("/notifications")
 def notifications():
-    # send_notification_email(1001) # RELOCATE THIS TO SEND EMAIL WHEN REPLACEMENT SHOULD BE ORDERED
     return render_template('notifications.html')
 
 
@@ -137,8 +187,16 @@ def remove_email():
 def roll_view():
     if request.method == 'POST':
         roll_num = request.form['roll_clicked']
+
         Connections.generate_graphs(roll_num)
         return render_template('rollView.html', graph=Connections.generate_graphs, roll_num = roll_num)
+
+        connection, message = Connections.sql_connect()
+        cur = connection.cursor()
+        cur.execute(f'SELECT * FROM grind_new WHERE roll_num = {roll_num} ORDER BY min_diameter ASC')
+        last_grinds = cur.fetchall()
+        Connections.generate_graphs(roll_num)
+        return render_template('rollView.html', graph=Connections.generate_graphs, roll_num = roll_num, last_grinds=last_grinds, num_grinds=len(last_grinds))
 
 def send_notification_email(roll_id):
     mail = Mail(app)
@@ -162,6 +220,7 @@ def send_notification_email(roll_id):
 #     if not hasattr(g, 'sqllite_db'):
 #         g.sqlite_db = Connections.sql_connect()
 #     return g.sqlite_db
+
 
 
 if __name__ == "__main__":

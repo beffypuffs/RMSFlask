@@ -11,18 +11,31 @@ def translate_history(directory):
     cur = connection.cursor()
     delete_these = [] #files to be deleted
     for filename in os.listdir(directory):
-        print(filename)
+        #print(filename)
         with open(directory + '/' + filename, 'r', errors='ignore') as f:
             total += 1
             data = f.read()
 
-            before = data.find('<RollDiameterBeforeGrindingTailstock>')
-            after = data.find(']]></RollDiameterBeforeGrindingTailstock>')
-            TS_diameter_before = data[before + 104:after].replace(" ", "")
-            print("here")
-            print(TS_diameter_before)
-            if (TS_diameter_before == '0' or TS_diameter_before == ''):
-                delete_these.append(filename)
+            before = data.find('<RollDiameterAfterGrindingTailstock>')
+            after = data.find(']]></RollDiameterAfterGrindingTailstock>')
+            TS_diameter_after = data[before + 103:after].replace(" ", "")
+
+        
+            before = data.find('<RollDiameterAfterGrindingMiddle>')
+            after = data.find(']]></RollDiameterAfterGrindingMiddle>')
+            mid_diameter_after = data[before + 103:after].replace(" ", "")
+            
+            before = data.find('<RollDiameterAfterGrindingHeadstock>')
+            after = data.find(']]></RollDiameterAfterGrindingHeadstock>')
+            HS_diameter_after = data[before + 102:after].replace(" ", "")
+            # print(len(TS_diameter_after))
+            # print('--------------------------------')
+            # print(len(mid_diameter_after))
+            # print('--------------------------------')
+            # print(len(HS_diameter_after))
+
+            if (TS_diameter_after == '0' or TS_diameter_after == '' or len(TS_diameter_after) > 100) or (mid_diameter_after == '0' or mid_diameter_after == '' or len(mid_diameter_after) > 100) or (HS_diameter_after == '0' or HS_diameter_after == '' or len(HS_diameter_after) > 100):
+                None
             else:
                 before = data.find('<ProcessDone><!--Indicates that the machining process is completed--')
                 after = data.find(']]></ProcessDone>')
@@ -84,18 +97,6 @@ def translate_history(directory):
                 after = data.find(']]></RollDiameterBeforeGrindingHeadstock>')
                 HS_diameter_before = data[before + 104:after].replace(" ", "")
 
-                before = data.find('<RollDiameterAfterGrindingTailstock><!--Roll diameter after grinding at the tailstock side--><!')
-                after = data.find(']]></RollDiameterAfterGrindingTailstock>')
-                TS_diameter_after = data[before + 102:after].replace(" ", "")
-
-                before = data.find('<RollDiameterAfterGrindingMiddle>')
-                after = data.find(']]></RollDiameterAfterGrindingMiddle>')
-                mid_diameter_after = data[before + 103:after].replace(" ", "")
-                
-                before = data.find('<RollDiameterAfterGrindingHeadstock>')
-                after = data.find(']]></RollDiameterAfterGrindingHeadstock>')
-                HS_diameter_after = data[before + 102:after].replace(" ", "")
-
                 before = data.find('<FormTolerance><!--Target shape tolerance--><![CDATA[')
                 after = data.find(']]></FormTolerance>')
                 tolerance = data[before + 53:after].replace(" ", "")
@@ -126,46 +127,58 @@ def translate_history(directory):
 
                 min_diameter_before = 0
                 min_diameter_after = 0
+                
+                if(roll_num == '16043'):
+                    print(TS_diameter_after)
+                    print(mid_diameter_after)
+                    print(HS_diameter_after)
                 if (TS_diameter_after is not 0 or '' and mid_diameter_after is not 0 or '' and HS_diameter_after is not 0 or ''):
                     min_diameter_before = min(float(TS_diameter_before), float(mid_diameter_before), float(HS_diameter_before))
                     min_diameter_after = min(float(TS_diameter_after), float(mid_diameter_after), float(HS_diameter_after))
 
                 
                 if (HS_diameter_after is not '' or '0') and (TS_diameter_after is not '' or 0) and (mid_diameter_after is not '' or 0) and before is not -1:
-                    print(f'Process done? {process_done}')
-                    print(f'Process interruped? {process_interrupted}')
-                    print(f'Operator: {operator}')
-                    print(f'roll Type: {roll_type}')
-                    print(f'roll ID: {roll_num}')
-                    print(f'Grind ID: {grind_id}')
-                    print(f'Grind start: {grind_start}')
-                    print(f'Grind end: {grind_end}')
-                    print(f'Program Number: {program_no}')
-                    print(f'Shape Number: {shape_no}')
-                    print(f'TS diameter before: {TS_diameter_before}')
-                    print(f'Middle diameter before: {mid_diameter_before}')
-                    print(f'HS_diameter_before: {HS_diameter_before}')
-                    print(f'TS diameter after: {TS_diameter_after}')
-                    print(f'Middle diameter after: {mid_diameter_after}')
-                    print(f'HS diameter after: {HS_diameter_after}')
-                    print(f'min diameter before: {min_diameter_before}')
-                    print(f'min diameter after: {min_diameter_after}')
-                    print(f'min diameter change: {min_diameter_before - min_diameter_after}')
-                    print(f'Target diameter: {target_diameter}')
-                    print(f'Distance between measurements: {Zdistance}')
-                    # print(f'Z axis reference data: {Z_ref_data}')
-                    # print(f'Shape before: {shape_before_grinding}')
-                    #print(f'Shape after: {shape_after_grinding}')
-                    print(f'Tolerance: {tolerance}')
-                    print(f.name)
+                    # print(f'Process done? {process_done}')
+                    # print(f'Process interruped? {process_interrupted}')
+                    # print(f'Operator: {operator}')
+                    # print(f'roll Type: {roll_type}')
+                    # print(f'roll ID: {roll_num}')
+                    # print(f'Grind ID: {grind_id}')
+                    # print(f'Grind start: {grind_start}')
+                    # print(f'Grind end: {grind_end}')
+                    # print(f'Program Number: {program_no}')
+                    # print(f'Shape Number: {shape_no}')
+                    # print(f'TS diameter before: {TS_diameter_before}')
+                    # print(f'Middle diameter before: {mid_diameter_before}')
+                    # print(f'HS_diameter_before: {HS_diameter_before}')
+                    # print(f'TS diameter after: {TS_diameter_after}')
+                    # print(f'Middle diameter after: {mid_diameter_after}')
+                    # print(f'HS diameter after: {HS_diameter_after}')
+                    # print(f'min diameter before: {min_diameter_before}')
+                    # print(f'min diameter after: {min_diameter_after}')
+                    # print(f'min diameter change: {min_diameter_before - min_diameter_after}')
+                    # print(f'Target diameter: {target_diameter}')
+                    # print(f'Distance between measurements: {Zdistance}')
+                    # # print(f'Z axis reference data: {Z_ref_data}')
+                    # # print(f'Shape before: {shape_before_grinding}')
+                    # #print(f'Shape after: {shape_after_grinding}')
+                    # print(f'Tolerance: {tolerance}')
+                    # print(f.name)
                     # print(f'Deviation before: {deviation_before_grinding}')
                     # print(f'Deviation after: {deviation_after_grinding}')
-                    print('-----------------')
+                    # print('-----------------')
                     count += 1
                     grind_end = datetime.strptime(grind_end, '%d_%m_%Y_%H_%M_%S')
+                    min_diameter = min_diameter_after * 0.0393701
+                    diameter_change = (min_diameter_before - min_diameter_after) * 0.0393701
+                    # print(roll_num)
+                    if (roll_num == '16043'):
+                        pass
+                        print(min_diameter)
                     # cur.execute(f'DELETE FROM grind_new WHERE grind_end = \'{str(grind_end)}\'')
-                    cur.execute(f'INSERT INTO grind_new VALUES({roll_num}, ROUND({min_diameter_after * 0.0393701}, 4), \'{str(grind_end)}\', ROUND({(min_diameter_before - min_diameter_after) * 0.0393701}, 4))')
-                    cur.execute(f'UPDATE roll_new SET diameter = ROUND({min_diameter_after * 0.0393701},4) WHERE roll_num = {roll_num}')
+                   
+                    cur.execute(f'INSERT INTO grind_new VALUES({roll_num}, {min_diameter}, \'{str(grind_end)}\', {diameter_change})')
+                    # cur.execute(f'UPDATE roll_new SET diameter = ROUND({min_diameter_after * 0.0393701},4) WHERE roll_num = {roll_num}')
                     # connection = Connections.sql_connect()
                     #cur = connection.cursor()
                     #cur.execute(f'INSERT INTO Grind_Raw VALUES({roll_num}, {grind_id}, {grind_start}, {grind_end}, {program_no}, {shape_no}, {TS_diameter_before}, {TS_diameter_after}, {mid_diameter_before}, {mid_diameter_after}, {HS_diameter_before}, {HS_diameter_after}, {average_diameter_before}, {average_diameter_after},'
@@ -173,14 +186,11 @@ def translate_history(directory):
     print(f'Valid entries: {count}')
     print(f'Invalid entries: {total - count}')
     connection.commit()
-    return delete_these
 
-directory = 'C:/Users/ov57591/Desktop/RMSFlask-main/RG 16'
-delete_these = translate_history(directory) #change user)
-for item in delete_these:
-    os.remove(directory + '/' + item)
+directory = 'C:/Users/ov57591/Desktop/X Drive Histories'
+translate_history(directory) #change user)
+
     
-directory = 'C:/Users/ov57591/Desktop/RMSFlask-main/RG 15'
-delete_these= translate_history(directory)
-for item in delete_these:
-    os.remove(directory + '/' + item)
+directory = 'C:/Users/ov57591/Desktop/Y Drive Histories'
+translate_history(directory)
+
