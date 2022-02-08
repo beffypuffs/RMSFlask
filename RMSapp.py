@@ -2,8 +2,10 @@ from flask import Flask, redirect, url_for, render_template, request, g
 from flask_mail import Mail, Message
 import Connections
 import Requests
+
 import Notifications as notif
 from flask_apscheduler import APScheduler
+
 
 app = Flask(__name__)
 
@@ -185,8 +187,41 @@ def remove_email():
 def roll_view():
     if request.method == 'POST':
         roll_num = request.form['roll_clicked']
+
         Connections.generate_graphs(roll_num)
         return render_template('rollView.html', graph=Connections.generate_graphs, roll_num = roll_num)
+
+        connection, message = Connections.sql_connect()
+        cur = connection.cursor()
+        cur.execute(f'SELECT * FROM grind_new WHERE roll_num = {roll_num} ORDER BY min_diameter ASC')
+        last_grinds = cur.fetchall()
+        Connections.generate_graphs(roll_num)
+        return render_template('rollView.html', graph=Connections.generate_graphs, roll_num = roll_num, last_grinds=last_grinds, num_grinds=len(last_grinds))
+
+def send_notification_email(roll_id):
+    mail = Mail(app)
+    message = Message('TEST MESSAGE', sender='RMSNotifications1@gmail.com')
+    # NEED TO REFORMAT THIS WITH HTML - include something about the recipient being on
+    # the notifications list and how to get off of it
+    message.body = f'This email should say something about a new roll needing to be ordered\
+    (and include the roll_num: {roll_id} that is being replaced)'
+    # USING MY EMAIL FOR NOW - should add all recipients on notifications list
+    message.add_recipient('rmsnotirecipient@gmail.com')
+    mail.send(message)
+    return 'Notification Email Sent'
+
+# def send_status_report():
+#     mail = Mail(app)
+#     #send current diameter and projected lifespan of each roll
+
+
+# @app.before_request
+# def set_db():
+#     if not hasattr(g, 'sqllite_db'):
+#         g.sqlite_db = Connections.sql_connect()
+#     return g.sqlite_db
+
+
 
 if __name__ == "__main__":
     app.run()
