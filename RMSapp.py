@@ -2,19 +2,70 @@ from flask import Flask, redirect, url_for, render_template, request, g
 from flask_mail import Mail, Message
 import Connections
 import Requests
+import Notifications as notif
+from flask_apscheduler import APScheduler
 
 
-app = Flask(__name__)
 
 
 # settings for sending email notifications - NOT FINAL VALUES
 # (should be changed when switching to use a Kaiser domain email)
-app.config['MAIL_SERVER']='smtp.gmail.com'
-app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'RMSNotifications1@gmail.com'
-app.config['MAIL_PASSWORD'] = 'Rm$aPp01'
-app.config['MAIL_USE_TLS'] = False
-app.config['MAIL_USE_SSL'] = True
+RMS_EMAIL = 'RMSNotifications1@gmail.com' # change for Kaiser email
+
+class RMSConfig():
+    """Class for Flask configuration (needed to send scheduled 
+    notification emails)
+    """
+    # Flask-mail config settings - NOT FINAL VALUES
+    MAIL_SERVER = 'smtp.gmail.com' # change for Kaiser email
+    MAIL_PORT = 465
+    MAIL_USERNAME = RMS_EMAIL
+    MAIL_PASSWORD = 'Rm$aPp01'
+    MAIL_USE_TLS = False
+    MAIL_USE_SSL = True
+    # Flask-APScheduler config settings
+    SCHEDULER_API_ENABLED = True
+
+app = Flask(__name__)
+app.config.from_object(RMSConfig())
+
+# initialize flask-mail
+rms_mail = Mail(app)
+
+# initialize scheduler
+scheduler = APScheduler()
+scheduler.init_app(app)
+
+@scheduler.task('cron', id='send_notification_email', week='*', day_of_week='*')
+def send_notification_email():
+    """Sends a notification email using flask-mail. Move to within the RMSApp 
+    Flask context. Connect to the database and check the connection. Query the 
+    RMS database for the rolls that need to be reordered immediately (less 
+    than a year from now) and the rolls that need to be reordered within the 
+    next 3 months (12-15 months from now). Query the database for recipients 
+    of the notification emails. Chek if there is any notification data to send 
+    and if there are any recipients. Send a notification email if there one 
+    needs to be sent.
+    """
+    with scheduler.app.app_context():
+        connection, conn_message = Connections.sql_connect()
+        if conn_message == "connected":
+            order_now, order_now_committed, message = Connections.rolls_order_now(connection)
+            if not order_now_committed:
+                return message
+            order_soon, order_soon_committed, message = Connections.rolls_order_soon(connection)
+            if not order_soon_committed:
+                return message
+            recipients, recipients_committed, message = Connections.email_notification_recipients(connection)
+            if not recipients_committed:
+                return message
+            if recipients != [] and (order_now != [] or order_soon != []):
+                notif.send_noti_email(order_now, order_soon, RMS_EMAIL, recipients, rms_mail)
+        else:
+            return conn_message # CHANGE TO A LOGGING STATEMENT
+
+# begin the scheduler to send notification emails
+scheduler.start()
 
 @app.route("/help")
 def help_page():
@@ -23,7 +74,7 @@ def help_page():
 
 @app.route("/chocksMenu")
 def chocksMenu():
-    return render_template('chocks.html')
+    return render_template('chocksMenu.html')
 
 
 @app.route("/chocksView", methods = ['GET','POST']) 
@@ -40,14 +91,14 @@ def chocksView():
         if committed is True:
                 return render_template('chocksview2.html', data = data, i = i, length = len(data)) #right now it sends every form which i'll fix later
         else:
-            return message
+            return render_template('error.html', message = message) #error message
     else:
         connection, message = Connections.sql_connect()
         data, committed, message = Connections.query_results(connection, "Select *  FROM report ORDER BY date DESC", 54)
         if committed is True:
             return render_template('chocksView2.html', data = data, i = 0, length = len(data)) #see above
         else:
-            return message #error message, needs an html page
+            return render_template('error.html', message = message) #error message
 
 
 @app.route("/chocks")
@@ -70,9 +121,9 @@ def home():
         if committed is True:
             return render_template("index.html", headings=headings, data=data)
         else:
-            return message #display error message, needs an html page
+            return render_template('error.html', message = message) #error message
     else:
-        return message
+        return render_template('error.html', message = message) #error message
 
 
 
@@ -93,21 +144,21 @@ def add_chock():
             if (committed is True):
                 return render_template('successfulAdd.html') #maybe option to view all chocks forms after submitting
             else:
-                return message #error message
+                return render_template('error.html', message = message) #error message
         elif (request.form['submitResponse'] == 'Remove Form'):
             data = Requests.chock_request_data(request)
             committed, message = Connections.remove_chock(connection, data)
             if (committed is True):
                 return render_template('successfulRemove.html')
             else:
-                return message
+                return render_template('error.html', message = message) #error message
         else:
             data = Requests.chock_request_data(request)
             committed, message = Connections.edit_chock(connection, data)
             if (committed is True):
                 return render_template('successfulEdit.html')
             else:
-                return message
+                return render_template('error.html', message = message) #error message
 
 @app.route('/add-email', methods = ['GET','POST'])#template for saving data from a webpage
 def add_email():
@@ -118,7 +169,7 @@ def add_email():
         if committed is True:
             return 'email succesfully added'
         else:
-            return message #error message
+            return render_template('error.html', message = message) #error message
     return 'thing'
 
 @app.route('/remove-email', methods = ['POST'])
@@ -130,7 +181,7 @@ def remove_email():
         if committed is True:
             return 'email succesfully removed'
         else:
-            return message #error message
+            return render_template('error.html', message = message) #error message
     return 'thing'
 
 @app.route('/roll-view', methods = ['POST'])
