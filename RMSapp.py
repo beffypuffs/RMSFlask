@@ -66,6 +66,7 @@ scheduler.start()
 
 @app.route("/help")
 def help_page():
+    send_notification_email()
     return render_template('help.html')
 
 
@@ -105,7 +106,6 @@ def chocks():
 
 @app.route("/notifications")
 def notifications():
-    # send_notification_email(1001) # RELOCATE THIS TO SEND EMAIL WHEN REPLACEMENT SHOULD BE ORDERED
     return render_template('notifications.html')
 
 
@@ -185,6 +185,10 @@ def remove_email():
 def roll_view():
     if request.method == 'POST':
         roll_num = request.form['roll_clicked']
+
+        Connections.generate_graphs(roll_num)
+        return render_template('rollView.html', graph=Connections.generate_graphs, roll_num = roll_num)
+
         connection, message = Connections.sql_connect()
         cur = connection.cursor()
         cur.execute(f'SELECT * FROM grind_new WHERE roll_num = {roll_num} ORDER BY min_diameter ASC')
@@ -214,6 +218,7 @@ def send_notification_email(roll_id):
 #     if not hasattr(g, 'sqllite_db'):
 #         g.sqlite_db = Connections.sql_connect()
 #     return g.sqlite_db
+
 
 
 if __name__ == "__main__":

@@ -346,7 +346,6 @@ def update_scrap_date():
             print(cur_day)
             print(message)
             cur.execute(message)
-# populate_data()
     connection.commit()
 
 def update_diameter():
@@ -370,10 +369,8 @@ def update_diameter():
             cur.execute(message)
     connection.commit()
 
-#update_diameter()
-
 #update_scrap_date()
-    
+
 def rolls_order_now(connection):
     """Gets a table of rolls whose replacements must be ordered immediately (They are within 
     a year of needing to be replaced). Query RMS database for rolls that are less than 12 

@@ -1,11 +1,20 @@
 <!DOCTYPE html>
 <html>
-<style>
-</style>
+    <style>
+    </style>
 <body>
-<div>
-<img src="/static/images/logo.png" style = "height: 250px; width: 500px;">
-<h1>Error connecting to SQL server</h1>
-</div>
+    <header>
+        <img src="/static/images/logo.png" style = "height: 250px; width: 500px;">
+        <!-- Main Kaiser logo and page navigation links -->
+		<p style="text-align: center">
+			<strong>Roll Management</strong>  |  <a href="http://127.0.0.1:5000/chocksMenu">Chocks and Bearings</a>  |  <a href="http://127.0.0.1:5000/notifications">Notification Settings</a>  |  <a href="http://127.0.0.1:5000/help">Help</a>
+		</p>
+		<hr>
+    </header>
+    <div>
+        
+        <h1>{{ message }}</h1>
+
+    </div>
 </body>
 </html>

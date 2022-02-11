@@ -30,6 +30,7 @@ Chocks and Bearings form
     input[type=text] {
         width: 150px;
     }
+
 </style>
 <script>
     var todaysDate = new Date()
@@ -57,18 +58,16 @@ Chocks and Bearings form
 
 <body>	
     <header>
-        <div id="helpOption">
-            <a href="http://127.0.0.1:5000/help">Help</a>
-            <a href="http://127.0.0.1:5000/help"><img src="static/images/helpBtn.png" height="60" width="60" class = "helpBtn" alt="Help Button" /></a>
-        </div>
 
         <a href="http://127.0.0.1:5000/"><img src="static/images/logo.png" alt="Kaiser Aluminium Logo"/></a> <!--height="150" width="300" class="logo"-->
-
-
+        <p style="text-align: center">
+			<a href="http://127.0.0.1:5000/">Roll Management</a>  |  <strong>Chocks and Bearings</strong>  |  <a href="http://127.0.0.1:5000/notifications">Notification Settings</a>  |  <a href="http://127.0.0.1:5000/help">Help</a>
+		</p>
+        <hr>
         <p style="text-align: left">
-        <strong>New Chocks and Bearings Form:</strong>  
+        <h3>New Chocks and Bearings Form:</h3>  
         <br>
-        Fill out form and select submit or <a href="http://127.0.0.1:5000/chocksMenu">Return to Chocks and Bearings Menu </a> 
+        Fill out form and select submit or <a href="http://127.0.0.1:5000/chocksView">View previous forms </a> 
         </p>
 
     </header>
@@ -102,7 +101,7 @@ Chocks and Bearings form
                 <input type="text" id="roll_mill" name="roll_mill" value=""> <br>
                 <label for="roll_type">Type of Roll</label>	
                 <select name = "roll_type" id = "roll_type">
-                    <option value ="wr">Work Roll</option>
+                    <option value ="wr" selected>Work Roll</option>
                     <option value = "bu">Back-Up</option>
                     <option value = "imr">IMR</option>
                 </select>
@@ -117,7 +116,7 @@ Chocks and Bearings form
             <h3>Reasons for D & I</h3>
             <div>
                 <select name = "reasons_d_and_i" id = "reasons_d_and_i">
-                    <option value ="schedled">Scheduled</option>
+                    <option value ="scheduled" selected>Scheduled</option>
                     <option value = "mill_damage"> Mill Damage</option>
                     <option value = "suspected_damage">Suspected Damage</option>
                 </select>
@@ -149,7 +148,7 @@ Chocks and Bearings form
             <h3>Condition of Bearing Grease</h3>
             <div>	
                 <select name = "bearing-grease" id = "bearing-grease">
-                    <option value ="washed-out">Washed Out</option>
+                    <option value ="washed-out" selected>Washed Out</option>
                     <option value = "flakes"> Metallic Flakes</option>
                     <option value = "water">Water</option>
                     <option value = "n/a_grease">N/A</option>
@@ -179,12 +178,12 @@ Chocks and Bearings form
                 <label for="cupA">Cup "A"</label>
                 <input type="text" id="cupA" name="cupA"  value=""> <br>
                 <label for="cupB">Cup "B - D"</label>
-                <input type="text" id="cupB" name="cupB" value=">"> <br>
+                <input type="text" id="cupB" name="cupB" value=""> <br>
                 <label for="cupE">Cup "E"</label>
                 <input type="text" id="cupE" name="cupE"  value=""> <br>
 
                 <select name = "bearing-condition" id = "bearing-condition">
-                    <option value ="reinstalled">Reinstalled</option>
+                    <option value ="reinstalled" selected>Reinstalled</option>
                     <option value = "scraped"> Scraped</option>
                     <option value = "stored">Stored</option>
                 </select>
@@ -268,11 +267,10 @@ Chocks and Bearings form
             </div>
             <br>
             <h4 style="text-align: left;">Comments:</h4>
-            <textarea id="comments" name="comments" rows="15" cols="100">
-            </textarea>
+            <textarea id="comments" name="comments" rows="15" cols="100"></textarea>
             <br>
             <br>
-            <input type="submit" value="Submit Form" id="submitResponse">
+            <input type="submit" value="Submit Form" id="submitResponse" name = "submitResponse">
         </form> <!-- END of form-->
     </main>
 </body>
