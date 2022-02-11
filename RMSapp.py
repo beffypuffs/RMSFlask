@@ -156,7 +156,7 @@ def add_chock():
                 debug('Chocks & Bearings Form ADDED successfully')
                 return render_template('successfulAdd.html') #maybe option to view all chocks forms after submitting
             else:
-                error('Problem ADDING Chocks & Bearings Form')
+                error('Problem ADDING Chocks & Bearings Form' + message)
                 return render_template('error.html', message = message) #error message
         elif (request.form['submitResponse'] == 'Remove Form'):
             data = Requests.chock_request_data(request)
@@ -165,7 +165,7 @@ def add_chock():
                 debug('Chocks & Bearings Form REMOVED successfully')
                 return render_template('successfulRemove.html')
             else:
-                error('Problem REMOVING Chocks & Bearings Form')
+                error('Problem REMOVING Chocks & Bearings Form' + message)
                 return render_template('error.html', message = message) #error message
         else:
             data = Requests.chock_request_data(request)
@@ -174,7 +174,7 @@ def add_chock():
                 debug('Chocks & Bearings Form EDITED successfully')
                 return render_template('successfulEdit.html')
             else:
-                error('Problem EDITING Chocks & Bearings Form')
+                error('Problem EDITING Chocks & Bearings Form' + message)
                 return render_template('error.html', message = message) #error message
 
 @app.route('/add-email', methods = ['GET','POST'])#template for saving data from a webpage
@@ -184,8 +184,9 @@ def add_email():
         data = Requests.email_request_data(request)
         committed, message = Connections.add_email(connection, data)
         if committed is True:
-            return 'email succesfully added'
+            debug('Email succesfully ADDED')
         else:
+            error('Problem ADDING email - ' + message)
             return render_template('error.html', message = message) #error message
 
 @app.route('/remove-email', methods = ['POST'])
@@ -195,8 +196,9 @@ def remove_email():
         data = Requests.email_request_data(request)
         committed, message = Connections.remove_email(connection, data)
         if committed is True:
-            return 'email succesfully removed'
+            debug('Email succesfully REMOVED')
         else:
+            error('Problem REMOVING email - ' + message)
             return render_template('error.html', message = message) #error message
     return 'thing'
 
