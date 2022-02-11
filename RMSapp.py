@@ -4,7 +4,7 @@ import Connections
 import Requests
 import Notifications as notif
 from flask_apscheduler import APScheduler
-from logging import basicConfig, DEBUG, info, debug
+from logging import basicConfig, DEBUG, info, debug, error
 from os import path
 
 # settings for sending email notifications - NOT FINAL VALUES
@@ -57,20 +57,20 @@ def send_notification_email():
         if conn_message == "connected":
             order_now, order_now_committed, message = Connections.rolls_order_now(connection)
             if not order_now_committed:
-                debug('PROBLEM SENDING NOTIFICATION EMAIL - ' + message)
+                error('PROBLEM SENDING NOTIFICATION EMAIL - ' + message)
             order_soon, order_soon_committed, message = Connections.rolls_order_soon(connection)
             if not order_soon_committed:
-                debug('PROBLEM SENDING NOTIFICATION EMAIL - ' + message)
+                error('PROBLEM SENDING NOTIFICATION EMAIL - ' + message)
             recipients, recipients_committed, message = Connections.email_notification_recipients(connection)
             if not recipients_committed:
-                debug('PROBLEM SENDING NOTIFICATION EMAIL - ' + message)
+                error('PROBLEM SENDING NOTIFICATION EMAIL - ' + message)
             if recipients != [] and (order_now != [] or order_soon != []):
                 notif.send_noti_email(order_now, order_soon, RMS_EMAIL, recipients, rms_mail)
-                info('Notification Email Sent')
+                debug('Notification Email Sent')
             else:
-                info('Notification Email NOT SENT - No roll replacements to order')
+                debug('Notification Email NOT SENT - No roll replacements to order')
         else:
-            debug('PROBLEM CONNECTING TO DATABASE - ' + conn_message)
+            error('PROBLEM CONNECTING TO DATABASE - ' + conn_message)
 
 # begin the scheduler to send notification emails
 scheduler.start()
@@ -124,12 +124,16 @@ def home():
     headings = ("Roll ID", "Diameter", "Scrap Diameter", "Approx. Scrap Date", "Grinds Left", "Mill", "Roll Type")
     connection, message = Connections.sql_connect()
     if message == "connected":
+        debug("Connected to RMS database")
         data, committed, message = Connections.query_results(connection, "Select *  FROM roll_new ORDER BY approx_scrap_date ASC", 7)
         if committed is True:
+            debug('Home Page Loaded Successfully - ' + message)
             return render_template("index.html", headings=headings, data=data)
         else:
+            error('PROBLEM LOADING HOME PAGE - ' + message)
             return render_template('error.html', message = message) #error message
     else:
+        error('PROBLEM CONNECTING TO RMS DATABASE - ' + message)
         return render_template('error.html', message = message) #error message
 
 
@@ -149,22 +153,28 @@ def add_chock():
             data = Requests.chock_request_data(request)
             committed, message = Connections.add_chock(connection, data)
             if (committed is True):
+                debug('Chocks & Bearings Form ADDED successfully')
                 return render_template('successfulAdd.html') #maybe option to view all chocks forms after submitting
             else:
+                error('Problem ADDING Chocks & Bearings Form')
                 return render_template('error.html', message = message) #error message
         elif (request.form['submitResponse'] == 'Remove Form'):
             data = Requests.chock_request_data(request)
             committed, message = Connections.remove_chock(connection, data)
             if (committed is True):
+                debug('Chocks & Bearings Form REMOVED successfully')
                 return render_template('successfulRemove.html')
             else:
+                error('Problem REMOVING Chocks & Bearings Form')
                 return render_template('error.html', message = message) #error message
         else:
             data = Requests.chock_request_data(request)
             committed, message = Connections.edit_chock(connection, data)
             if (committed is True):
+                debug('Chocks & Bearings Form EDITED successfully')
                 return render_template('successfulEdit.html')
             else:
+                error('Problem EDITING Chocks & Bearings Form')
                 return render_template('error.html', message = message) #error message
 
 @app.route('/add-email', methods = ['GET','POST'])#template for saving data from a webpage
@@ -177,7 +187,6 @@ def add_email():
             return 'email succesfully added'
         else:
             return render_template('error.html', message = message) #error message
-    return 'thing'
 
 @app.route('/remove-email', methods = ['POST'])
 def remove_email():

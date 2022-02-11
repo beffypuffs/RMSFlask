@@ -113,7 +113,6 @@ def add_email(connection, data):
 
 def query_results(connection, query, cols): #Displays roll information
     executed = False
-    message = ""
     cur = connection.cursor() # Used to execute actions, might be able do more idk
     try:
         cur.execute(query) # Query
@@ -130,6 +129,7 @@ def query_results(connection, query, cols): #Displays roll information
         # Array to hold a single data entry / Table row
         table_data.append(data_row)
     executed = True
+    message = "database queried successfully"
     return table_data, executed, message
 
 def add_chock(connection, data):
