@@ -4,6 +4,8 @@ import Connections
 import Requests
 import Notifications as notif
 from flask_apscheduler import APScheduler
+from logging import basicConfig, DEBUG, info, debug
+from os import path
 
 # settings for sending email notifications - NOT FINAL VALUES
 # (should be changed when switching to use a Kaiser domain email)
@@ -33,6 +35,12 @@ rms_mail = Mail(app)
 scheduler = APScheduler()
 scheduler.init_app(app)
 
+# initialize logging
+RMS_LOGS_PATH = path.join('logs', 'RMSapp.log')
+RMS_LOGS_FORMAT = '%(asctime)s : %(levelname)s - %(message)s'
+basicConfig(filename=RMS_LOGS_PATH, format=RMS_LOGS_FORMAT, level=DEBUG)
+info('Starting RMSapp...')
+
 @scheduler.task('cron', id='send_notification_email', week='*', day_of_week='*')
 def send_notification_email():
     """Sends a notification email using flask-mail. Move to within the RMSApp 
@@ -49,24 +57,26 @@ def send_notification_email():
         if conn_message == "connected":
             order_now, order_now_committed, message = Connections.rolls_order_now(connection)
             if not order_now_committed:
-                return message
+                debug('PROBLEM SENDING NOTIFICATION EMAIL - ' + message)
             order_soon, order_soon_committed, message = Connections.rolls_order_soon(connection)
             if not order_soon_committed:
-                return message
+                debug('PROBLEM SENDING NOTIFICATION EMAIL - ' + message)
             recipients, recipients_committed, message = Connections.email_notification_recipients(connection)
             if not recipients_committed:
-                return message
+                debug('PROBLEM SENDING NOTIFICATION EMAIL - ' + message)
             if recipients != [] and (order_now != [] or order_soon != []):
                 notif.send_noti_email(order_now, order_soon, RMS_EMAIL, recipients, rms_mail)
+                info('Notification Email Sent')
+            else:
+                info('Notification Email NOT SENT - No roll replacements to order')
         else:
-            return conn_message # CHANGE TO A LOGGING STATEMENT
+            debug('PROBLEM CONNECTING TO DATABASE - ' + conn_message)
 
 # begin the scheduler to send notification emails
 scheduler.start()
 
 @app.route("/help")
 def help_page():
-    send_notification_email()
     return render_template('help.html')
 
 
@@ -195,18 +205,6 @@ def roll_view():
         last_grinds = cur.fetchall()
         Connections.generate_graphs(roll_num)
         return render_template('rollView.html', graph=Connections.generate_graphs, roll_num = roll_num, last_grinds=last_grinds, num_grinds=len(last_grinds))
-
-def send_notification_email(roll_id):
-    mail = Mail(app)
-    message = Message('TEST MESSAGE', sender='RMSNotifications1@gmail.com')
-    # NEED TO REFORMAT THIS WITH HTML - include something about the recipient being on
-    # the notifications list and how to get off of it
-    message.body = f'This email should say something about a new roll needing to be ordered\
-    (and include the roll_num: {roll_id} that is being replaced)'
-    # USING MY EMAIL FOR NOW - should add all recipients on notifications list
-    message.add_recipient('rmsnotirecipient@gmail.com')
-    mail.send(message)
-    return 'Notification Email Sent'
 
 # def send_status_report():
 #     mail = Mail(app)
