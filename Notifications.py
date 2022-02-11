@@ -5,6 +5,7 @@
 
 from flask import render_template
 from flask_mail import Message
+from logging import info
 
 # subject for the RMS email notification
 SUBJECT = 'RMS Roll Status Notification'
@@ -21,8 +22,10 @@ def send_noti_email(order_now, order_soon, sender, recipients, mail):
     to order now and soon. Then send the notification email using 
     flask-mail.
     """
+    info('Creating Notification Email')
     message = Message(subject=SUBJECT, recipients=recipients, 
     sender=sender)
     message.html = render_template("noti_email.html", headings=HEADINGS, 
     order_now=order_now, order_soon=order_soon)
+    info('Notification Email Created')
     mail.send(message)
