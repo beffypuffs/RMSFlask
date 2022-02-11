@@ -369,6 +369,7 @@ def update_diameter():
             cur.execute(message)
     connection.commit()
 
+#update_scrap_date()
 
 def rolls_order_now(connection):
     """Gets a table of rolls whose replacements must be ordered immediately (They are within 
@@ -441,12 +442,3 @@ def email_notification_recipients(connection):
     except pp.Error as e:
         message = "error executing query: " + str(e)
         return None, executed, message
-
-
-
-
-
-
-    
-    
-

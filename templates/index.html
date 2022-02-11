@@ -33,7 +33,7 @@ table, th, td {
 		<!-- Main Kaiser logo and page navigation links -->
 		<img src="static/images/logo.png" alt="Kaiser Aluminium Logo"/>
 		<p style="text-align: center">
-			<strong>Roll Management</strong>  |  <a href="http://127.0.0.1:5000/chocksMenu">Chocks and Bearings</a>  |  <a href="http://127.0.0.1:5000/notifications">Notification Settings</a>  |  <a href="http://127.0.0.1:5000/help">Help</a>
+			<strong>Home Roll Management Page</strong>  |  <a href="http://127.0.0.1:5000/chocksMenu">Chocks and Bearings </a>  |  <a href="http://127.0.0.1:5000/notifications">Notification Settings</a>  |  <a href="http://127.0.0.1:5000/help">Help</a>
 		</p>
 		<hr>
 	</header>
@@ -83,7 +83,7 @@ table, th, td {
 						{% endif %}
 					{% endfor %}
 				</tr>
-				{% elif row[3] < '2027-12-31' %}
+				{% elif row[3] < '2057-12-31' %}
 				<tr bgcolor="#90EE90">
 					{% for cell in row %}
 						<!-- I just need to pass the data -->
