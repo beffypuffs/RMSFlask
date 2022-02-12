@@ -4,40 +4,20 @@ import datetime
 from dateutil import relativedelta
 import numpy as np
 import math
-import pyodbc as pp
-import psycopg2
+# import pyodbc as pp
+"""
+MAKE SURE THE PYODBC LINE IS COMMENTED IN, PYMSSQL IS COMMENTED OUT, AND YOU ARE USING THE RIGHT SQL_CONNECT d
+"""
+import pymssql as pp
+# import psycopg2
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
-
-def access_connect(): #irrelevant now
-    try:
-        conn = pp.connect('Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=E:\\RMS\\Access\\RSMS_IF.NET.mdb;')
-    except pp.Error as e:
-        print('error connecting to Access server: ' + str(e))
-        exit()
-    try:
-        S_conn = pp.connect('Driver= {SQL Server};Server=localhost\\SQLEXPRESS;Database=rms;'
-        'uid=rmsapp;pwd=ss1RMSpw@wb02')
-    except pp.error as e:
-        print("error connecting to SQL server" + str(e))
-        exit()
-    cur = conn.cursor()
-    cur.execute('select * from Grind_Data')
-    for row in cur.fetchall():
-        insert = sql_insert('grind_raw', row) #generate insert message
-        cur = S_conn.cursor()
-        # print(insert)
-        cur.execute(insert)
-    delete_dups(S_conn)
-    #remove_fake_data(S_conn)
-    S_conn.commit()
-
-
 #Some of the data gets changed from access into python, this cleans it up for SQL.
 def sql_insert(table, values):
+    """Might have some utility eventually to build a sql insert, not sure if its worth the trouble """
     exec_message = 'INSERT INTO ' + table + ' VALUES ('
     first = True
     for item in values:
@@ -60,9 +40,9 @@ def sql_insert(table, values):
     return exec_message
 
 
-def delete_dups(connection):#deletes duplicates using CTE. Can be simplified if we get admin priveleges.
-    cur = connection.cursor()
-    cur.execute('WITH CTE([Entry_Time], dups) AS (SELECT [Entry_Time], ROW_NUMBER() OVER (PARTITION BY [Entry_Time] ORDER BY Id) AS dups FROM Grind_Raw) DELETE FROM CTE WHERE dups > 1')
+# def delete_dups(connection):#deletes duplicates using CTE. Can be simplified if we get admin priveleges.
+#     cur = connection.cursor()
+#     cur.execute('WITH CTE([Entry_Time], dups) AS (SELECT [Entry_Time], ROW_NUMBER() OVER (PARTITION BY [Entry_Time] ORDER BY Id) AS dups FROM Grind_Raw) DELETE FROM CTE WHERE dups > 1')
 
 
 # def remove_fake_data(connection):#SQL data has some fake entries, won't need this function once we are getting live data
@@ -73,12 +53,6 @@ def delete_dups(connection):#deletes duplicates using CTE. Can be simplified if 
 def remove_email(connection, data):
     committed = False
     message = ""
-    # try: #Use this code whenever you connect to SQL server
-    #     connection, message = sql_connect()
-    # except pp.Error as e: 
-    #     message = ('error connecting to SQL server: ' + str(e))
-    #     return committed, message
-
     badge_number = data[0]
     name = data[1]
     email = data[2]
@@ -112,6 +86,9 @@ def add_email(connection, data):
         
 
 def query_results(connection, query, cols): #Displays roll information
+    """Returns results of a SELECT query in table form
+    Not every query uses this function, might be worth fixing
+    """
     executed = False
     cur = connection.cursor() # Used to execute actions, might be able do more idk
     try:
@@ -178,11 +155,21 @@ def edit_chock(connection, data): #only works when date and bage_number are not 
 #         return None, message
 #     return connection, message
 
-def sql_connect(): #Use on your own machine, other one is for kaiser
+# def sql_connect(): #Use on your own machine, other one is for kaiser
+#     message = "connected"
+#     try: #Use this code whenever you connect to SQL server
+#         connection = pp.connect('Driver={SQL Server};Server=rmssql.database.windows.net;Database=RMSSQL;'
+#     'uid=RMS;pwd=trpJ63iGY4F7mRj') 
+#     except pp.Error as e:
+#         message = "error connecting to SQL Server: " + str(e) #returns error type
+#         print(message)
+#         return None, message
+#     return connection, message
+
+def sql_connect(): #For JC's computer
     message = "connected"
     try: #Use this code whenever you connect to SQL server
-        connection = pp.connect('Driver={SQL Server};Server=rmssql.database.windows.net;Database=RMSSQL;'
-    'uid=RMS;pwd=trpJ63iGY4F7mRj') 
+        connection = pp.connect(server='rmssql.database.windows.net', user='RMS', password='trpJ63iGY4F7mRj', database='RMSSQL')
     except pp.Error as e:
         message = "error connecting to SQL Server: " + str(e) #returns error type
         print(message)
@@ -223,9 +210,9 @@ def generate_graphs(roll_num): #not useful rn just messing around with matplotli
     data_exists = False
     for row in grind_data:
         data_exists = True
-        date = datetime.datetime.strptime(row[2], '%Y-%m-%d')
-        dates.append(date)
-        x.append(date)
+        #date = datetime.datetime.strptime(row[2], '%Y-%m-%d')
+        # dates.append(row[2])
+        x.append(row[2])
         y.append(row[1])
 
 
@@ -269,7 +256,8 @@ def generate_graphs(roll_num): #not useful rn just messing around with matplotli
     
     plt.xlabel('Date')
     plt.ylabel('Diameter (in.)')
-    plt.savefig('static\\images\\Sample Graph.png')
+    plt.savefig('static/images/Sample Graph.png')
+    return plt
 
 def update_roll_info(roll_num):
     connection, message = sql_connect()
@@ -442,3 +430,5 @@ def email_notification_recipients(connection):
     except pp.Error as e:
         message = "error executing query: " + str(e)
         return None, executed, message
+
+# generate_graphs(16043)

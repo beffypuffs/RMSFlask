@@ -1,11 +1,29 @@
 from flask import Flask, redirect, url_for, render_template, request, g
 from flask_mail import Mail, Message
+from sqlalchemy import create_engine, MetaData, Table
+from sqlalchemy.sql import select, insert, update
+from sqlalchemy.orm import mapper
+from sqlalchemy.ext.automap import automap_base
 import Connections
 import Requests
 import Notifications as notif
+import pymssql
 from flask_apscheduler import APScheduler
 from logging import basicConfig, DEBUG, info, debug, error
 from os import path
+
+
+engine = create_engine('mssql+pymssql://RMS:trpJ63iGY4F7mRj@rmssql.database.windows.net/RMSSQL')
+sql_connection = engine.connect()
+metadata = MetaData(engine)
+
+
+
+
+ROLLS = Table('roll_new', metadata, autoload=True, autoload_with=engine)
+GRINDS = Table('grind_new', metadata, autoload=True, autoload_with=engine)
+INFO = Table('roll_info', metadata, autoload=True, autoload_with=engine)
+
 
 # settings for sending email notifications - NOT FINAL VALUES
 # (should be changed when switching to use a Kaiser domain email)
@@ -38,7 +56,7 @@ scheduler.init_app(app)
 # initialize logging
 RMS_LOGS_PATH = path.join('logs', 'RMSapp.log')
 RMS_LOGS_FORMAT = '%(asctime)s : %(levelname)s - %(message)s'
-basicConfig(filename=RMS_LOGS_PATH, format=RMS_LOGS_FORMAT, level=DEBUG)
+# basicConfig(filename=RMS_LOGS_PATH, format=RMS_LOGS_FORMAT, level=DEBUG)
 info('Starting RMSapp...')
 
 @scheduler.task('cron', id='send_notification_email', week='*', day_of_week='*')
@@ -206,16 +224,14 @@ def remove_email():
 def roll_view():
     if request.method == 'POST':
         roll_num = request.form['roll_clicked']
-
-        Connections.generate_graphs(roll_num)
-        return render_template('rollView.html', graph=Connections.generate_graphs, roll_num = roll_num)
-
         connection, message = Connections.sql_connect()
         cur = connection.cursor()
         cur.execute(f'SELECT * FROM grind_new WHERE roll_num = {roll_num} ORDER BY min_diameter ASC')
         last_grinds = cur.fetchall()
-        Connections.generate_graphs(roll_num)
-        return render_template('rollView.html', graph=Connections.generate_graphs, roll_num = roll_num, last_grinds=last_grinds, num_grinds=len(last_grinds))
+        s = select(ROLLS)
+        result = sql_connection.execute(s)
+        graph = Connections.generate_graphs(roll_num)
+        return render_template('rollView.html', graph=graph, roll_num = roll_num, last_grinds=last_grinds, num_grinds=len(last_grinds))
 
 # def send_status_report():
 #     mail = Mail(app)

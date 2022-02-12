@@ -296,5 +296,4 @@ def chock_request_data(request):
         is_sealed, seals_replaced, cup_a, cup_bd, cup_e, race_a, race_b, race_d, race_e, bearing_status, different_bearing_installed, bearing_mfg_new, serial_number_new, sealed_new, chock_bore_round, chock_bore, no_rust,
         grease_purged, spots_dings, manual_pack, lube_bore, grease_packed_bearings, height_shoulder, bearing_depth, shims_needed, was_paper_used, by_hand, was_torqued, ancillary_installed, grease_pack_sealed,
         chock_ready_for_installation, comments, mill, badge_number, roll_type]
-
     return data
