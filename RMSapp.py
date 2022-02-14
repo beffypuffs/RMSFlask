@@ -1,15 +1,11 @@
-from re import T
-from flask import Flask, redirect, url_for, render_template, request, g
-from flask_mail import Mail, Message
-import pytz_deprecation_shim
+from flask import Flask, render_template, request
+from flask_mail import Mail
 import Connections
 import Requests
 import Notifications as notif
 from flask_apscheduler import APScheduler
 from logging import basicConfig, DEBUG, info, debug, error
 from os import path
-from zoneinfo import ZoneInfo
-from datetime import datetime
 
 # settings for sending email notifications - NOT FINAL VALUES
 # (should be changed when switching to use a Kaiser domain email)
