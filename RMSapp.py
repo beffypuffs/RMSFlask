@@ -1,11 +1,15 @@
+from re import T
 from flask import Flask, redirect, url_for, render_template, request, g
 from flask_mail import Mail, Message
+import pytz_deprecation_shim
 import Connections
 import Requests
 import Notifications as notif
 from flask_apscheduler import APScheduler
 from logging import basicConfig, DEBUG, info, debug, error
 from os import path
+from zoneinfo import ZoneInfo
+from datetime import datetime
 
 # settings for sending email notifications - NOT FINAL VALUES
 # (should be changed when switching to use a Kaiser domain email)
@@ -24,6 +28,7 @@ class RMSConfig():
     MAIL_USE_SSL = True
     # Flask-APScheduler config settings
     SCHEDULER_API_ENABLED = True
+    SCHEDULER_TIMEZONE = "America/Los_Angeles"
 
 app = Flask(__name__)
 app.config.from_object(RMSConfig())
@@ -31,7 +36,7 @@ app.config.from_object(RMSConfig())
 # initialize flask-mail
 rms_mail = Mail(app)
 
-# initialize scheduler
+# initialize scheduler using the PST timezone
 scheduler = APScheduler()
 scheduler.init_app(app)
 
