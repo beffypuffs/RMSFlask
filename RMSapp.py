@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, render_template, request, g
+from flask import Flask, redirect, url_for, render_template, request, g, send_from_directory
 from flask_mail import Mail, Message
 import Connections
 import Requests
@@ -40,6 +40,10 @@ RMS_LOGS_PATH = path.join('logs', 'RMSapp.log')
 RMS_LOGS_FORMAT = '%(asctime)s : %(levelname)s - %(message)s'
 basicConfig(filename=RMS_LOGS_PATH, format=RMS_LOGS_FORMAT, level=DEBUG)
 info('Starting RMSapp...')
+
+@app.route("/<path:path>")
+def home(path):
+    return send_from_directory('client/public', path)
 
 @scheduler.task('cron', id='send_notification_email', week='*', day_of_week='*')
 def send_notification_email():
@@ -119,16 +123,21 @@ def notifications():
     return render_template('notifications.html')
 
 
-@app.route("/")
-def home():
+@app.route("/data/headings")
+def headings():
     headings = ("Roll ID", "Diameter", "Scrap Diameter", "Approx. Scrap Date", "Grinds Left", "Mill", "Roll Type")
+    return headings
+
+
+@app.route("/data")
+def data():
     connection, message = Connections.sql_connect()
     if message == "connected":
         debug("Connected to RMS database")
         data, committed, message = Connections.query_results(connection, "Select *  FROM roll_new ORDER BY approx_scrap_date ASC", 7)
         if committed is True:
             debug('Home Page Loaded Successfully - ' + message)
-            return render_template("index.html", headings=headings, data=data)
+            return data
         else:
             error('PROBLEM LOADING HOME PAGE - ' + message)
             return render_template('error.html', message = message) #error message
@@ -136,6 +145,10 @@ def home():
         error('PROBLEM CONNECTING TO RMS DATABASE - ' + message)
         return render_template('error.html', message = message) #error message
 
+
+@app.route("/")
+def base():
+    return send_from_directory('client/public', 'index.html')
 
 
 #Replace with /index when its finished
@@ -206,9 +219,6 @@ def remove_email():
 def roll_view():
     if request.method == 'POST':
         roll_num = request.form['roll_clicked']
-
-        Connections.generate_graphs(roll_num)
-        return render_template('rollView.html', graph=Connections.generate_graphs, roll_num = roll_num)
 
         connection, message = Connections.sql_connect()
         cur = connection.cursor()
