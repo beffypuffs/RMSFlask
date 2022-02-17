@@ -176,61 +176,61 @@ def sql_connect(): #For JC's computer
         return None, message
     return connection, message
 
-def generate_graphs(roll_num): #not useful rn just messing around with matplotlib, we need a dataset for multiple rolls that we can use until we have enough data
-    connection, message = sql_connect()
-    cur = connection.cursor()
-    # scrap_date = datetime.date()
-    scrap_diameter = None
-    mill = None
-    roll_type = None
+def generate_graphs(roll, grinds, info): #not useful rn just messing around with matplotlib, we need a dataset for multiple rolls that we can use until we have enough data
+    # connection, message = sql_connect()
+    # cur = connection.cursor()
+    # # scrap_date = datetime.date()
+    # scrap_diameter = None
+    # mill = None
+    # roll_type = None
     y = []
     x = []
     dates = []
 
-    cur.execute(f'SELECT * FROM roll_new WHERE roll_num={roll_num}')
-    roll_data = cur.fetchall()
-    for row in roll_data:
-        scrap_diameter = row[2]
-        mill = row[5]
-        roll_type = row[6]
-        diameter = row[1]
+    # cur.execute(f'SELECT * FROM roll_new WHERE roll_num={roll_num}')
+    # roll_data = cur.fetchall()
+    # for row in roll_data:
+    #     scrap_diameter = row[2]
+    #     mill = row[5]
+    #     roll_type = row[6]
+    #     diameter = row[1]
 
-    cur.execute(f'SELECT * FROM roll_info WHERE mill = \'{mill}\' AND roll_type = \'{roll_type}\'')
-    roll_info = cur.fetchall()
-    print(mill)
-    print(roll_type)
+    # cur.execute(f'SELECT * FROM roll_info WHERE mill = \'{mill}\' AND roll_type = \'{roll_type}\'')
+    # roll_info = cur.fetchall()
+    # print(mill)
+    # print(roll_type)
 
 
-    for row in roll_info:
-        avg_grind = row[3]
-        days_between = row[4]
+    # for row in roll_info:
+    #     avg_grind = row[3]
+    #     days_between = row[4]
 
-    cur.execute(f'SELECT * FROM grind_new WHERE roll_num={roll_num} ORDER BY min_diameter DESC')
-    grind_data = cur.fetchall()
+    # cur.execute(f'SELECT * FROM grind_new WHERE roll_num={roll_num} ORDER BY min_diameter DESC')
+    # grind_data = cur.fetchall()
     data_exists = False
-    for row in grind_data:
+    for grind in grinds:
         data_exists = True
         #date = datetime.datetime.strptime(row[2], '%Y-%m-%d')
         # dates.append(row[2])
-        x.append(row[2])
-        y.append(row[1])
+        x.append(grind.grind_date)
+        y.append(grind.min_diameter)
 
 
     fig, ax = plt.subplots()
-    other_diameter = calculate_12mo_diameter(scrap_diameter, days_between, avg_grind)
+    other_diameter = calculate_12mo_diameter(info.scrap_diameter, info.days_between_rolls, info.avg_grind_diameter)
 
     if data_exists is True:
         cur_day = datetime.datetime(x[-1].year, x[-1].month, x[-1].day)
         trend_x = []
         trend_y = []
-        diameter_proj = diameter
+        diameter_proj = roll.diameter
     
-        while diameter_proj > scrap_diameter:
+        while diameter_proj > roll.scrap_diameter:
             trend_y.append(diameter_proj)
             trend_x.append(cur_day)
-            diameter_proj = diameter_proj - avg_grind
-            cur_day = cur_day + datetime.timedelta(days=days_between)
-        trend_y.append(scrap_diameter)
+            diameter_proj = diameter_proj - info.avg_grind_diameter
+            cur_day = cur_day + datetime.timedelta(days=info.days_between_rolls) #CHANGE TO days_between_rolls WHEN U FINALIZE SQL DATABASE
+        trend_y.append(info.scrap_diameter)
         trend_x.append(cur_day)
             
 
@@ -242,7 +242,7 @@ def generate_graphs(roll_num): #not useful rn just messing around with matplotli
     
     ax.plot_date(x, y, markerfacecolor = 'CornflowerBlue', markeredgecolor = 'Red', zorder=10)
     plt.axhline(y=other_diameter, color='y', linestyle='-')
-    plt.axhline(y=scrap_diameter, color='r', linestyle='-')
+    plt.axhline(y=info.scrap_diameter, color='r', linestyle='-')
     
         
         
@@ -252,7 +252,7 @@ def generate_graphs(roll_num): #not useful rn just messing around with matplotli
     #ax.set_xlim([datetime.date(2020, 12, 25), datetime.date(2030, 2, 1)])
     # ax.set_xlim([datetime.date(2020, 1, 26), datetime.date(2025, 2, 1)])
     fig.autofmt_xdate()
-    ax.title.set_text(f'Diameter Over Time: Roll {roll_num}')
+    ax.title.set_text(f'Diameter Over Time: Roll {roll.roll_num}')
     
     plt.xlabel('Date')
     plt.ylabel('Diameter (in.)')
@@ -430,5 +430,9 @@ def email_notification_recipients(connection):
     except pp.Error as e:
         message = "error executing query: " + str(e)
         return None, executed, message
+
+
+
+
 
 # generate_graphs(16043)

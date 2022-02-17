@@ -53,6 +53,7 @@ table, th, td {
 			
 			<br><br>
 				<!-- Display table headings-->
+				
 				<tr>
 					{% for header in headings %}
 						<th>{{ header }}</th>
@@ -61,40 +62,21 @@ table, th, td {
 				
 				<!-- Display SQL server data to index.html-->
 				{% for row in data %}
-				{% if row[3] < '2022-12-08' %}
+				{% if row.approx_scrap_date.strftime('%Y-%m-%d') < '2023--08'  %}
 				<tr bgcolor="#FF7F7F">
-					{% for cell in row %}
-						<!-- I just need to pass the data -->
-						{% if cell == row[0] %}
-						<td style="text-align:center"><button type="submit" name="roll_clicked" value = {{cell}} class="btn-link">{{cell}}</button></td>
-						{% else %}
-						<td style="text-align:center">{{cell}}</td>
-						{% endif %}
-					{% endfor %}
-				</tr>
-				{% elif row[3] < '2023-06-08' %}
+				{% elif row.approx_scrap_date.strftime('%Y-%m-%d') < '2023-06-08' %}
 				<tr bgcolor="#FFFFE0">
-					{% for cell in row %}
-						<!-- I just need to pass the data -->
-						{% if cell == row[0] %}
-						<td style="text-align:center"><button type="submit" name="roll_clicked" value = {{cell}} class="btn-link">{{cell}}</button></td>
-						{% else %}
-						<td style="text-align:center">{{cell}}</td>
-						{% endif %}
-					{% endfor %}
-				</tr>
-				{% elif row[3] < '2057-12-31' %}
+				{% elif row.approx_scrap_date.strftime('%Y-%m-%d') < '2057-12-31' %}
 				<tr bgcolor="#90EE90">
-					{% for cell in row %}
-						<!-- I just need to pass the data -->
-						{% if cell == row[0] %}
-						<td style="text-align:center"><button type="submit" name="roll_clicked" value = {{cell}} class="btn-link">{{cell}}</button></td>
-						{% else %}
-						<td style="text-align:center">{{cell}}</td>
-						{% endif %}
-					{% endfor %}
-				</tr>
 				{% endif %}
+				<td style="text-align:center"><button type="submit" name="roll_clicked" value = '{{row.roll_num}}' class="btn-link">{{row.roll_num}}</button></td>
+				<td style="text-align:center">{{row.diameter|round(2)}}</td>
+				<td style="text-align:center">{{row.scrap_diameter}}</td>
+				<td style="text-align:center">{{row.approx_scrap_date}}</td>
+				<td style="text-align:center">{{row.grind_left}}</td>
+				<td style="text-align:center">{{row.mill}}</td>
+				<td style="text-align:center">{{row.roll_type}}</td>
+				</tr>
 				{% endfor %}
 					
 			</table>

@@ -1,28 +1,16 @@
-from flask import Flask, redirect, url_for, render_template, request, g
+from flask import Flask, redirect, url_for, render_template, request, session
 from flask_mail import Mail, Message
-from sqlalchemy import create_engine, MetaData, Table
-from sqlalchemy.sql import select, insert, update
-from sqlalchemy.orm import mapper
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.automap import automap_base
+from sqlalchemy import asc, desc
 import Connections
 import Requests
+import History
 import Notifications as notif
 import pymssql
 from flask_apscheduler import APScheduler
 from logging import basicConfig, DEBUG, info, debug, error
 from os import path
-
-
-engine = create_engine('mssql+pymssql://RMS:trpJ63iGY4F7mRj@rmssql.database.windows.net/RMSSQL')
-sql_connection = engine.connect()
-metadata = MetaData(engine)
-
-
-
-
-ROLLS = Table('roll_new', metadata, autoload=True, autoload_with=engine)
-GRINDS = Table('grind_new', metadata, autoload=True, autoload_with=engine)
-INFO = Table('roll_info', metadata, autoload=True, autoload_with=engine)
 
 
 # settings for sending email notifications - NOT FINAL VALUES
@@ -40,11 +28,31 @@ class RMSConfig():
     MAIL_PASSWORD = 'Rm$aPp01'
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True
+    
     # Flask-APScheduler config settings
     SCHEDULER_API_ENABLED = True
+    SQLALCHEMY_DATABASE_URI = 'mssql+pymssql://RMS:trpJ63iGY4F7mRj@rmssql.database.windows.net/RMSSQL'
 
 app = Flask(__name__)
 app.config.from_object(RMSConfig())
+db = SQLAlchemy(app)
+
+
+Base = automap_base() #Makes a class for all tables in the database
+Base.prepare(db.engine, reflect = True)
+Roll = Base.classes.roll_new
+Grind = Base.classes.grind_new #what is displayed
+Grinds = Base.classes.Grinds #closer to what the final grind class should look like
+Info = Base.classes.roll_info
+
+History.temp_function_delete(db, Roll, Info)
+
+# results = db.session.query(Roll).order_by(Roll.approx_scrap_date)
+# #results = db.session.query(info).all()
+# for result in results:
+#     print("thing:")
+#     print(result.approx_scrap_date)
+
 
 # initialize flask-mail
 rms_mail = Mail(app)
@@ -55,9 +63,10 @@ scheduler.init_app(app)
 
 # initialize logging
 RMS_LOGS_PATH = path.join('logs', 'RMSapp.log')
-RMS_LOGS_FORMAT = '%(asctime)s : %(levelname)s - %(message)s'
+RMS_LOGS_FORMAT  = '%(asctime)s : %(levelname)s - %(message)s'
 # basicConfig(filename=RMS_LOGS_PATH, format=RMS_LOGS_FORMAT, level=DEBUG)
-info('Starting RMSapp...')
+# info('Starting RMSapp...')
+
 
 @scheduler.task('cron', id='send_notification_email', week='*', day_of_week='*')
 def send_notification_email():
@@ -139,28 +148,30 @@ def notifications():
 
 @app.route("/")
 def home():
+    #db.session.query(Grinds).delete()
+    #History.translate_history(db, Grinds, 'grindFiles')
     headings = ("Roll ID", "Diameter", "Scrap Diameter", "Approx. Scrap Date", "Grinds Left", "Mill", "Roll Type")
-    connection, message = Connections.sql_connect()
-    if message == "connected":
-        debug("Connected to RMS database")
-        data, committed, message = Connections.query_results(connection, "Select *  FROM roll_new ORDER BY approx_scrap_date ASC", 7)
-        if committed is True:
-            debug('Home Page Loaded Successfully - ' + message)
-            return render_template("index.html", headings=headings, data=data)
-        else:
-            error('PROBLEM LOADING HOME PAGE - ' + message)
-            return render_template('error.html', message = message) #error message
-    else:
-        error('PROBLEM CONNECTING TO RMS DATABASE - ' + message)
-        return render_template('error.html', message = message) #error message
+    # if message == "connected":
+    #     debug("Connected to RMS database")
+    #     # data, committed, message = Connections.query_results(connection, "Select *  FROM roll_new ORDER BY approx_scrap_date ASC", 7)
+    #     roll = db.Table('roll_new', db.metadata, autoload=True, autoload_with=db.engine)
+    #     data = db.session.query(roll).all()
+    #     if committed is True:
+    #         debug('Home Page Loaded Successfully - ' + message)
+    #         return render_template("index.html", headings=headings, data=data)
+    #     else:
+    #         error('PROBLEM LOADING HOME PAGE - ' + message)
+    #         return render_template('error.html', message = message) #error message
+    # else:
+    #     error('PROBLEM CONNECTING TO RMS DATABASE - ' + message)
+    #     return render_template('error.html', message = message) #error message
+    # roll = db.Table('roll_new', db.metadata, autoload=True, autoload_with=db.engine)
+    results = db.session.query(Roll).order_by(Roll.approx_scrap_date)
+    # names = []
+    # for c in Roll.__table__.columns:
+    #     names.append(c.name)
+    return render_template('index.html', headings=headings, data=results)
 
-
-
-#Replace with /index when its finished
-@app.route("/queryresults") #this will eventually replace home/index.html
-def query():
-    #return query_results()
-    return render_template('rollData.html')#temporary link
 
 #Add chock function
 @app.route('/add_chock', methods = ['GET','POST'])
@@ -224,25 +235,19 @@ def remove_email():
 def roll_view():
     if request.method == 'POST':
         roll_num = request.form['roll_clicked']
-        connection, message = Connections.sql_connect()
-        cur = connection.cursor()
-        cur.execute(f'SELECT * FROM grind_new WHERE roll_num = {roll_num} ORDER BY min_diameter ASC')
-        last_grinds = cur.fetchall()
-        s = select(ROLLS)
-        result = sql_connection.execute(s)
-        graph = Connections.generate_graphs(roll_num)
-        return render_template('rollView.html', graph=graph, roll_num = roll_num, last_grinds=last_grinds, num_grinds=len(last_grinds))
+        # connection, message = Connections.sql_connect()
+        # cur = connection.cursor()
+        # cur.execute(f'SELECT * FROM grind_new WHERE roll_num = {roll_num} ORDER BY min_diameter ASC')
+        roll = db.session.query(Roll).filter_by(roll_num=roll_num).first() #since we know this is only going to grab 1 result, we just grab the first item in the initial resulting list. Result is a roll object 
+        grinds = db.session.query(Grind).filter_by(roll_num=roll_num).order_by(Grind.grind_date) #returns list of all grinds 
+        info = db.session.query(Info).filter_by(mill=roll.mill, roll_type=roll.roll_type).first() #Returns the first item in the list, 
+        graph = Connections.generate_graphs(roll, grinds, info)
+        return render_template('rollView.html', graph=graph, roll_num = roll_num, last_grinds=grinds, num_grinds=grinds.count())
 
 # def send_status_report():
 #     mail = Mail(app)
 #     #send current diameter and projected lifespan of each roll
 
-
-# @app.before_request
-# def set_db():
-#     if not hasattr(g, 'sqllite_db'):
-#         g.sqlite_db = Connections.sql_connect()
-#     return g.sqlite_db
 
 
 
