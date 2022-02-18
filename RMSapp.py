@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, render_template, request, g, send_from_directory
+from flask import Flask, redirect, url_for, render_template, request, g, send_from_directory, make_response
 from flask_mail import Mail, Message
 import Connections
 import Requests
@@ -123,21 +123,19 @@ def notifications():
     return render_template('notifications.html')
 
 
-@app.route("/data/headings")
-def headings():
-    headings = ("Roll ID", "Diameter", "Scrap Diameter", "Approx. Scrap Date", "Grinds Left", "Mill", "Roll Type")
-    return headings
-
-
-@app.route("/data")
+@app.route("/data", methods = ['GET','POST'])
 def data():
+    headings = ["Roll ID", "Diameter", "Scrap Diameter", "Approx. Scrap Date", "Grinds Left", "Mill", "Roll Type"]
     connection, message = Connections.sql_connect()
     if message == "connected":
         debug("Connected to RMS database")
         data, committed, message = Connections.query_results(connection, "Select *  FROM roll_new ORDER BY approx_scrap_date ASC", 7)
         if committed is True:
             debug('Home Page Loaded Successfully - ' + message)
-            return data
+            data_dict = {}          # Convert lists to dictionary so they can be converted to json
+            for i in range(len(data)):
+                data_dict[i] = {headings[j]:data[i][j] for j in range(len(headings))}
+            return data_dict        # Auto-converted to json
         else:
             error('PROBLEM LOADING HOME PAGE - ' + message)
             return render_template('error.html', message = message) #error message
