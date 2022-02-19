@@ -212,8 +212,10 @@ def generate_graphs(roll, grinds, info): #not useful rn just messing around with
         data_exists = True
         #date = datetime.datetime.strptime(row[2], '%Y-%m-%d')
         # dates.append(row[2])
-        x.append(grind.grind_date)
-        y.append(grind.min_diameter)
+        # x.append(grind.grind_date)
+        # y.append(grind.min_diameter)
+        x.append(grind.entry_time)
+        y.append(grind.HS_after)
 
 
     fig, ax = plt.subplots()
@@ -223,18 +225,32 @@ def generate_graphs(roll, grinds, info): #not useful rn just messing around with
         cur_day = datetime.datetime(x[-1].year, x[-1].month, x[-1].day)
         trend_x = []
         trend_y = []
+        trend2_y = []
+        trend2_x = []
         diameter_proj = roll.diameter
     
-        while diameter_proj > roll.scrap_diameter:
+        while diameter_proj > info.scrap_diameter:
             trend_y.append(diameter_proj)
             trend_x.append(cur_day)
             diameter_proj = diameter_proj - info.avg_grind_diameter
             cur_day = cur_day + datetime.timedelta(days=info.days_between_rolls) #CHANGE TO days_between_rolls WHEN U FINALIZE SQL DATABASE
         trend_y.append(info.scrap_diameter)
         trend_x.append(cur_day)
+
+        diameter_proj = roll.diameter
+        cur_day = datetime.datetime(x[-1].year, x[-1].month, x[-1].day)
+        while diameter_proj > info.scrap_diameter:
+            trend2_y.append(diameter_proj)
+            trend2_x.append(cur_day)
+            diameter_proj = diameter_proj - roll.avg_grind
+            cur_day = cur_day + datetime.timedelta(days=roll.days_between_grinds)
+
+        
+        
             
 
         plt.plot_date(trend_x,trend_y,'b-')
+        plt.plot_date(trend2_x, trend2_y, 'g-')
     
 
     
@@ -259,10 +275,6 @@ def generate_graphs(roll, grinds, info): #not useful rn just messing around with
     plt.savefig('static/images/Sample Graph.png')
     return plt
 
-def update_roll_info(roll_num):
-    connection, message = sql_connect()
-    cur = connection.cursor()
-    cur.execute()
 
 def calculate_12mo_diameter(scrap_diameter, days_between, avg_grind):
     if days_between > 180 and days_between < 250:
@@ -274,67 +286,54 @@ def calculate_12mo_diameter(scrap_diameter, days_between, avg_grind):
 def trendline(roll_num, mill, type):
     pass
 
-def populate_data(): # dont run this on kaiser's server, its just to make fake data
-    connection, message = sql_connect()
-    cur = connection.cursor()
-    cur.execute(f'SELECT * FROM roll_new')
-    roll_data = cur.fetchall()
-    for row in roll_data:
-            roll_num = row[0]
-            diameter = row[1]
-            scrap_diameter = row[2]
-            mill = row[5]
-            roll_type = row[6]
+# def populate_data(db, Roll, Grinds, Info): # dont run this on kaiser's server, its just to make fake data
+#     connection, message = sql_connect()
+#     cur = connection.cursor()
+#     cur.execute(f'SELECT * FROM roll_new')
+#     roll_data = cur.fetchall()
+#     for row in roll_data:
+#             roll_num = row[0]
+#             diameter = row[1]
+#             scrap_diameter = row[2]
+#             mill = row[5]
+#             roll_type = row[6]
 
-            cur.execute(f'SELECT * FROM roll_info WHERE mill = \'{mill}\' AND roll_type = \'{roll_type}\'')
-            roll_info = cur.fetchall()
-            avg_grind = roll_info[0][3]
-            days_between = roll_info[0][4]
-            cur_day = datetime.date.today()
+#             cur.execute(f'SELECT * FROM roll_info WHERE mill = \'{mill}\' AND roll_type = \'{roll_type}\'')
+#             roll_info = cur.fetchall()
+#             avg_grind = roll_info[0][3]
+#             days_between = roll_info[0][4]
+#             cur_day = datetime.date.today()
 
-            while cur_day > datetime.date(2019, 1, 21):
-            #   cur.execute(f'INSERT INTO grind_new VALUES(roll_num = {roll_num}, min_diameter = {diameter}, grind_date = TO_DATE(\'{cur_day.year}-{cur_day.month}-{cur_day.year}\', \'YYYY-MM-DD\'), min_diameter_change = {avg_grind})')
-                print(f'types: {type(roll_num)}, {type(diameter)},  {type(cur_day)},  {type(avg_grind)}')
-                message = f'INSERT INTO grind_new VALUES({roll_num}, {diameter}, \'{cur_day}\', {avg_grind})'
-                print(message)
-                cur.execute(message)
-                cur_day = cur_day - datetime.timedelta(days=days_between)
-                diameter = diameter + avg_grind
-    connection.commit()
+#             while cur_day > datetime.date(2019, 1, 21):
+#             #   cur.execute(f'INSERT INTO grind_new VALUES(roll_num = {roll_num}, min_diameter = {diameter}, grind_date = TO_DATE(\'{cur_day.year}-{cur_day.month}-{cur_day.year}\', \'YYYY-MM-DD\'), min_diameter_change = {avg_grind})')
+#                 print(f'types: {type(roll_num)}, {type(diameter)},  {type(cur_day)},  {type(avg_grind)}')
+#                 message = f'INSERT INTO grind_new VALUES({roll_num}, {diameter}, \'{cur_day}\', {avg_grind})'
+#                 print(message)
+#                 cur.execute(message)
+#                 cur_day = cur_day - datetime.timedelta(days=days_between)
+#                 diameter = diameter + avg_grind
+#     connection.commit()
 
-def update_scrap_date():
-    connection, message = sql_connect()
-    cur = connection.cursor()
-    cur.execute(f'SELECT * FROM roll_new')
-    roll_data = cur.fetchall()
-    for row in roll_data:
-        roll_num = row[0]
-        diameter = row[1]
-        scrap_diameter = row[2]
-        mill = row[5]
-        roll_type = row[6]
-        print(mill)
-        print(roll_type)
-        cur.execute(f'SELECT * FROM roll_info WHERE mill = \'{mill}\' AND roll_type = \'{roll_type}\'')
-        roll_info = cur.fetchall()
-        print(roll_info)
-        avg_grind = roll_info[0][3]
-        days_between = roll_info[0][4]
-
-        cur.execute(f'SELECT * FROM grind_new WHERE roll_num = {roll_num} ORDER BY grind_date ASC')
-        grind_data = cur.fetchall()
-        if len(grind_data) != 0:
-            cur_day = datetime.datetime.strptime(grind_data[-1][2], '%Y-%m-%d').date()
-        
-            while diameter > scrap_diameter:
-                cur_day = cur_day + datetime.timedelta(days=days_between)
-                diameter = diameter - avg_grind
-
-            message = f'UPDATE roll_new SET approx_scrap_date = \'{cur_day}\' WHERE roll_num = {roll_num}'
-            print(cur_day)
-            print(message)
-            cur.execute(message)
-    connection.commit()
+def update_scrap_date(db, Roll, Grinds, Info):
+    rolls = db.session.query(Roll).all()
+    for roll in rolls:
+        info = db.session.query(Info).filter_by(mill=roll.mill, roll_type=roll.roll_type).first()
+        grinds = db.session.query(Grinds).filter_by(roll_num=roll.roll_num).order_by(Grinds.entry_time.desc())
+        if grinds.count() > 0:
+            cur_day = grinds.first().entry_time
+            diameter = roll.diameter
+            grinds = 0
+            while diameter > info.scrap_diameter:
+                cur_day = cur_day + datetime.timedelta(days=info.days_between_rolls)
+                diameter = diameter - info.avg_grind_diameter
+                grinds = grinds + 1
+            roll.scrap_date = cur_day
+            roll.grinds_left = grinds
+            if grinds == 0:
+                roll.scrapped = True
+            else:
+                roll.scrapped = False
+    db.session.commit()
 
 def update_diameter():
     connection, message = sql_connect()

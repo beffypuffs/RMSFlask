@@ -54,21 +54,19 @@
                 <th>Headstock</th>
             </tr>            
             <tr>
-                <tr>
-                    <td>Roll Diameter Before(in.)</td>
-                    {%if num_grinds > 0%}
-                    <td id="roll_diameter_tailstock_before_grinding">{{(last_grinds[0].min_diameter + last_grinds[0].min_diameter_change)|round(2)}}</td>
-                    <td id="roll_diameter_middle_before_grinding">{{(last_grinds[0].min_diameter + last_grinds[0].min_diameter_change)|round(2)}}</td>
-                    <td id="roll_diameter_headstock_before_grinding">{{(last_grinds[0].min_diameter + last_grinds[0].min_diameter_change)|round(2)}}</td>
-                </tr>
-                <tr>
-                    <td>Roll Diameter After (in.)</td>
-                    <td id="roll_diameter_tailstock_after_grinding">{{last_grinds[0].min_diameter|round(2)}}</td>
-                    <td id="roll_diameter_middle_after_grinding">{{last_grinds[0].min_diameter|round(2)}}</td>
-                    <td id="roll_diameter_headstock_after_grinding">{{last_grinds[0].min_diameter|round(2)}}</td>
-                </tr>
-                {% endif %}
+                <td>Roll Diameter Before(in.)</td>
+                {%if num_grinds > 0%}
+                <td id="roll_diameter_tailstock_before_grinding">{{(last_grinds[0].min_diameter + last_grinds[0].min_diameter_change)|round(2)}}</td>
+                <td id="roll_diameter_middle_before_grinding">{{(last_grinds[0].min_diameter + last_grinds[0].min_diameter_change)|round(2)}}</td>
+                <td id="roll_diameter_headstock_before_grinding">{{(last_grinds[0].min_diameter + last_grinds[0].min_diameter_change)|round(2)}}</td>
             </tr>
+            <tr>
+                <td>Roll Diameter After (in.)</td>
+                <td id="roll_diameter_tailstock_after_grinding">{{last_grinds[0].min_diameter|round(2)}}</td>
+                <td id="roll_diameter_middle_after_grinding">{{last_grinds[0].min_diameter|round(2)}}</td>
+                <td id="roll_diameter_headstock_after_grinding">{{last_grinds[0].min_diameter|round(2)}}</td>
+            </tr>
+            {% endif %}
             
         </table>
         {% endif %}
@@ -81,21 +79,21 @@
                 <th>Diameter After</th>
             </tr>            
             <tr>
-                <td>{{last_grinds[0].grind_date}}</td>
+                <td>{{last_grinds[0].entry_time}}</td>
                 <td>{{(last_grinds[0].min_diameter + last_grinds[0].min_diameter_change)|round(2)}}</td>
                 <td>{{last_grinds[0].min_diameter|round(2)}}</td>
             </tr>
             
             {% if num_grinds > 1 %}
             <tr>
-                <td>{{last_grinds[1].grind_date}}</td>
+                <td>{{last_grinds[1].entry_time}}</td>
                 <td>{{(last_grinds[1].min_diameter + last_grinds[0].min_diameter_change)|round(2)}}</td>
                 <td>{{last_grinds[1].min_diameter|round(2)}}</td>
             </tr>
             {% endif %}
             {% if num_grinds > 2 %}
             <tr>
-                <td>{{last_grinds[2].grind_date}}</td>
+                <td>{{last_grinds[2].entry_time}}</td>
                 <td>{{(last_grinds[2].min_diameter + last_grinds[0].min_diameter_change)|round(2)}}</td>
                 <td>{{last_grinds[2].min_diameter|round(2)}}</td>
             </tr>

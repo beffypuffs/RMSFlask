@@ -45,7 +45,7 @@ Grind = Base.classes.grind_new #what is displayed
 Grinds = Base.classes.Grinds #closer to what the final grind class should look like
 Info = Base.classes.roll_info
 
-History.temp_function_delete(db, Roll, Info)
+
 
 # results = db.session.query(Roll).order_by(Roll.approx_scrap_date)
 # #results = db.session.query(info).all()
@@ -239,17 +239,19 @@ def roll_view():
         # cur = connection.cursor()
         # cur.execute(f'SELECT * FROM grind_new WHERE roll_num = {roll_num} ORDER BY min_diameter ASC')
         roll = db.session.query(Roll).filter_by(roll_num=roll_num).first() #since we know this is only going to grab 1 result, we just grab the first item in the initial resulting list. Result is a roll object 
-        grinds = db.session.query(Grind).filter_by(roll_num=roll_num).order_by(Grind.grind_date) #returns list of all grinds 
+        grinds = db.session.query(Grinds).filter_by(roll_num=roll_num).order_by(Grinds.entry_time) #returns list of all grinds 
         info = db.session.query(Info).filter_by(mill=roll.mill, roll_type=roll.roll_type).first() #Returns the first item in the list, 
         graph = Connections.generate_graphs(roll, grinds, info)
         return render_template('rollView.html', graph=graph, roll_num = roll_num, last_grinds=grinds, num_grinds=grinds.count())
 
+
 # def send_status_report():
 #     mail = Mail(app)
 #     #send current diameter and projected lifespan of each roll
+# History.make_data(db, Roll, Grinds, Info)
+#rolls = db.session.query(Roll).all()
 
-
-
+#Connections.update_scrap_date(db, Roll, Grinds, Info)
 
 if __name__ == "__main__":
     app.run()

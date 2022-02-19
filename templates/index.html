@@ -61,8 +61,10 @@ table, th, td {
 				</tr>
 				
 				<!-- Display SQL server data to index.html-->
+				
 				{% for row in data %}
-				{% if row.approx_scrap_date.strftime('%Y-%m-%d') < '2023--08'  %}
+				{% if row.scrapped == False%}
+				{% if row.approx_scrap_date.strftime('%Y-%m-%d') < '2023-08-01'  %}
 				<tr bgcolor="#FF7F7F">
 				{% elif row.approx_scrap_date.strftime('%Y-%m-%d') < '2023-06-08' %}
 				<tr bgcolor="#FFFFE0">
@@ -73,11 +75,13 @@ table, th, td {
 				<td style="text-align:center">{{row.diameter|round(2)}}</td>
 				<td style="text-align:center">{{row.scrap_diameter}}</td>
 				<td style="text-align:center">{{row.approx_scrap_date}}</td>
-				<td style="text-align:center">{{row.grind_left}}</td>
+				<td style="text-align:center">{{row.grinds_left}}</td>
 				<td style="text-align:center">{{row.mill}}</td>
 				<td style="text-align:center">{{row.roll_type}}</td>
 				</tr>
+				{% endif %}
 				{% endfor %}
+				
 					
 			</table>
 		</form>
