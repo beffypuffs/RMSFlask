@@ -2,12 +2,13 @@ from flask import Flask, redirect, url_for, render_template, request, session
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.automap import automap_base
-from sqlalchemy import asc, desc
+import sqlalchemy as sa
 import Connections
 import Requests
 import History
 import Notifications as notif
-import pymssql
+# import pymssql
+import pyodbc
 from flask_apscheduler import APScheduler
 from logging import basicConfig, DEBUG, info, debug, error
 from os import path
@@ -31,7 +32,21 @@ class RMSConfig():
     
     # Flask-APScheduler config settings
     SCHEDULER_API_ENABLED = True
-    SQLALCHEMY_DATABASE_URI = 'mssql+pymssql://RMS:trpJ63iGY4F7mRj@rmssql.database.windows.net/RMSSQL'
+    #SQLALCHEMY_DATABASE_URI = 'mssql+pymssql://RMS:trpJ63iGY4F7mRj@rmssql.database.windows.net/RMSSQL'
+    USERNAME = 'RMS'
+    PWD = 'trpJ63iGY4F7mRj'
+    HOST = 'rmssql.database.windows.net'
+    DB = 'RMSSQL'
+    DRIVER = 'ODBC Driver 17 for SQL Server'
+
+    SQLALCHEMY_DATABASE_URI = sa.engine.url.URL(
+        "mssql+pyodbc",username=USERNAME,password=PWD, host=HOST, database=DB,
+        query={"driver": DRIVER}
+    )
+
+
+
+
 
 app = Flask(__name__)
 app.config.from_object(RMSConfig())
