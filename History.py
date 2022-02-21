@@ -137,103 +137,82 @@ def translate_history(db, Grinds, directory):
                 #     min_diameter_after = min(float(TS_diameter_after), float(mid_diameter_after), float(HS_diameter_after))
 
                 
-                if (HS_diameter_after is not '' or '0') and (TS_diameter_after is not '' or 0) and (mid_diameter_after is not '' or 0) and before is not -1:
+                if (HS_diameter_after != ('' or '0')) and (TS_diameter_after !=  ('' or 0)) and (mid_diameter_after != ('' or 0)):
                     count += 1
                     grind_end = datetime.strptime(grind_end, '%d_%m_%Y_%H_%M_%S')
                     min_diameter = min_diameter_after * 0.0393701
                     diameter_change = (min_diameter_before - min_diameter_after) * 0.0393701
                     # print(roll_num)
-                    if (roll_num == '16043'):
-                        pass
-                        print(min_diameter)
+                    # if (roll_num == '16043'):
+                    #     pass
+                    #     print(min_diameter)
                     
                     newGrind = Grinds(roll_num=roll_num, entry_time=grind_end, HS_before=HS_diameter_before, MD_before=mid_diameter_before, TS_before=TS_diameter_before, HS_after=HS_diameter_after, MD_after=mid_diameter_after,
                     TS_after=TS_diameter_after, diameter_change=diameter_change, max_deviation=0, min_deviation=0, roll_length=0, crowning_length=0, crowning_angle=0, crowning_bevel=0)
-                    # cur.execute(f'DELETE FROM grind_new WHERE grind_end = \'{str(grind_end)}\'')
-                    # try:
-                    #     cur.execute(f'INSERT INTO grind_new VALUES({roll_num}, {min_diameter}, \'{str(grind_end)}\', {diameter_change})')
-                    # except:
-                    #     pass
-                    #try:
-                    print(filename)
-                    db.session.add(newGrind)
+        
+                    db.session.add(newGrind)#adds the new grind to the database
                     
-                    # cur.execute(f'UPDATE roll_new SET diameter = ROUND({min_diameter_after * 0.0393701},4) WHERE roll_num = {roll_num}')
-                    # connection = Connections.sql_connect()
-                    #cur = connection.cursor()
-                    #cur.execute(f'INSERT INTO Grind_Raw VALUES({roll_num}, {grind_id}, {grind_start}, {grind_end}, {program_no}, {shape_no}, {TS_diameter_before}, {TS_diameter_after}, {mid_diameter_before}, {mid_diameter_after}, {HS_diameter_before}, {HS_diameter_after}, {average_diameter_before}, {average_diameter_after},'
-                    #     f'{target_diameter}, {ZDistance}, {Z_ref_data}, {shape_before_grinding}, {shape_after_grinding}, {tolerance}, {deviation_before_grinding}, {deviation_after_grinding})')
+    
     print(f'Valid entries: {count}')
-    print(f'Invalid entries: {total - count}')
-    db.session.commit()
+    print(f'Invalid entries: {total - count}')#should probably log this
+    db.session.commit() #
     # connection.commit()
 
 
-# directory = 'grindFiles/X files'
-# translate_history(directory) #change user)
 def add_grind(db, Grinds, roll_num, grind_end, HS_diameter_before, mid_diameter_before, TS_diameter_before, HS_diameter_after, mid_diameter_after, TS_diameter_after, diameter_change):
     newGrind = Grinds(roll_num=roll_num, entry_time=grind_end, HS_before=HS_diameter_before, MD_before=mid_diameter_before, TS_before=TS_diameter_before, HS_after=HS_diameter_after, MD_after=mid_diameter_after,
                     TS_after=TS_diameter_after, diameter_change=diameter_change, max_deviation=0, min_deviation=0, roll_length=0, crowning_length=0, crowning_angle=0, crowning_bevel=0)
     db.session.add(newGrind)
 
-# def temp_function_delete(db, Roll, Info):
-#     rolls = db.session.query(Roll).all()
-#     for roll in rolls:
-#         info = db.session.query(Info).filter_by(mill=roll.mill, roll_type=roll.roll_type).first()
-#         roll.avg_grind = info.avg_grind_diameter
-#         roll.days_between_grinds = info.days_between_rolls
-#     db.session.commit()
-
-def update_data(db, Roll, Grinds, Info, cur_date, diameter_change):
-    grinds = db.session.query(Grinds).filter_by(roll_num=Roll.roll_num).order_by(Grinds.entry_time.desc())
-    if (grinds.count() > 1):
+def update_data(db, Roll, Grinds, Info, cur_date, diameter_change):#call when a new grind is added. updates the average grind diameter, number of grinds, and the average days between grinds of 
+    #both the specific roll and roll type
+    grinds = db.session.query(Grinds).filter_by(roll_num=Roll.roll_num).order_by(Grinds.entry_time.desc()) #use the order_by function to grab the grinds in order of recency
+    if (grinds.count() > 1): #If this isn't the first grind
         last_grind = grinds[1]
         delta = cur_date - last_grind.entry_time
-        if grinds.count() == 1:
+        if grinds.count() == 2: #If its the second grind, the number of days since the last grind is the average
             Roll.days_between_grinds = delta
         else:
-            Roll.days_between_grinds = ((Roll.days_between_grinds * Roll.num_grinds) + delta.days) / (Roll.num_grinds+1)
+            Roll.days_between_grinds = ((Roll.days_between_grinds * Roll.num_grinds) + delta.days) / (Roll.num_grinds+1)# otherwise, calculate the average
         Roll.num_grinds = Roll.num_grinds + 1
         Roll.avg_grind = ((Roll.avg_grind * (Roll.num_grinds - 1)) + diameter_change)/Roll.num_grinds
         Info.num_grinds = Info.num_grinds + 1
         Info.avg_grind_diameter = ((Info.avg_grind_diameter * (Info.num_grinds - 1) + diameter_change)/Info.num_grinds)
-    else:
+    else: #adds data for the first grind
         Roll.num_grinds = 1
         Info.num_grinds = Info.num_grinds + 1
         Info.avg_grind_diameter = ((Info.avg_grind_diameter * (Info.num_grinds - 1) + diameter_change)/Info.num_grinds)
         Roll.avg_grind = diameter_change
 
-def make_data(db, Roll, Grinds, Info):
-    db.session.query(Grinds).delete()
-    rolls = db.session.query(Roll).all()
-    double_grind_chance = 20
+# def make_data(db, Roll, Grinds, Info):#generates grind data, shouldnt be used on kaiser server
+#     db.session.query(Grinds).delete()
+#     rolls = db.session.query(Roll).all()
 
-    for roll in rolls:
-        info = db.session.query(Info).filter_by(mill=roll.mill, roll_type=roll.roll_type).first()
-        roll.diameter = info.scrap_diameter + 1
-        cur_date = datetime.today()
-        double_grind_chance = 20 
-        while cur_date < datetime(2028, 1, 1) and roll.diameter > info.scrap_diameter:
-            double_result = random.randrange(1, 100)
-           # print(cur_date)
-            diameter_change = (random.randrange(5, 15) / 10) * info.avg_grind_diameter
-            day_change = (random.randrange(5, 15)/ 10) * info.days_between_rolls
-            roll.diameter = roll.diameter - diameter_change
-            newGrind = Grinds(roll_num=roll.roll_num, entry_time=cur_date, HS_before=roll.diameter + diameter_change, MD_before=roll.diameter + diameter_change, TS_before=roll.diameter + diameter_change, HS_after=roll.diameter, MD_after=roll.diameter,
-                    TS_after=roll.diameter, min_diameter_change=diameter_change, max_deviation=0, min_deviation=0, roll_length=0, crowning_length=0, crowning_angle=0, crowning_bevel=0, min_diameter=roll.diameter)
-            db.session.add(newGrind)
-            update_data(db, roll, Grinds, info, cur_date, diameter_change)
-            if double_result <= double_grind_chance:
-                double_grind_chance + 3
-                cur_date = cur_date + timedelta(minutes=5)
-                roll.diameter = roll.diameter - diameter_change
-                newGrind = Grinds(roll_num=roll.roll_num, entry_time=cur_date, HS_before=roll.diameter + diameter_change, MD_before=roll.diameter + diameter_change, TS_before=roll.diameter + diameter_change, HS_after=roll.diameter, MD_after=roll.diameter,
-                     TS_after=roll.diameter, min_diameter_change=diameter_change, max_deviation=0, min_deviation=0, roll_length=0, crowning_length=0, crowning_angle=0, crowning_bevel=0, min_diameter=roll.diameter)
-                db.session.add(newGrind)
-                update_data(db, roll, Grinds, info, cur_date, diameter_change)
+#     for roll in rolls:
+#         info = db.session.query(Info).filter_by(mill=roll.mill, roll_type=roll.roll_type).first()
+#         double_grind_chance = 5 #random chance of a double grind 
+#         roll.diameter = info.scrap_diameter + 1
+#         cur_date = datetime.today()
+#         while cur_date < datetime(2028, 1, 1) and roll.diameter > info.scrap_diameter: # change this to whatever year you want to generate data for
+#             double_result = random.randrange(1, 100)
+#            # print(cur_date)
+#             diameter_change = (random.randrange(5, 15) / 10) * info.avg_grind_diameter #random diameter change
+#             day_change = (random.randrange(5, 15)/ 10) * info.days_between_rolls# random days between grinds
+#             roll.diameter = roll.diameter - diameter_change
+#             newGrind = Grinds(roll_num=roll.roll_num, entry_time=cur_date, HS_before=roll.diameter + diameter_change, MD_before=roll.diameter + diameter_change, TS_before=roll.diameter + diameter_change, HS_after=roll.diameter, MD_after=roll.diameter,
+#                     TS_after=roll.diameter, min_diameter_change=diameter_change, max_deviation=0, min_deviation=0, roll_length=0, crowning_length=0, crowning_angle=0, crowning_bevel=0, min_diameter=roll.diameter)
+#             db.session.add(newGrind)
+#             update_data(db, roll, Grinds, info, cur_date, diameter_change)
+#             if double_result <= double_grind_chance:
+#                 cur_date = cur_date + timedelta(minutes=5)
+#                 roll.diameter = roll.diameter - diameter_change
+#                 newGrind = Grinds(roll_num=roll.roll_num, entry_time=cur_date, HS_before=roll.diameter + diameter_change, MD_before=roll.diameter + diameter_change, TS_before=roll.diameter + diameter_change, HS_after=roll.diameter, MD_after=roll.diameter,
+#                      TS_after=roll.diameter, min_diameter_change=diameter_change, max_deviation=0, min_deviation=0, roll_length=0, crowning_length=0, crowning_angle=0, crowning_bevel=0, min_diameter=roll.diameter)
+#                 db.session.add(newGrind)
+#                 update_data(db, roll, Grinds, info, cur_date, diameter_change)
             
-            cur_date = cur_date + timedelta(days=day_change)
-    db.session.commit()
+#             cur_date = cur_date + timedelta(days=day_change)
+#     db.session.commit()
 
     
 

@@ -177,43 +177,12 @@ def sql_connect(): #For JC's computer
     return connection, message
 
 def generate_graphs(roll, grinds, info): #not useful rn just messing around with matplotlib, we need a dataset for multiple rolls that we can use until we have enough data
-    # connection, message = sql_connect()
-    # cur = connection.cursor()
-    # # scrap_date = datetime.date()
-    # scrap_diameter = None
-    # mill = None
-    # roll_type = None
     y = []
     x = []
     dates = []
-
-    # cur.execute(f'SELECT * FROM roll_new WHERE roll_num={roll_num}')
-    # roll_data = cur.fetchall()
-    # for row in roll_data:
-    #     scrap_diameter = row[2]
-    #     mill = row[5]
-    #     roll_type = row[6]
-    #     diameter = row[1]
-
-    # cur.execute(f'SELECT * FROM roll_info WHERE mill = \'{mill}\' AND roll_type = \'{roll_type}\'')
-    # roll_info = cur.fetchall()
-    # print(mill)
-    # print(roll_type)
-
-
-    # for row in roll_info:
-    #     avg_grind = row[3]
-    #     days_between = row[4]
-
-    # cur.execute(f'SELECT * FROM grind_new WHERE roll_num={roll_num} ORDER BY min_diameter DESC')
-    # grind_data = cur.fetchall()
     data_exists = False
     for grind in grinds:
         data_exists = True
-        #date = datetime.datetime.strptime(row[2], '%Y-%m-%d')
-        # dates.append(row[2])
-        # x.append(grind.grind_date)
-        # y.append(grind.min_diameter)
         x.append(grind.entry_time)
         y.append(grind.HS_after)
 
@@ -221,7 +190,7 @@ def generate_graphs(roll, grinds, info): #not useful rn just messing around with
     fig, ax = plt.subplots()
     other_diameter = calculate_12mo_diameter(info.scrap_diameter, info.days_between_rolls, info.avg_grind_diameter)
 
-    if data_exists is True:
+    if grinds.count() > 0:
         cur_day = datetime.datetime(x[-1].year, x[-1].month, x[-1].day)
         trend_x = []
         trend_y = []
@@ -229,7 +198,7 @@ def generate_graphs(roll, grinds, info): #not useful rn just messing around with
         trend2_x = []
         diameter_proj = roll.diameter
     
-        while diameter_proj > info.scrap_diameter:
+        while diameter_proj > info.scrap_diameter:#projection based on roll type average grind
             trend_y.append(diameter_proj)
             trend_x.append(cur_day)
             diameter_proj = diameter_proj - info.avg_grind_diameter
@@ -239,34 +208,21 @@ def generate_graphs(roll, grinds, info): #not useful rn just messing around with
 
         diameter_proj = roll.diameter
         cur_day = datetime.datetime(x[-1].year, x[-1].month, x[-1].day)
-        while diameter_proj > info.scrap_diameter:
+        while diameter_proj > info.scrap_diameter: #projection based on specific rolls average grind
+            print("in here")
             trend2_y.append(diameter_proj)
             trend2_x.append(cur_day)
             diameter_proj = diameter_proj - roll.avg_grind
             cur_day = cur_day + datetime.timedelta(days=roll.days_between_grinds)
-
-        
-        
-            
-
+        trend2_y.append(info.scrap_diameter)
+        trend2_x.append(cur_day)
         plt.plot_date(trend_x,trend_y,'b-')
-        plt.plot_date(trend2_x, trend2_y, 'g-')
-    
-
-    
-
+        plt.plot_date(trend2_x, trend2_y, 'g-')#
     
     ax.plot_date(x, y, markerfacecolor = 'CornflowerBlue', markeredgecolor = 'Red', zorder=10)
     plt.axhline(y=other_diameter, color='y', linestyle='-')
     plt.axhline(y=info.scrap_diameter, color='r', linestyle='-')
     
-        
-        
-
-    #ax.xaxis.set_major_formatter(
-    # mdates.ConciseDateFormatter(ax.xaxis.get_major_locator()))
-    #ax.set_xlim([datetime.date(2020, 12, 25), datetime.date(2030, 2, 1)])
-    # ax.set_xlim([datetime.date(2020, 1, 26), datetime.date(2025, 2, 1)])
     fig.autofmt_xdate()
     ax.title.set_text(f'Diameter Over Time: Roll {roll.roll_num}')
     
@@ -283,41 +239,10 @@ def calculate_12mo_diameter(scrap_diameter, days_between, avg_grind):
         thing = math.ceil(365 / days_between)
         return scrap_diameter + (avg_grind * thing)
 
-def trendline(roll_num, mill, type):
-    pass
-
-# def populate_data(db, Roll, Grinds, Info): # dont run this on kaiser's server, its just to make fake data
-#     connection, message = sql_connect()
-#     cur = connection.cursor()
-#     cur.execute(f'SELECT * FROM roll_new')
-#     roll_data = cur.fetchall()
-#     for row in roll_data:
-#             roll_num = row[0]
-#             diameter = row[1]
-#             scrap_diameter = row[2]
-#             mill = row[5]
-#             roll_type = row[6]
-
-#             cur.execute(f'SELECT * FROM roll_info WHERE mill = \'{mill}\' AND roll_type = \'{roll_type}\'')
-#             roll_info = cur.fetchall()
-#             avg_grind = roll_info[0][3]
-#             days_between = roll_info[0][4]
-#             cur_day = datetime.date.today()
-
-#             while cur_day > datetime.date(2019, 1, 21):
-#             #   cur.execute(f'INSERT INTO grind_new VALUES(roll_num = {roll_num}, min_diameter = {diameter}, grind_date = TO_DATE(\'{cur_day.year}-{cur_day.month}-{cur_day.year}\', \'YYYY-MM-DD\'), min_diameter_change = {avg_grind})')
-#                 print(f'types: {type(roll_num)}, {type(diameter)},  {type(cur_day)},  {type(avg_grind)}')
-#                 message = f'INSERT INTO grind_new VALUES({roll_num}, {diameter}, \'{cur_day}\', {avg_grind})'
-#                 print(message)
-#                 cur.execute(message)
-#                 cur_day = cur_day - datetime.timedelta(days=days_between)
-#                 diameter = diameter + avg_grind
-#     connection.commit()
-
-def update_scrap_date(db, Roll, Grinds, Info):
+def update_scrap_date(db, Roll, Grinds, Info): #Updates the scrap date, checks if a roll needs to be scrapped
     rolls = db.session.query(Roll).all()
     for roll in rolls:
-        info = db.session.query(Info).filter_by(mill=roll.mill, roll_type=roll.roll_type).first()
+        info = db.session.query(Info).filter_by(mill=roll.mill, roll_type=roll.roll_type).first()# roll info
         grinds = db.session.query(Grinds).filter_by(roll_num=roll.roll_num).order_by(Grinds.entry_time.desc())
         if grinds.count() > 0:
             cur_day = grinds.first().entry_time
@@ -327,7 +252,7 @@ def update_scrap_date(db, Roll, Grinds, Info):
                 cur_day = cur_day + datetime.timedelta(days=info.days_between_rolls)
                 diameter = diameter - info.avg_grind_diameter
                 grinds = grinds + 1
-            roll.scrap_date = cur_day
+            roll.approx_scrap_date = cur_day
             roll.grinds_left = grinds
             if grinds == 0:
                 roll.scrapped = True

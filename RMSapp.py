@@ -2,10 +2,8 @@ from flask import Flask, redirect, url_for, render_template, request, session
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.automap import automap_base
-from sqlalchemy import asc, desc
 import Connections
 import Requests
-import History
 import Notifications as notif
 import pymssql
 from flask_apscheduler import APScheduler
@@ -240,7 +238,7 @@ def roll_view():
         # cur.execute(f'SELECT * FROM grind_new WHERE roll_num = {roll_num} ORDER BY min_diameter ASC')
         roll = db.session.query(Roll).filter_by(roll_num=roll_num).first() #since we know this is only going to grab 1 result, we just grab the first item in the initial resulting list. Result is a roll object 
         grinds = db.session.query(Grinds).filter_by(roll_num=roll_num).order_by(Grinds.entry_time) #returns list of all grinds 
-        info = db.session.query(Info).filter_by(mill=roll.mill, roll_type=roll.roll_type).first() #Returns the first item in the list, 
+        info = db.session.query(Info).filter_by(mill=roll.mill, roll_type=roll.roll_type).first() #Returns the first item in the list
         graph = Connections.generate_graphs(roll, grinds, info)
         return render_template('rollView.html', graph=graph, roll_num = roll_num, last_grinds=grinds, num_grinds=grinds.count())
 
@@ -248,7 +246,7 @@ def roll_view():
 # def send_status_report():
 #     mail = Mail(app)
 #     #send current diameter and projected lifespan of each roll
-# History.make_data(db, Roll, Grinds, Info)
+#History.make_data(db, Roll, Grinds, Info)
 #rolls = db.session.query(Roll).all()
 
 #Connections.update_scrap_date(db, Roll, Grinds, Info)
