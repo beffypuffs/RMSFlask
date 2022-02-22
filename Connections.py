@@ -4,11 +4,11 @@ import datetime
 from dateutil import relativedelta
 import numpy as np
 import math
-import pyodbc as pp
+#import pyodbc as pp
 """
 MAKE SURE THE PYODBC LINE IS COMMENTED IN, PYMSSQL IS COMMENTED OUT, AND YOU ARE USING THE RIGHT SQL_CONNECT d
 """
-#import pymssql as pp
+import pymssql as pp
 # import psycopg2
 import matplotlib
 matplotlib.use('Agg')
