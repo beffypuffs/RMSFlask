@@ -1,5 +1,5 @@
 from flask import Flask, redirect, url_for, render_template, request, session
-from flask_mail import Mail, Message
+from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.automap import automap_base
 import sqlalchemy as sa
@@ -22,7 +22,7 @@ class RMSConfig():
     notification emails)
     """
     # Flask-mail config settings - NOT FINAL VALUES
-    MAIL_SERVER = 'smtp.gmail.com' # change for Kaiser email
+    MAIL_SERVER = 'smtp.gmail.com' # change for Kaiser domain
     MAIL_PORT = 465
     MAIL_USERNAME = RMS_EMAIL
     MAIL_PASSWORD = 'Rm$aPp01'
@@ -31,6 +31,8 @@ class RMSConfig():
     
     # Flask-APScheduler config settings
     SCHEDULER_API_ENABLED = True
+    
+    # SQLAlchemy database connection settings
     #SQLALCHEMY_DATABASE_URI = 'mssql+pymssql://RMS:trpJ63iGY4F7mRj@rmssql.database.windows.net/RMSSQL'
     USERNAME = 'RMS'
     PWD = 'trpJ63iGY4F7mRj'
