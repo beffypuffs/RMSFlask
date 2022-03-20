@@ -81,7 +81,7 @@ scheduler.start()
 
 @app.route("/help")
 def help_page():
-    return render_template('help.html')
+    return render_template('./client/public/help.html')
 
 
 @app.route("/chocksMenu")

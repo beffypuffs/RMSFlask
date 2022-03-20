@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href = "style.css" rel="stylesheet" type="text/css" >
+	<style>
+		.collapsible {
+		  background-color: rgb(255, 255, 255);
+		  color: rgb(0, 0, 0);
+		  cursor: pointer;
+		  padding: auto;
+		  width: 100%;
+		  border: none;
+		  text-align: left;
+		  outline: none;
+		  font-size: 20px;
+		  font-weight: bold;
+		  font-family: 'Times New Roman';
+		}
+		
+		.content {
+		  padding: 0 18px;
+		  max-height: 0;
+		  overflow: hidden;
+		  transition: max-height 0.2s ease-out;
+		  background-color: #f1f1f1;
+		}
+	</style>
+
+	<title>RMS Help</title>
+</head>
+<body>
+    <header>
+		<!-- Help icon and links -->
+		<!-- Main Kaiser logo and page navigation links -->
+		<img src="static/images/logo.png" alt="Kaiser Aluminium Logo"/>
+		<p style="text-align: center">
+			<a href="http://127.0.0.1:5000">Roll Management</a>  |  <a href="http://127.0.0.1:5000/chocksMenu">Chocks and Bearings</a>  |  <a href="http://127.0.0.1:5000/notifications">Notification Settings</a>  |  <strong>Help</strong>
+		</p>
+		<hr>
+	</header>
+
+    <main>
+		<button class="collapsible" id="rmColl">Roll Management ▾</button>
+		<div class="content">
+			
+  		<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+		</div>
+
+		<button class="collapsible" id="cabColl">Chocks and Bearings ▾</button>
+		<div class="content">
+  		<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+		</div>
+
+        <button class="collapsible" id="nsColl">Notification Settings ▾</button>
+		<div class="content">
+  		<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+		</div>
+
+    </main>
+
+	<script>
+		var coll = document.getElementsByClassName("collapsible");
+		var i;
+		
+		for (i = 0; i < coll.length; i++) {
+		  	coll[i].addEventListener("click", function() {
+				this.classList.toggle("active");
+				var content = this.nextElementSibling;
+				if (content.style.maxHeight){
+					content.style.maxHeight = null;
+				} else {
+			  		content.style.maxHeight = content.scrollHeight + "px";
+				} 
+				if (this.value.endsWith("▾")) this.value.replace("▾", "▴");
+				else this.value.replace("▴", "▾");
+		  	});
+		}
+		</script>
+
+</body>
+</html>
