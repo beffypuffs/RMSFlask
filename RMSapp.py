@@ -6,7 +6,7 @@ import Notifications as notif
 from flask_apscheduler import APScheduler
 from logging import basicConfig, DEBUG, info, debug, error
 from os import path
-
+ 
 # settings for sending email notifications - NOT FINAL VALUES
 # (should be changed when switching to use a Kaiser domain email)
 RMS_EMAIL = 'RMSNotifications1@gmail.com' # change for Kaiser email
