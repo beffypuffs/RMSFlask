@@ -3,11 +3,13 @@ from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.automap import automap_base
 import sqlalchemy as sa
+from models import * 
 import Connections
 import Requests
+import History
 import Notifications as notif
-# import pymssql
-import pyodbc
+import pymssql
+#import pyodbc
 from flask_apscheduler import APScheduler
 from logging import basicConfig, DEBUG, info, debug, error
 from os import path
@@ -16,6 +18,7 @@ from os import path
 # settings for sending email notifications - NOT FINAL VALUES
 # (should be changed when switching to use a Kaiser domain email)
 RMS_EMAIL = 'RMSNotifications1@gmail.com' # change for Kaiser email
+
 
 class RMSConfig():
     """Class for Flask configuration (needed to send scheduled 
@@ -31,20 +34,17 @@ class RMSConfig():
     
     # Flask-APScheduler config settings
     SCHEDULER_API_ENABLED = True
-    #SQLALCHEMY_DATABASE_URI = 'mssql+pymssql://RMS:trpJ63iGY4F7mRj@rmssql.database.windows.net/RMSSQL'
-    USERNAME = 'RMS'
-    PWD = 'trpJ63iGY4F7mRj'
-    HOST = 'rmssql.database.windows.net'
-    DB = 'RMSSQL'
-    DRIVER = 'ODBC Driver 17 for SQL Server'
+    SQLALCHEMY_DATABASE_URI = 'mssql+pymssql://RMS:trpJ63iGY4F7mRj@rmssql.database.windows.net/RMSSQL'
+    # USERNAME = 'RMS'
+    # PWD = 'trpJ63iGY4F7mRj'
+    # HOST = 'rmssql.database.windows.net'
+    # DB = 'RMSSQL'
+    # DRIVER = 'ODBC Driver 17 for SQL Server'
 
-    SQLALCHEMY_DATABASE_URI = sa.engine.url.URL(
-        "mssql+pyodbc",username=USERNAME,password=PWD, host=HOST, database=DB,
-        query={"driver": DRIVER}
-    )
-
-
-
+    # SQLALCHEMY_DATABASE_URI = sa.engine.url.URL(
+    #     "mssql+pyodbc",username=USERNAME,password=PWD, host=HOST, database=DB,
+    #     query={"driver": DRIVER}
+    # )
 
 
 app = Flask(__name__)
@@ -52,12 +52,14 @@ app.config.from_object(RMSConfig())
 db = SQLAlchemy(app)
 
 
-Base = automap_base() #Makes a class for all tables in the database
-Base.prepare(db.engine, reflect = True)
-Roll = Base.classes.roll_new
-Grind = Base.classes.grind_new #what is displayed
-Grinds = Base.classes.Grinds #closer to what the final grind class should look like
-Info = Base.classes.roll_info
+
+# Base = automap_base() #Makes a class for all tables in the database
+# Base.prepare(db.engine, reflect = True)
+# Roll = Base.classes.roll_new
+# Grind = Base.classes.grind_new #what is displayed
+# Grinds = Base.classes.Grinds #closer to what the final grind class should look like
+# Info = Base.classes.roll_info
+# Employee = Base.classes.employee
 
 
 
@@ -67,6 +69,8 @@ Info = Base.classes.roll_info
 #     print("thing:")
 #     print(result.approx_scrap_date)
 
+# def proccess_new_files():
+#     pass
 
 # initialize flask-mail
 rms_mail = Mail(app)
@@ -74,6 +78,7 @@ rms_mail = Mail(app)
 # initialize scheduler
 scheduler = APScheduler()
 scheduler.init_app(app)
+# scheduler.add_job(func=process_new_files, trigger="interval", minutes = 60)
 
 # initialize logging
 RMS_LOGS_PATH = path.join('logs', 'RMSapp.log')
@@ -135,24 +140,19 @@ def chocksView():
             i -= 1
         else:
             i += 1
-        connection, message = Connections.sql_connect()
-        data, committed, message = Connections.query_results(connection, "Select *  FROM report ORDER BY date DESC", 54)
-        if committed is True:
-                return render_template('chocksview2.html', data = data, i = i, length = len(data)) #right now it sends every form which i'll fix later
-        else:
-            return render_template('error.html', message = message) #error message
+        reports = db.session.query(Report).order_by(Report.date.desc()).all()
+        return render_template('chocksview2.html', data = reports[i], i = i, length = len(reports))
     else:
-        connection, message = Connections.sql_connect()
-        data, committed, message = Connections.query_results(connection, "Select *  FROM report ORDER BY date DESC", 54)
-        if committed is True:
-            return render_template('chocksView2.html', data = data, i = 0, length = len(data)) #see above
-        else:
-            return render_template('error.html', message = message) #error message
+        reports = db.session.query(Report).order_by(Report.date.desc()).all()
+        return render_template('chocksView2.html', data = reports[0], i = 0, length = len(reports))
 
 
-@app.route("/chocks")
+@app.route("/chocks", methods = ['GET', 'POST'])
 def chocks():
-    return render_template('chocks.html')
+    if request.method == 'GET':
+        return render_template('chocks.html')
+    elif request.method == 'POST':
+        return 'POST'
 
 
 @app.route("/notifications")
@@ -162,39 +162,21 @@ def notifications():
 
 @app.route("/")
 def home():
-    #db.session.query(Grinds).delete()
-    #History.translate_history(db, Grinds, 'grindFiles')
+    #test_rollSim.reset_rolls(db, Roll, Grinds, Info)
+    #History.make_data(db, Roll, Grinds, Info)
     headings = ("Roll ID", "Diameter", "Scrap Diameter", "Approx. Scrap Date", "Grinds Left", "Mill", "Roll Type")
-    # if message == "connected":
-    #     debug("Connected to RMS database")
-    #     # data, committed, message = Connections.query_results(connection, "Select *  FROM roll_new ORDER BY approx_scrap_date ASC", 7)
-    #     roll = db.Table('roll_new', db.metadata, autoload=True, autoload_with=db.engine)
-    #     data = db.session.query(roll).all()
-    #     if committed is True:
-    #         debug('Home Page Loaded Successfully - ' + message)
-    #         return render_template("index.html", headings=headings, data=data)
-    #     else:
-    #         error('PROBLEM LOADING HOME PAGE - ' + message)
-    #         return render_template('error.html', message = message) #error message
-    # else:
-    #     error('PROBLEM CONNECTING TO RMS DATABASE - ' + message)
-    #     return render_template('error.html', message = message) #error message
-    # roll = db.Table('roll_new', db.metadata, autoload=True, autoload_with=db.engine)
     results = db.session.query(Roll).order_by(Roll.approx_scrap_date)
-    # names = []
-    # for c in Roll.__table__.columns:
-    #     names.append(c.name)
+
     return render_template('index.html', headings=headings, data=results)
 
 
 #Add chock function
 @app.route('/add_chock', methods = ['GET','POST'])
 def add_chock():
-    connection, message = Connections.sql_connect()
     if request.method == 'POST':
         if (request.form['submitResponse'] == 'Submit Form'):
             data = Requests.chock_request_data(request)
-            committed, message = Connections.add_chock(connection, data)
+            committed, message = Connections.add_chock(data, Report)
             if (committed is True):
                 debug('Chocks & Bearings Form ADDED successfully')
                 return render_template('successfulAdd.html') #maybe option to view all chocks forms after submitting
@@ -203,7 +185,7 @@ def add_chock():
                 return render_template('error.html', message = message) #error message
         elif (request.form['submitResponse'] == 'Remove Form'):
             data = Requests.chock_request_data(request)
-            committed, message = Connections.remove_chock(connection, data)
+            committed, message = Connections.remove_chock(data)
             if (committed is True):
                 debug('Chocks & Bearings Form REMOVED successfully')
                 return render_template('successfulRemove.html')
@@ -212,7 +194,8 @@ def add_chock():
                 return render_template('error.html', message = message) #error message
         else:
             data = Requests.chock_request_data(request)
-            committed, message = Connections.edit_chock(connection, data)
+            i = request.form['form_num']
+            committed, message = Connections.edit_chock(data, i)
             if (committed is True):
                 debug('Chocks & Bearings Form EDITED successfully')
                 return render_template('successfulEdit.html')
@@ -223,9 +206,8 @@ def add_chock():
 @app.route('/add-email', methods = ['GET','POST'])#template for saving data from a webpage
 def add_email():
     if request.method == 'POST':
-        connection = Connections.sql_connect()
         data = Requests.email_request_data(request)
-        committed, message = Connections.add_email(connection, data)
+        committed, message = Connections.add_email(data, Employee)
         if committed is True:
             debug('Email succesfully ADDED')
         else:
@@ -235,9 +217,8 @@ def add_email():
 @app.route('/remove-email', methods = ['POST'])
 def remove_email():
     if request.method == 'POST':
-        connection = Connections.sql_connect()
         data = Requests.email_request_data(request)
-        committed, message = Connections.remove_email(connection, data)
+        committed, message = Connections.remove_email(data, Employee)
         if committed is True:
             debug('Email succesfully REMOVED')
         else:
@@ -249,23 +230,12 @@ def remove_email():
 def roll_view():
     if request.method == 'POST':
         roll_num = request.form['roll_clicked']
-        # connection, message = Connections.sql_connect()
-        # cur = connection.cursor()
-        # cur.execute(f'SELECT * FROM grind_new WHERE roll_num = {roll_num} ORDER BY min_diameter ASC')
         roll = db.session.query(Roll).filter_by(roll_num=roll_num).first() #since we know this is only going to grab 1 result, we just grab the first item in the initial resulting list. Result is a roll object 
-        grinds = db.session.query(Grinds).filter_by(roll_num=roll_num).order_by(Grinds.entry_time) #returns list of all grinds 
+        grinds = db.session.query(Grind).filter_by(roll_num=roll_num).order_by(Grind.entry_time) #returns list of all grinds 
         info = db.session.query(Info).filter_by(mill=roll.mill, roll_type=roll.roll_type).first() #Returns the first item in the list
-        graph = Connections.generate_graphs(roll, grinds, info)
+        graph = roll.generate_graphs(grinds, info)
         return render_template('rollView.html', graph=graph, roll_num = roll_num, last_grinds=grinds, num_grinds=grinds.count())
 
-
-# def send_status_report():
-#     mail = Mail(app)
-#     #send current diameter and projected lifespan of each roll
-#History.make_data(db, Roll, Grinds, Info)
-#rolls = db.session.query(Roll).all()
-
-#Connections.update_scrap_date(db, Roll, Grinds, Info)
 
 if __name__ == "__main__":
     app.run()

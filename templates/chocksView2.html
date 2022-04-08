@@ -89,12 +89,12 @@ Chocks and Bearings form
             <h3>Disassemble and Inspect (D & I)</h3>
             <div>
                 <label for="badge_number">Employee Badge No:</label>
-                <input type="text" id="badge_number" name="badge_number" value={{data[i][52]}}> 
+                <input type="text" id="badge_number" name="badge_number" value={{data.badge_number}}> 
                 
                 <!--<button onclick = "document.write(convertDate)">Add date </button> -->
                 <div class="right-Text">
                     <label for="date">Date:</label> 
-                    <input type="date" id="date" name="date" value={{data[i][0]}}> 
+                    <input type="date" id="date" name="date" value={{data.date}}> 
                 </div>
             </div>
             <br>
@@ -108,113 +108,103 @@ Chocks and Bearings form
                 </div>
         
                 <label for="roll_mill">Mill</label> &nbsp;&nbsp;
-                <input type="text" id="roll_mill" name="roll_mill" value={{data[i][51]}}  > <br>
+                <input type="text" id="roll_mill" name="roll_mill" value={{data.mill}}  > <br>
                 <label for="roll_type">Type of Roll</label>	
-                <input type="text" id=roll_type" name = "roll_type" value= {{data[i][53]}}  > <br>
+                <input type="text" id=roll_type" name = "roll_type" value= {{data.roll_type}}  > <br>
                 <!--<input type="text" id="roll_id" name="roll-type">--> <br>		
                 <label for="chock-num">Chock No.</label>	
-                <input type="text" id="chock-num" name="chock-num" value= {{data[i][1]}}  > <br>		
+                <input type="text" id="chock-num" name="chock-num" value= {{data.chock_number}}  > <br>		
                 <label for="position">Position</label>	
-                <input type="text" id="position" name="position" value={{data[i][2]}}  > <br>
+                <input type="text" id="position" name="position" value={{data.position}}  > <br>
             </div>
             <br>
             
             <h3>Reasons for D & I</h3>
             <div>
                 <select name = "reasons_d_and_i" id = "reasons_d_and_i" value = "">
-                    {% if data[i][3] == 'scheduled' %}
-                    <option value ="scheduled" selected>Scheduled</option>
-                    <option value = "mill_damage"> Mill Damage </option>
-                    <option value = "suspected_damage">Suspected Damage</option>
-                    {% elif data[i][3] == 'mill_damage' %}
-                    <option value ="scheduled">Scheduled</option>
-                    <option value = "mill_damage" selected> Mill Damage </option>
-                    <option value = "suspected_damage">Suspected Damage</option>
-                    {% elif data[i][3] == 'suspected_damage' %}
-                    <option value ="scheduled">Scheduled</option>
-                    <option value = "mill_damage"> Mill Damage </option>
-                    <option value = "suspected_damage" selected>Suspected Damage</option>
-                    {% endif %}
+                    <option value ="scheduled"  {% if data.reason == 'scheduled' %}selected{% endif %}>Scheduled</option>
+                    <option value = "mill_damage" {% if data.reason == 'mill_damage' %} selected {% endif %}> Mill Damage </option>
+                    <option value = "suspected_damage" {% if data.reason == 'suspected_damage' %} selected {% endif %}>Suspected Damage</option>
 
                 </select>
                 <br>
-                {% if data[i][4] == 'on' %}
+                {% if data.visible_chock_numbers == 'on' %}
                 <input type="checkbox" id="obvi" name="obvi" checked>
                 {% else %}
                 <input type="checkbox" id="obvi" name="obvi" >
                 {% endif %}
                 <label for="obvi">Obvious and Clearly Visible Chock Numbers</label>  <br>
-                {% if data[i][5] == 'on' %}
+                
+                {% if data.lifting_bolt_thread_condition == 'on' %}
                 <input type="checkbox" id="lifting" name="lifting" checked >
                 {% else %}
                 <input type="checkbox" id="lifting" name="lifting"  >
                 {% endif %}
-                
                 <label for="lifting">Lifting Bolt Holes Thread Condition</label> <br>
-                {% if data[i][6] == 'on' %}
+                
+                {% if data.cover_end_condition == 'on' %}
                 <input type="checkbox" id="cover" name="cover"  checked>
                 {% else %}
                 <input type="checkbox" id="cover" name="cover"  >
                 {% endif %}
-                
                 <label for="cover">Cover and End Bell Bolts and Threaded Holes</label> <br>
-                {% if data[i][7] == 'on' %}
+                
+                {% if data.bell_o_ring_condition == 'on' %}
                 <input type="checkbox" id="end-bell" name="end-bell"  checked>
                 {% else %}
                 <input type="checkbox" id="end-bell" name="end-bell"  >
                 {% endif %}
-                
                 <label for="end-bell">End Bell "O" Rings</label> <br>
-                {% if data[i][8] == 'on' %}
+                
+                {% if data.thrust_collar == 'on' %}
                 <input type="checkbox" id="thrust" name="thrust"  checked>
                 {% else %}
                 <input type="checkbox" id="thrust" name="thrust"  >
                 {% endif %}
-                
                 <label for="thrust">Thrust Collar, Key Condition and Ancillary Equitment</label> <br>
-                {% if data[i][9] == 'on' %}
+                
+                {% if data.lockkeepers == 'on' %}
                 <input type="checkbox" id="locks" name="locks"  checked>
                 {% else %}
                 <input type="checkbox" id="locks" name="locks"  >
                 {% endif %}
-                
                 <label for="locks">Locks and Keepers</label> <br>
-                {% if data[i][10] == 'on' %}
+                
+                {% if data.liner_plates == 'on' %}
                 <input type="checkbox" id="liner" name="liner"  checked>
                 {% else %}
                 <input type="checkbox" id="liner" name="liner"  >
                 {% endif %}
-                
                 <label for="liner">Liner Plates Smooth, Clean, and Bolts Tight</label> <br>
                 <br>
                 Inboard Radial Seals: &emsp; <br>
                 <label for="num-rep">No. Replaced:</label> 
-                <input type="text" id="num-rep" name="num-rep" value="{{data[i][11]}}"  > <br>
+                <input type="text" id="num-rep" name="num-rep" value="{{data.inboard_radials_seals_replaced}}"  > <br>
                 <label for="seals1">Inboard Face Seal</label>
-                <input type="text" id="seals1" name="seals1"  value={{data[i][12]}}  > <br>
+                <input type="text" id="seals1" name="seals1"  value={{data.inboard_face_seal}}  > <br>
                 <label for="mill1">Load Zone From Mill</label>
-                <input type="text" id="mill1" name="mill1"  value={{data[i][14]}} > 
+                <input type="text" id="mill1" name="mill1"  value={{data.load_zone_from_mill}} > 
             
             </div>
             <h3>Condition of Bearing Grease</h3>
             <div>	
                 <select name = "bearing-grease" id = "bearing-grease"  >
-                    {% if data[0][16] == 'washed-out' %}
+                    {% if data.bearing_grease_condition == 'washed-out' %}
                     <option value ="washed-out" selected>Washed Out </option>
                     <option value = "flakes"> Metallic Flakes</option>
                     <option value = "water">Water</option>
                     <option value = "no grease">N/A</option>
-                    {% elif data[0][16] == 'flakes' %}
+                    {% elif data.bearing_grease_condition == 'flakes' %}
                     <option value ="washed-out">Washed Out </option>
                     <option value = "flakes" selected> Metallic Flakes</option>
                     <option value = "water">Water</option>
                     <option value = "no grease">N/A</option>
-                    {% elif data[0][16] == 'water' %}
+                    {% elif data.bearing_grease_condition == 'water' %}
                     <option value ="washed-out">Washed Out </option>
                     <option value = "flakes"> Metallic Flakes</option>
                     <option value = "water" selected>Water</option>
                     <option value = "no grease">N/A</option>
-                    {% elif data[0][16] == 'no grease' %}
+                    {% elif data.bearing_grease_condition == 'no grease' %}
                     <option value ="washed-out">Washed Out </option>
                     <option value = "flakes"> Metallic Flakes</option>
                     <option value = "water">Water</option>
@@ -223,48 +213,48 @@ Chocks and Bearings form
                 </select>
                 <br>
                 <label for="mfg">Bearing MFG</label>
-                <input type="text" id="mfg" name="mfg" value={{data[i][16]}}  > <br>
+                <input type="text" id="mfg" name="mfg" value={{data.bearing_mfg}}  > <br>
                 <label for="sn">S/N</label>
-                <input type="text" id="sn" name="sn" value={{data[i][17]}}  > <br>
+                <input type="text" id="sn" name="sn" value={{data.bearing_serial_number}}  > <br>
                 <label for="sealed">Sealed</label>
-                {% if data[i][19] == 'on' %}
+                {% if data.is_sealed == 'on' %}
                 <input type="checkbox" id="sealed" name="sealed"  checked> <br>
                 {% else %}
                 <input type="checkbox" id="sealed" name="sealed"  > <br>
                 {% endif %}
                 	
                 <label for="seals-rep">No. of Seals Replaced</label>
-                <input type="text" id="seals-rep" name="seals-rep"  value={{data[i][19]}}  > <br>
+                <input type="text" id="seals-rep" name="seals-rep"  value={{data.seals_replaced}}  > <br>
             </div>
             <h3>Bearing Condition</h3>
             <div>
                 <div class="right-Text">
                     <label for="raceA">Race "A"</label>
-                    <input type="text" id="raceA" name="raceA"  value={{data[i][23]}}  > <br>
+                    <input type="text" id="raceA" name="raceA"  value={{data.race_a}}  > <br>
                     <label for="raceB">Race "B"</label>
-                    <input type="text" id="raceB" name="raceB" value={{data[i][24]}}  > <br>
+                    <input type="text" id="raceB" name="raceB" value={{data.race_b}}  > <br>
                     <label for="raceD">Race "D"</label>
-                    <input type="text" id="raceD" name="raceD" value={{data[i][25]}}  > <br>
+                    <input type="text" id="raceD" name="raceD" value={{data.race_d}}  > <br>
                     <label for="raceE">Race "E"</label>
-                    <input type="text" id="raceE" name="raceE" value={{data[i][26]}}  > <br>
+                    <input type="text" id="raceE" name="raceE" value={{data.race_e}}  > <br>
                 </div>
                 <label for="cupA">Cup "A"</label>
-                <input type="text" id="cupA" name="cupA"  value={{data[i][20]}}  > <br>
+                <input type="text" id="cupA" name="cupA"  value={{data.cup_a}}  > <br>
                 <label for="cupB">Cup "B - D"</label>
-                <input type="text" id="cupB" name="cupB" value={{data[i][21]}}  > <br>
+                <input type="text" id="cupB" name="cupB" value={{data.cup_bd}}  > <br>
                 <label for="cupE">Cup "E"</label>
-                <input type="text" id="cupE" name="cupE"  value={{data[i][22]}}  > <br>
+                <input type="text" id="cupE" name="cupE"  value={{data.cup_e}}  > <br>
 
                 <select name = "bearing-condition" id = "bearing-condition"  >
-                    {% if data[0][28] == 'reinstalled' %}
+                    {% if data.bearing_status == 'reinstalled' %}
                     <option value ="reinstalled" selected>Reinstalled</option>
                     <option value = "scraped"> Scraped</option>
                     <option value = "stored">Stored</option>
-                    {% elif data[0][28] == 'scraped' %}
+                    {% elif data.bearing_status == 'scraped' %}
                     <option value ="reinstalled">Reinstalled</option>
                     <option value = "scraped" selected> Scraped</option>
                     <option value = "stored">Stored</option>
-                    {% elif data[0][28] == 'stored' %}
+                    {% elif data.bearing_status == 'stored' %}
                     <option value ="reinstalled">Reinstalled</option>
                     <option value = "scraped"> Scraped</option>
                     <option value = "stored" selected>Stored</option>
@@ -280,20 +270,44 @@ Chocks and Bearings form
             <div>
                 <div>
                     Different Bearing Installed &emsp; &emsp;
-                    <label for="new-bearing">New</label>
-                    <input type="radio" id="new-bearing" value="new-bearing" name="diff-bearing" > &nbsp;
-                    <label for="used-bearing">Used</label>
-                    <input type="radio" id="used-bearing" value="used-bearing" name="diff-bearing"  > &nbsp;
-                    <label for="other-bearing">N/A</label>
-                    <input type="radio" id="other-bearing" value="other-bearing" name="diff-bearing"  > &nbsp;
+
+                    {%if data.different_bearing_installed == 'new-bearing'%}                    
+                        <label for="new-bearing">New</label>
+                        <input type="radio" id="new-bearing" value="new-bearing" name="diff-bearing" selected> &nbsp;
+                        <label for="used-bearing">Used</label>
+                        <input type="radio" id="used-bearing" value="used-bearing" name="diff-bearing"  > &nbsp;
+                        <label for="other-bearing">N/A</label>
+                        <input type="radio" id="other-bearing" value="other-bearing" name="diff-bearing"  > &nbsp;
+                    {% elif data.different_bearing_installed == 'used-bearing' %}  
+                        <label for="new-bearing">New</label>
+                        <input type="radio" id="new-bearing" value="new-bearing" name="diff-bearing" > &nbsp;
+                        <label for="used-bearing">Used</label>
+                        <input type="radio" id="used-bearing" value="used-bearing" name="diff-bearing"  selected> &nbsp;
+                        <label for="other-bearing">N/A</label>
+                        <input type="radio" id="other-bearing" value="other-bearing" name="diff-bearing"  > &nbsp;
+                    {% elif data.different_bearing_installed == 'other-bearing' %}  
+                        <label for="new-bearing">New</label>
+                        <input type="radio" id="new-bearing" value="new-bearing" name="diff-bearing" > &nbsp;
+                        <label for="used-bearing">Used</label>
+                        <input type="radio" id="used-bearing" value="used-bearing" name="diff-bearing"  > &nbsp;
+                        <label for="other-bearing">N/A</label>
+                        <input type="radio" id="other-bearing" value="other-bearing" name="diff-bearing"  selected> &nbsp;
+                    {% else %}  
+                        <label for="new-bearing">New</label>
+                        <input type="radio" id="new-bearing" value="new-bearing" name="diff-bearing" > &nbsp;
+                        <label for="used-bearing">Used</label>
+                        <input type="radio" id="used-bearing" value="used-bearing" name="diff-bearing"  > &nbsp;
+                        <label for="other-bearing">N/A</label>
+                        <input type="radio" id="other-bearing" value="other-bearing" name="diff-bearing"  > &nbsp;
+                    {% endif %}  
                 </div>	
     
                 <label for="textMFG">Bearing MFG</label>
-                <input type="text" id="textMFG" name="textMFG" value={{data[i][29]}}  >
+                <input type="text" id="textMFG" name="textMFG" value={{data.bearing_mfg_new}}  >
                 <label for="MFGsn">S/N</label>
-                <input type="text" id="MFGsn" name="MFGsn" value = {{data[i][30]}}> 
+                <input type="text" id="MFGsn" name="MFGsn" value = {{data.serial_number_new}}> 
                 <label for="sealed2">Sealed</label>	
-                {% if data[i][32] == 'on' %}
+                {% if data.sealed_new == 'on' %}
                 <input type="checkbox" id="sealed2" name="sealed2"  checked> <br>
                 {% else %}
                 <input type="checkbox" id="sealed2" name="sealed2"  > <br>
@@ -301,55 +315,55 @@ Chocks and Bearings form
                 
                 
                 <label for="chockBoreRound">Chock Bore Round</label>	
-                {% if data[i][33] == 'on' %}
+                {% if data.chock_bore_round == 'on' %}
                 <input type="checkbox" id="chockBoreRound" name="chockBoreRound"  checked> &emsp; &emsp;
                 {% else %}
                 <input type="checkbox" id="chockBoreRound" name="chockBoreRound"  > &emsp; &emsp;
                 {% endif %}
                 
                 <label for="chockBoreOOR">Chock Bore Out of Round</label>
-                {% if data[i][34] == 'on' %}
+                {% if data.chock_bore == 'on' %}
                 <input type="checkbox" id="chockBoreOOR" name="chockBoreOOR"  checked> <br>
                 {% else %}
                 <input type="checkbox" id="chockBoreOOR" name="chockBoreOOR"  > <br>
                 {% endif %}
                 
-                {% if data[i][35] == 'on' %}
+                {% if data.no_rust == 'on' %}
                 <input type="checkbox" id="wearOrRust" name="wearOrRust"  checked> &nbsp;
                 {% else %}
                 <input type="checkbox" id="wearOrRust" name="wearOrRust"  > &nbsp;
                 {% endif %}
                 
                 <label for="wearOrRust">No Excessive Wear or Heavy Rust</label> <br>
-                {% if data[i][36] == 'on' %}
+                {% if data.grease_purged == 'on' %}
                 <input type="checkbox" id="purgeGrease" name="purgeGrease"  checked> &nbsp;
                 {% else %}
                 <input type="checkbox" id="purgeGrease" name="purgeGrease"  > &nbsp;
                 {% endif %}
                 
                 <label for="purgeGrease">Purge all Grease Channels. Use EP-2 Grease.</label> <br>
-                {% if data[i][37] == 'on' %}
+                {% if data.spots_dings == 'on' %}
                 <input type = "checkbox" id="spots-dings" name="spots-dings"  checked> &nbsp;
                 {% else %}
                 <input type = "checkbox" id="spots-dings" name="spots-dings"  > &nbsp;
                 {% endif %}
                 
                 <label for="spots-dings">Remove all High Spots and Dings</label> <br>
-                {% if data[i][38] == 'on' %}
+                {% if data.manual_pack == 'on' %}
                 <input type = "checkbox" id="manual-pack" name="manual-pack"  checked> &nbsp;
                 {% else %}
                 <input type = "checkbox" id="manual-pack" name="manual-pack"  > &nbsp;
                 {% endif %}
                 
                 <label for="manual-pack">Manually Pack Each Bearing Segment. Use EP-2 Grease</label> <br>
-                {% if data[i][39] == 'on' %}
+                {% if data.lube_bore == 'on' %}
                 <input type="checkbox" id="lube-bore" name="lube-bore"  checked> &nbsp;
                 {% else %}
                 <input type="checkbox" id="lube-bore" name="lube-bore"  > &nbsp;
                 {% endif %}
                 
                 <label for="lube-bore">Lube Bore of Chock. Use EP-2 Grease</label> <br>
-                {% if data[i][40] == 'on' %}
+                {% if data.grease_packed_bearings == 'on' %}
                 <input type="checkbox" id="dropped" name="dropped"  checked> &nbsp;
                 {% else %}
                 <input type="checkbox" id="dropped" name="dropped"  > &nbsp;
@@ -358,26 +372,23 @@ Chocks and Bearings form
                 <label for="dropped">Dropped in Grease Packed Bearings.</label> <br>
     
                 a) With a Depth Guage Measure the Height of the Shoulder on the Cover. 
-                <input type="text" id="droppedA" name="droppedA"  value = {{data[i][41]}}  > <br>
+                <input type="text" id="droppedA" name="droppedA"  value = {{data.height_shoulder}}  > <br>
     
                 b) Measure the Depth of the Bearing From the Top of the Chock 
-                <input type="text" id="droppedB" name="droppedB" value = {{data[i][42]}} > <br>
+                <input type="text" id="droppedB" name="droppedB" value = {{data.bearing_depth}} > <br>
     
                 Subtract "b" from "a" = The amount of Shims Needed for Zero Clearance 
                 <input type="text" id="droppedDifference" name="droppedDifference" value= "" > <br>
-                {% if data[i][4] == 'on' %}
-                {% else %}
-                {% endif %}
                 <input type="checkbox" id="paper-used" name="paper-used"  > &nbsp;
                 <label for = "paper-used">Add 15% more Shim Material if Paper is used to allow from Compression <!-- Text entry, but can we automatiacally make the calculation appear when other values entered -->
                     The 112 Mill Work Rolls Drive Side Requires a 0.094 Clearance. </label> <br>
 
-                {% if data[i][4] == 'on' %}
+                {% if data.bearing_depth == 'on' %}
                 {% else %}
                 {% endif %}
                 <input type="checkbox" id="shim" name="shim"  > &nbsp;
                 <label for="shim">Install Shim/Gasket and Install Cover and Evenly Snug Down all Bolts by Hand</label> <br>
-                {% if data[i][4] == 'on' %}
+                {% if data.bearing_depth == 'on' %}
                 {% else %}
                 {% endif %}
                 <input type="checkbox" id="phases" name="phases"  > &nbsp;
@@ -385,17 +396,17 @@ Chocks and Bearings form
                     After each pass, turn the cones (inner races) one and a half times to sear the rollers.
                     First Torque Light. Second Torque Medium. Third Torque Full. Forth Torque Full.</label> <br>
 
-                {% if data[i][4] == 'on' %}
+                {% if data.bearing_depth == 'on' %}
                 {% else %}
                 {% endif %}
                 <input type="checkbox" id="ancillary" name="ancillary"  > &nbsp;
                 <label for="ancillary">Install all Ancillary Equitment</label> <br>	
-                {% if data[i][4] == 'on' %}
+                {% if data.bearing_depth == 'on' %}
                 {% else %}
                 {% endif %}
                 <input type="checkbox" id="greasePack" name="greasePack"  > &nbsp;
                 <label for="greasePack">Grease Pack all Seals. Use EP-2 Grease.</label> <br>
-                {% if data[i][4] == 'on' %}
+                {% if data.bearing_depth == 'on' %}
                 {% else %}
                 {% endif %}
                 <input type="checkbox" id="ready" name="ready"  > &nbsp;
@@ -403,7 +414,7 @@ Chocks and Bearings form
             </div>
             <br>
             <h4 style="text-align: left;">Comments:</h4>
-            <textarea id="comments" name="comments" rows="15" cols="100" value = >{{data[i][50]}}</textarea>
+            <textarea id="comments" name="comments" rows="15" cols="100" value = >{{data[50]}}</textarea>
             <br>
             <br>
             <input type="submit" value="Edit Form" id="submitResponse" name = "submitResponse"> <input type="submit" value= "Remove Form" id ="submitResponse" name = 'submitResponse'>
