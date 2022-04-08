@@ -13,7 +13,7 @@ import pymssql
 from flask_apscheduler import APScheduler
 from logging import basicConfig, DEBUG, info, debug, error
 from os import path
-
+from __constants import *
 
 # settings for sending email notifications - NOT FINAL VALUES
 # (should be changed when switching to use a Kaiser domain email)
@@ -24,13 +24,13 @@ class RMSConfig():
     """Class for Flask configuration (needed to send scheduled 
     notification emails)
     """
-    # Flask-mail config settings - NOT FINAL VALUES
-    MAIL_SERVER = 'smtp.gmail.com' # change for Kaiser email
-    MAIL_PORT = 465
-    MAIL_USERNAME = RMS_EMAIL
-    MAIL_PASSWORD = 'Rm$aPp01'
+    # Flask-mail config settings
+    MAIL_SERVER = RMS_MAIL_SERVER
     MAIL_USE_TLS = False
-    MAIL_USE_SSL = True
+    MAIL_USE_SSL = False
+    MAIL_PORT = RMS_EMAIL_PORT
+    MAIL_USERNAME = RMS_EMAIL_USERNAME
+    MAIL_PASSWORD = RMS_EMAIL_PASSWORD
     
     # Flask-APScheduler config settings
     SCHEDULER_API_ENABLED = True
