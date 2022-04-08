@@ -78,24 +78,44 @@ def send_notification_email():
     needs to be sent.
     """
     with scheduler.app.app_context():
-        connection, conn_message = Connections.sql_connect()
-        if conn_message == "connected":
-            order_now, order_now_committed, message = Connections.rolls_order_now(connection)
-            if not order_now_committed:
-                error('PROBLEM SENDING NOTIFICATION EMAIL - ' + message)
-            order_soon, order_soon_committed, message = Connections.rolls_order_soon(connection)
-            if not order_soon_committed:
-                error('PROBLEM SENDING NOTIFICATION EMAIL - ' + message)
-            recipients, recipients_committed, message = Connections.email_notification_recipients(connection)
-            if not recipients_committed:
-                error('PROBLEM SENDING NOTIFICATION EMAIL - ' + message)
-            if recipients != [] and (order_now != [] or order_soon != []):
-                notif.send_noti_email(order_now, order_soon, RMS_EMAIL, recipients, rms_mail)
-                debug('Notification Email Sent')
+        order_now_query = [Roll.approx_scrap_date < (datetime.datetime.today() + datetime.timedelta(days=365)), 
+                   Roll.approx_scrap_date > datetime.datetime.today()]
+        order_now_results = db.session.query(Roll).filter(*order_now_query).order_by(Roll.approx_scrap_date)
+
+        order_soon_query = [Roll.approx_scrap_date < (datetime.datetime.today() + datetime.timedelta(days=548)), 
+                   Roll.approx_scrap_date > datetime.datetime.today() + datetime.timedelta(days=365)]
+        order_soon_results = db.session.query(Roll).filter(*order_soon_query).order_by(Roll.approx_scrap_date)
+
+        recipients_results = db.session.query(Employee.email)
+
+        if recipients_results != []:
+            if order_now_results != [] and order_soon_results != []:
+                notif.send_noti_email(order_now=order_now_results, order_soon=order_soon_results,
+                    recipients=recipients_results, sender=RMS_EMAIL_USERNAME, mail=rms_mail)
             else:
-                debug('Notification Email NOT SENT - No roll replacements to order')
+                debug('Notification Email NOT SENT - no roll replacements to order')
         else:
-            error('PROBLEM CONNECTING TO DATABASE - ' + conn_message)
+            debug('Notification Email NOT SENT - no registered notification recipients')
+
+        # NOTE - old way to get data for the noti email
+        # connection, conn_message = Connections.sql_connect()
+        # if conn_message == "connected":
+        #     order_now, order_now_committed, message = Connections.rolls_order_now(connection)
+        #     if not order_now_committed:
+        #         error('PROBLEM SENDING NOTIFICATION EMAIL - ' + message)
+        #     order_soon, order_soon_committed, message = Connections.rolls_order_soon(connection)
+        #     if not order_soon_committed:
+        #         error('PROBLEM SENDING NOTIFICATION EMAIL - ' + message)
+        #     recipients, recipients_committed, message = Connections.email_notification_recipients(connection)
+        #     if not recipients_committed:
+        #         error('PROBLEM SENDING NOTIFICATION EMAIL - ' + message)
+        #     debug('Notification Email Sent')
+        #     if recipients != [] or (order_now != [] and order_soon != []):
+        #         notif.send_noti_email(order_now, order_soon, RMS_EMAIL, recipients, rms_mail)
+        #     else:
+        #         debug('Notification Email NOT SENT - No roll replacements to order')
+        # else:
+        #     error('PROBLEM CONNECTING TO DATABASE - ' + conn_message)
 
 # begin the scheduler to send notification emails
 scheduler.start()
