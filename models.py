@@ -165,7 +165,7 @@ class Roll(db.Model):
                         HS_lost += (grind.HS_before - grind.HS_after)
                         MD_lost += (grind.MD_before - grind.MD_after)
                         TS_lost += (grind.TS_before - grind.TS_after)
-                        print(avg_grind)
+                        #print(avg_grind)
                         num_grinds += 1
                 
                 days_between_grinds = None

@@ -51,27 +51,6 @@ app = Flask(__name__)
 app.config.from_object(RMSConfig())
 db = SQLAlchemy(app)
 
-
-
-# Base = automap_base() #Makes a class for all tables in the database
-# Base.prepare(db.engine, reflect = True)
-# Roll = Base.classes.roll_new
-# Grind = Base.classes.grind_new #what is displayed
-# Grinds = Base.classes.Grinds #closer to what the final grind class should look like
-# Info = Base.classes.roll_info
-# Employee = Base.classes.employee
-
-
-
-# results = db.session.query(Roll).order_by(Roll.approx_scrap_date)
-# #results = db.session.query(info).all()
-# for result in results:
-#     print("thing:")
-#     print(result.approx_scrap_date)
-
-# def proccess_new_files():
-#     pass
-
 # initialize flask-mail
 rms_mail = Mail(app)
 
