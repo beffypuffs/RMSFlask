@@ -28,6 +28,8 @@
 			border-color: grey;
 		}
         img {
+			border: solid;
+			border-color: black;
 			max-width: 100%;
 			height: auto;
 			width: auto;
@@ -116,8 +118,33 @@
 		</div>
 
         <h3 class="tab_header" onclick="showText('notification_information')">Notification Settings</h3>
-        <div id="notification_information" class="hide">NOTIFS</div>
+        <div id="notification_information" class="hide">
+			<h3 class="sub_header" onclick="showText('add_email')">How do I register an email?</h3>
+			<div id="add_email" class="hide">
+				<p>
+					Navigate to the "Notification Settings" page and click "Add Email"
+					<br>
+					<img src="static/images/pic_notification_add_btn.PNG" alt="pic_notification_add_btn.png">
+					<br>
+					Fill all highlighted form information and click "Add E-mail" to submit
+					<br>
+					<img src="static/images/pic_notification_add_form.PNG" alt="pic_notification_add_form.png">
+				</p>
+			</div>
 
+			<h3 class="sub_header" onclick="showText('remove_email')">How do remove a registered email?</h3>
+			<div id="remove_email" class="hide">
+				<p>
+					Navigate to the "Notification Settings" page and click "Remove Email"
+					<br>
+					<img src="static/images/pic_notification_remove_btn.PNG" alt="pic_notification_remove_btn.png">
+					<br>
+					Fill all highlighted form information and click "Remove E-mail" to unsubscribe from notifications
+					<br>
+					<img src="static/images/pic_notification_remove_form.PNG" alt="pic_notification_remove_form.png">
+				</p>
+			</div>
+		</div>
     </main>
 </body>
 <script>
