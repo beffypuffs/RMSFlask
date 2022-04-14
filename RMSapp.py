@@ -153,6 +153,9 @@ def chocks():
     elif request.method == 'POST':
         return 'POST'
 
+@app.route("/demo_notifications")
+def demo_notifications():
+    send_notification_email()
 
 @app.route("/notifications")
 def notifications():
