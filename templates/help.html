@@ -4,26 +4,49 @@
 <head>
     <link href = "style.css" rel="stylesheet" type="text/css" >
 	<style>
-		.collapsible {
-		  background-color: rgb(255, 255, 255);
-		  color: rgb(0, 0, 0);
-		  cursor: pointer;
-		  padding: auto;
-		  width: 100%;
-		  border: none;
-		  text-align: left;
-		  outline: none;
-		  font-size: 20px;
-		  font-weight: bold;
-		  font-family: 'Times New Roman';
+		.container {
+		  display: flex;
+          flex-direction: column;
+		  /**
+          border: solid;
+		  border-color: blue;
+		  **/
+		  margin-left: 10%;
+		  margin-right: 10%;
 		}
-		
-		.content {
-		  padding: 0 18px;
-		  max-height: 0;
-		  overflow: hidden;
-		  transition: max-height 0.2s ease-out;
-		  background-color: #f1f1f1;
+        .tab_header {
+            margin-top: 3px;
+			margin-bottom: 3px;
+            border: solid;
+            border-color: black;
+            text-align: center;
+        }
+		.sub_header {
+			margin-top: 3px;
+			margin-bottom: 3px;
+			border-bottom: solid;
+			border-color: grey;
+		}
+        img {
+			border: solid;
+			border-color: black;
+			max-width: 100%;
+			height: auto;
+			width: auto;
+		}
+        div {
+			margin-top: 5px;
+			margin-bottom: 5px;
+        }
+
+        div.show {
+            display:block;
+        }
+        div.hide {
+            display: none;
+        }
+		h1 {
+			text-align: center;
 		}
 	</style>
 
@@ -39,39 +62,99 @@
 		</p>
 		<hr>
 	</header>
+	
+    <main class="container">
+		<h1> What do you need help with?</h1>
+        <h3 class="tab_header" onclick="showText('roll_information')">Roll Management</h3>
+        <div id="roll_information" class="hide">
+			<h3 class="sub_header" onclick="showText('individual_roll')">How do I view individual roll data?</h3>
+			<div id="individual_roll" class="hide">
+				<p>
+					Choose the roll id of the roll instance you would like to view:
+					<br>
+					<img src="static/images/pic_roll_id.PNG" alt="pic_roll_id.png">
+					<br>
+					Click the linked roll ID to enter advanced view:
+					<br>
+					<img src="static/images/pic_roll_advanced_view.PNG" alt="pic_roll_advanced_view.png">
+				</p>
+			</div>
 
-    <main>
-		<button class="collapsible" id="rmColl">Roll Management ▾</button>
-		<div class="content">
-  		<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+			<h3 class="sub_header" onclick="showText('search_roll')">How do I search for a roll?</h3>
+			<div id="search_roll" class="hide">
+				<p>
+					Utilize the search bar to locate desired roll based on attributes:
+					<br>
+					<img src="static/images/pic_search_roll.PNG" alt="pic_search_roll.png">
+					<br>
+				</p>
+			</div>
+        </div>
+
+        <h3 class="tab_header" onclick="showText('chock_information')">Chocks and Bearings</h3>
+        <div id="chock_information" class="hide">
+			<h3 class="sub_header" onclick="showText('fill_form')">How do I fill a chocks form?</h3>
+			<div id="fill_form" class="hide">
+				<p>
+					Navigate to the chocks and bearings page and fill all required spaces in the form:
+					<br>
+					<img src="static/images/pic_chocks_fill.PNG" alt="pic_chocks_fill.png">
+					<br>
+					When finished, click "submit" to upload the form to the server:
+					<br>
+					<img src="static/images/pic_chocks_submit.PNG" alt="pic_chocks_submit.png">
+				</p>
+			</div>
+
+			<h3 class="sub_header" onclick="showText('previous_form')">How do I view a previous form?</h3>
+			<div id="previous_form" class="hide">
+				<p>
+					In the chocks and bearings page, click "View previous forms" link at the top of the page:
+					<br>
+					<img src="static/images/pic_chocks_previous.PNG" alt="pic_chocks_previous.png">
+					<br>
+				</p>
+			</div>
 		</div>
 
+        <h3 class="tab_header" onclick="showText('notification_information')">Notification Settings</h3>
+        <div id="notification_information" class="hide">
+			<h3 class="sub_header" onclick="showText('add_email')">How do I register an email?</h3>
+			<div id="add_email" class="hide">
+				<p>
+					Navigate to the "Notification Settings" page and click "Add Email"
+					<br>
+					<img src="static/images/pic_notification_add_btn.PNG" alt="pic_notification_add_btn.png">
+					<br>
+					Fill all highlighted form information and click "Add E-mail" to submit
+					<br>
+					<img src="static/images/pic_notification_add_form.PNG" alt="pic_notification_add_form.png">
+				</p>
+			</div>
 
-        <h3>Chocks and Bearings</h3>
-
-        <h3>Notification Settings</h3>
-
-
+			<h3 class="sub_header" onclick="showText('remove_email')">How do remove a registered email?</h3>
+			<div id="remove_email" class="hide">
+				<p>
+					Navigate to the "Notification Settings" page and click "Remove Email"
+					<br>
+					<img src="static/images/pic_notification_remove_btn.PNG" alt="pic_notification_remove_btn.png">
+					<br>
+					Fill all highlighted form information and click "Remove E-mail" to unsubscribe from notifications
+					<br>
+					<img src="static/images/pic_notification_remove_form.PNG" alt="pic_notification_remove_form.png">
+				</p>
+			</div>
+		</div>
     </main>
-
-	<script>
-		var coll = document.getElementsByClassName("collapsible");
-		var i;
-		
-		for (i = 0; i < coll.length; i++) {
-		  	coll[i].addEventListener("click", function() {
-				this.classList.toggle("active");
-				var content = this.nextElementSibling;
-				if (content.style.maxHeight){
-					content.style.maxHeight = null;
-				} else {
-			  		content.style.maxHeight = content.scrollHeight + "px";
-				} 
-				if (this.value.endsWith("▾")) this.value.replace("▾", "▴");
-				else this.value.replace("▴", "▾");
-		  	});
-		}
-		</script>
-
 </body>
+<script>
+    function showText(tab)
+    {
+        if (document.getElementById(tab).className == "hide") {
+            document.getElementById(tab).className = "show";
+        } else if (document.getElementById(tab).className == "show") {
+            document.getElementById(tab).className = "hide";
+        }
+    }
+</script>
 </html>

@@ -8,14 +8,14 @@ db=SQLAlchemy()
 
 class Roll(db.Model):
         __tablename__ = 'roll_new'
-        roll_num = db.Column(db.Integer, primary_key=True)
+        roll_num = db.Column(db.Integer, primary_key=True, autoincrement=False)
         diameter = db.Column(db.Float, nullable=False)
         scrap_diameter = db.Column(db.Float, nullable=False)
-        approx_scrap_date = db.Column(db.DateTime, nullable=True)
+        approx_scrap_date = db.Column(db.DateTime, nullable=False, default='12-12-12')
         grinds_left = db.Column(db.Integer, nullable=True)
         mill = db.Column(db.String, nullable=False)
         roll_type = db.Column(db.String, nullable=False)
-        avg_grind = db.Column(db.String, nullable=True)
+        avg_grind = db.Column(db.Float, nullable=True)
         days_between_grinds = db.Column(db.Float, nullable=True)
         num_grinds = db.Column(db.Integer, nullable = False)
         scrapped = db.Column(db.Boolean, nullable=False)
@@ -24,25 +24,26 @@ class Roll(db.Model):
         def add_grind(self, grind):
                 info = db.session.query(Info).filter_by(mill=self.mill, roll_type=self.roll_type)[0]
                 
+                
 
                 if self.num_grinds == 0:
                         self.diameter = self.diameter - grind.min_diameter_change
                         self.avg_grind = grind.min_diameter_change
-                        
-
+                        db.session.add(grind)
                 else: 
-                        last_grind = db.session.query(Grind).filter_by(roll_num=self.roll_num)[0]
+                        last_grind = db.session.query(Grind).filter_by(roll_num=self.roll_num)[-1]
                         delta = grind.entry_time - last_grind.entry_time
+                        db.session.add(grind)
+                        # print(delta)
+                        # print(delta.total_seconds()/86400)
                         if self.num_grinds == 1:
-                                self.days_between_grinds = delta.total_seconds()/68400
+                                self.days_between_grinds = delta.total_seconds()/86400
                         else:
-                                self.days_between_grinds = ((self.days_between_grinds * self.num_grinds) + (delta/datetime.timedelta(days=1))/(self.num_grinds + 1))
+                                self.days_between_grinds = ((self.days_between_grinds * self.num_grinds) + (delta.total_seconds()/86400))/(self.num_grinds + 1)
                         
                         self.diameter = self.diameter - grind.min_diameter_change   
-                        #print(self.avg_grind)  
+                        
                         self.avg_grind = ((self.avg_grind * float(self.num_grinds)) + grind.min_diameter_change) / (float(self.num_grinds + 1))
-                        #print(self.avg_grind)
-                        #print('----------')
                         info.avg_grind_diameter = ((info.avg_grind_diameter * info.num_grinds) + grind.min_diameter_change)/ (info.num_grinds + 1)
                         days = ((info.days_between_grinds * info.num_grinds) + (delta/datetime.timedelta(days=1)))/(info.num_grinds + 1)
                         info.days_between_grinds = days
@@ -50,7 +51,7 @@ class Roll(db.Model):
                         self.update_scrap_date()
                 
                 self.num_grinds += 1 
-                db.session.add(grind)
+                db.session.commit()
                 
 
         def update_scrap_date(self):
@@ -80,7 +81,6 @@ class Roll(db.Model):
                 for grind in grinds:
                         data_exists = True
                         x.append(grind.entry_time)
-                        #y.append(grind.HS_after)
                         y.append(grind.min_diameter)
 
 
@@ -88,7 +88,68 @@ class Roll(db.Model):
                 other_diameter = self.calculate_12mo_diameter(info.scrap_diameter, info.days_between_grinds, info.avg_grind_diameter)
 
                 if grinds.count() > 0:
+                        cur_day = datetime.date(x[-1].year, x[-1].month, x[-1].day)
+                        trend_x = []
+                        trend_y = []
+                        trend2_y = []
+                        trend2_x = []
+                        diameter_proj = self.diameter
+
+                        while diameter_proj > info.scrap_diameter:#projection based on roll type average grind
+                                trend_y.append(diameter_proj)
+                                trend_x.append(cur_day)
+                                diameter_proj = diameter_proj - info.avg_grind_diameter
+                                cur_day = cur_day + datetime.timedelta(days=info.days_between_grinds)
+
+                        trend_y.append(info.scrap_diameter)
+                        trend_x.append(cur_day)
+
+                        diameter_proj = self.diameter
                         cur_day = datetime.datetime(x[-1].year, x[-1].month, x[-1].day)
+                        if (self.avg_grind != None):
+                                while diameter_proj > info.scrap_diameter: #projection based on specific rolls average grind
+                                        print(cur_day)
+                                        print(self.days_between_grinds)
+                                        trend2_y.append(diameter_proj)
+                                        trend2_x.append(cur_day)
+                                        diameter_proj = diameter_proj - self.avg_grind
+                                        cur_day = cur_day + datetime.timedelta(days=self.days_between_grinds)
+                                trend2_y.append(info.scrap_diameter)
+                                trend2_x.append(cur_day)
+                                plt.plot_date(trend2_x, trend2_y, 'g-')#
+                        plt.plot_date(trend_x,trend_y,'b-')
+                        
+
+                ax.plot_date(x, y, markerfacecolor = 'CornflowerBlue', markeredgecolor = 'Red', zorder=10)
+                plt.axhline(y=other_diameter, color='y', linestyle='-')
+                plt.axhline(y=info.scrap_diameter, color='r', linestyle='-')
+
+                fig.autofmt_xdate()
+                ax.title.set_text(f'Diameter Over Time (All Grinds)')
+
+                plt.xlabel('Date')
+                plt.ylabel('Diameter (in.)')
+                plt.savefig(f'static/images/{self.roll_num} Graph.png', dpi=200)
+                return plt
+        
+
+        def generate_graphs_2(self, grinds, info, period, projection):
+                y = []
+                x = []
+                dates = []
+                data_exists = False
+                for grind in grinds:
+                        data_exists = True
+                        if grind.entry_time > datetime.datetime.today() - period:
+                                x.append(grind.entry_time)
+                                y.append(grind.min_diameter)
+
+
+                fig, ax = plt.subplots()
+                other_diameter = self.calculate_12mo_diameter(info.scrap_diameter, info.days_between_grinds, info.avg_grind_diameter)
+
+                if len(x) > 0:
+                        cur_day = datetime.date(x[-1].year, x[-1].month, x[-1].day)
                         trend_x = []
                         trend_y = []
                         trend2_y = []
@@ -120,11 +181,18 @@ class Roll(db.Model):
                 plt.axhline(y=info.scrap_diameter, color='r', linestyle='-')
 
                 fig.autofmt_xdate()
-                ax.title.set_text(f'Diameter Over Time: Roll {self.roll_num}')
+                days = period.days
+                months = int(days/30)
+                ax.title.set_text(f'Diameter Over Last {months} Months')
 
                 plt.xlabel('Date')
                 plt.ylabel('Diameter (in.)')
-                plt.savefig('static/images/Sample Graph.png')
+                if period == datetime.timedelta(weeks=13):
+                        plt.savefig(f'static/images/{self.roll_num} Graph2.png', dpi=200)
+                elif period == datetime.timedelta(weeks=26):
+                        plt.savefig(f'static/images/{self.roll_num} Graph3.png', dpi=200)
+                else:
+                        plt.savefig(f'static/images/{self.roll_num} Graph4.png', dpi=200)
                 return plt
         
         def calculate_12mo_diameter(self, scrap_diameter, days_between, avg_grind):
@@ -155,10 +223,10 @@ class Roll(db.Model):
                 grind_data = []
                 for grind in grinds:
                         if num_grinds == 0:
-                                avg_grind = grind.min_diameter_change
+                                avg_grind = float(grind.min_diameter_change)
                                 
                         else:
-                                avg_grind = ((avg_grind/num_grinds) + grind.min_diameter_change) / (num_grinds + 1)
+                                avg_grind = float(((avg_grind * num_grinds) + grind.min_diameter_change) / (num_grinds + 1))
                         
                         total_min_diameter_lost += grind.min_diameter_change
 
@@ -179,6 +247,7 @@ class Roll(db.Model):
                 grind_data.append(MD_lost)
                 grind_data.append(TS_lost)
                 grind_data.append(days_between_grinds)
+                grind_data.append(num_grinds)
 
                 #print(grind_data)
 

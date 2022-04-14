@@ -5,6 +5,14 @@
       * {
         box-sizing: border-box;
       }
+      main {
+        margin-top: 15px;
+        margin-left: 25%;
+        margin-right: 25%;
+        border: double;
+        border-color: grey;
+        padding-bottom: 15px;
+      }
       .openBtn {
         display: flex;
         justify-content: left;
@@ -26,14 +34,14 @@
       .formPopup {
         display: none;
         position: fixed;
-        left: 45%;
+        left: 50%;
         top: 5%;
         transform: translate(-50%, 5%);
         border: 3px solid #999999;
         z-index: 9;
       }
       .formContainer {
-        max-width: 300px;
+        max-width: 500px;
         padding: 20px;
         background-color: #fff;
       }
@@ -68,49 +76,63 @@
       .openButton:hover {
         opacity: 1;
       }
-      h2 {font-size: 20px;}
+      .options {
+        text-align: center;
+      }
+      h1 {
+        text-align: center;
+      }
+      h2 {
+        font-size: 20px;
+      }
+      h3 {
+        margin-bottom: 5px;
+      }
     </style>
   </head>
   <body>
     <header>
-      
-        <a href="http://127.0.0.1:5000/"><img src="static/images/logo.png" alt="Kaiser Aluminium Logo"/></a> <!--height="150" width="300" class="logo"-->
+      <a href="http://127.0.0.1:5000/"><img src="static/images/logo.png" alt="Kaiser Aluminium Logo"/></a> <!--height="150" width="300" class="logo"-->
       <p style="text-align:center">
         <a href="http://127.0.0.1:5000/">Roll Management</a>  |  <a href="http://127.0.0.1:5000/chocksMenu">Chocks and Bearings</a> | <strong>Notification Settings</strong>  |  <a href="http://127.0.0.1:5000/help">Help</a>
       </p>
       <hr>
-      </header>
-<h3>Options:</h3>
-
-&emsp;&emsp;Please select if you:<br><br>
-&emsp;&emsp;Want to set up notifications: <button type = "button" onclick="openAddForm()"><strong>Add Email</strong></button> <br><br>
-&emsp;&emsp;No longer want to receive email notifications: <button type = "button" onclick="openRemoveForm()"><strong>Remove Email</strong></button> <br><br>
-    <div class="loginPopup">
-      <div class="formPopup" id="popupForm"> <!--popup form for the add email button-->
-        <form action="http://127.0.0.1:5000/add-email" class="formContainer" method = "POST">
-          <h2>Enter your credentials to be added to email list</h2>
-          <label for="badge_number">
-              <strong>Badge Number</strong>
-          </label>
-          <input type = "text" id = "badge_number" placeholder = "Your Badge Number" name = "badge_number" required>
-          <label for="nm">
-            <strong>Name</strong>
-          </label>
-          <input type="text" id="nm" placeholder="Your Name" name="nm" required>
-          <label for="email">
-            <strong>E-mail</strong>
-          </label>
-          <input type="text" id="email" placeholder="Your Email" name="email" required>
-          <button type="submit" class="btn" >Add E-mail</button>
-          <button type="button" class="btn cancel" onclick="closeAddForm()">Close</button> <!--already closes the form on click, just needs to be a small x in the corner instead of a giant button-->
-        </form>
+    </header>
+    <main>
+      <h1>Notification Settings</h1>
+      <div class="options">
+        <h3>Setup email notifications:</h3>
+        <button type = "button" onclick="openAddForm()"><strong>Add Email</strong></button>
+        <br>
+        <h3>Remove Email notifications:</h3>
+        <button type = "button" onclick="openRemoveForm()"><strong>Remove Email</strong></button> 
       </div>
-    </div>
-    <div class="formPopup" id="removeForm"> <!--popup form for removing emails-->
+      <div class="loginPopup">
+        <div class="formPopup" id="addForm"> <!--popup form for the add email button-->
+          <form action="http://127.0.0.1:5000/add-email" class="formContainer" method = "POST">
+            <h2>Enter your credentials to be added to email list</h2>
+            <label for="badge_number">
+                <strong>Badge Number</strong>
+            </label>
+            <input type = "text" id = "badge_number" placeholder = "Your Badge Number" name = "badge_number" required>
+            <label for="nm">
+              <strong>Name</strong>
+            </label>
+            <input type="text" id="nm" placeholder="Your Name" name="nm" required>
+            <label for="email">
+              <strong>E-mail</strong>
+            </label>
+            <input type="text" id="email" placeholder="Your Email" name="email" required>
+            <button type="submit" class="btn" >Add E-mail</button>
+            <button type="button" class="btn cancel" onclick="closeAddForm()">Close</button> <!--already closes the form on click, just needs to be a small x in the corner instead of a giant button-->
+          </form>
+        </div>
+      </div>
+      <div class="formPopup" id="removeForm"> <!--popup form for removing emails-->
         <form action="http://127.0.0.1:5000/remove-email" class="formContainer" method = "POST">
           <h2>Enter your credentials to be removed from email list</h2>
           <label for="badge_number">
-              <strong>Badge Number</strong>
+            <strong>Badge Number</strong>
           </label>
           <input type = "text" id = "badge_number" placeholder = "Your Badge Number" name = "badge_number" required>
           <label for="nm">
@@ -124,13 +146,14 @@
           <button type="submit" class="btn" >Remove E-mail</button>
           <button type="button" class="btn cancel" onclick="closeRemoveForm()">Close</button> <!--already closes the form on click, just needs to be a small x in the corner instead of a giant button-->
         </form>
-      </div>
+        </div>
+    </main>
     <script>
       function openAddForm() {
-        document.getElementById("popupForm").style.display = "block";
+        document.getElementById("addForm").style.display = "block";
       }
       function closeAddForm() {
-        document.getElementById("popupForm").style.display = "none";
+        document.getElementById("addForm").style.display = "none";
       }
       function openRemoveForm() {
           document.getElementById("removeForm").style.display = "block";

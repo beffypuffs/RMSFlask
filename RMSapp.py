@@ -4,9 +4,11 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.automap import automap_base
 import sqlalchemy as sa
 from models import * 
+from datetime import timedelta
 import Connections
 import Requests
 import History
+import random
 import Notifications as notif
 import pymssql
 #import pyodbc
@@ -18,7 +20,7 @@ from os import path
 # settings for sending email notifications - NOT FINAL VALUES
 # (should be changed when switching to use a Kaiser domain email)
 RMS_EMAIL = 'RMSNotifications1@gmail.com' # change for Kaiser email
-
+CUR_DAY = datetime.datetime.now() - datetime.timedelta(weeks=52)
 
 class RMSConfig():
     """Class for Flask configuration (needed to send scheduled 
@@ -51,6 +53,7 @@ app = Flask(__name__)
 app.config.from_object(RMSConfig())
 db = SQLAlchemy(app)
 
+
 # initialize flask-mail
 rms_mail = Mail(app)
 
@@ -64,6 +67,8 @@ RMS_LOGS_PATH = path.join('logs', 'RMSapp.log')
 RMS_LOGS_FORMAT  = '%(asctime)s : %(levelname)s - %(message)s'
 # basicConfig(filename=RMS_LOGS_PATH, format=RMS_LOGS_FORMAT, level=DEBUG)
 # info('Starting RMSapp...')
+
+
 
 
 @scheduler.task('cron', id='send_notification_email', week='*', day_of_week='*')
@@ -104,10 +109,25 @@ scheduler.start()
 def help_page():
     return render_template('help.html')
 
+@app.route("/add_roll", methods = ["POST"])
+def add_roll():
+    if request.method == "POST":
+        roll_num = request.form['roll_SN']
+        start_diameter = request.form['start_diameter']
+        roll_type = request.form['roll_type']
+        mill = request.form['mill']
+        info = db.session.query(Info).filter_by(mill=mill, roll_type=roll_type)[0]
+        newRoll = Roll(roll_num=roll_num, diameter = start_diameter, scrap_diameter=info.scrap_diameter, mill=mill, roll_type=roll_type, num_grinds=0, scrapped=False)
+        db.session.add(newRoll)
+        db.session.commit()
+        return render_template('successfulRollAdd.html')
+    else:
+        return "How"
+
 
 @app.route("/chocksMenu")
 def chocksMenu():
-    return render_template('chocksMenu.html')
+    return render_template('chocks.html')
 
 
 @app.route("/chocksView", methods = ['GET','POST']) 
@@ -141,8 +161,10 @@ def notifications():
 
 @app.route("/")
 def home():
-    #test_rollSim.reset_rolls(db, Roll, Grinds, Info)
-    #History.make_data(db, Roll, Grinds, Info)
+    # reset_stats()
+    # global CUR_DAY
+    # advance_one_year(CUR_DAY)
+    # CUR_DAY = CUR_DAY + datetime.timedelta(weeks=52) ##this is just for demo purposes, wont be used in production
     headings = ("Roll ID", "Diameter", "Scrap Diameter", "Approx. Scrap Date", "Grinds Left", "Mill", "Roll Type")
     results = db.session.query(Roll).order_by(Roll.approx_scrap_date)
 
@@ -213,8 +235,47 @@ def roll_view():
         grinds = db.session.query(Grind).filter_by(roll_num=roll_num).order_by(Grind.entry_time) #returns list of all grinds 
         info = db.session.query(Info).filter_by(mill=roll.mill, roll_type=roll.roll_type).first() #Returns the first item in the list
         graph = roll.generate_graphs(grinds, info)
-        return render_template('rollView.html', graph=graph, roll_num = roll_num, last_grinds=grinds, num_grinds=grinds.count())
+        roll.generate_graphs_2(grinds, info, timedelta(weeks=52), False)
+        roll.generate_graphs_2(grinds, info, timedelta(weeks=26), False)
+        roll.generate_graphs_2(grinds, info, timedelta(weeks=13), False)
+        stats1 = roll.avg_grind_stats(timedelta(weeks=52))
+        stats2 = roll.avg_grind_stats(timedelta(weeks=26))
+        stats3 = roll.avg_grind_stats(timedelta(weeks=13))
+        return render_template('rollView.html', graph=graph, roll_num = roll_num, last_grinds=grinds, num_grinds=grinds.count(), roll = roll, info=info, stats1=stats1, stats2=stats2, stats3=stats3)
+
+
+
+def reset_stats():
+    db.session.query(Grind).delete()
+    rolls = db.session.query(Roll).all()
+    for roll in rolls:
+        inches_above_scrap = random.randrange(1, 3)
+        roll.diameter = roll.scrap_diameter + inches_above_scrap
+        roll.approx_scrap_date = '12-12-12'
+        roll.grinds_left = None
+        roll.avg_grind = None
+        roll.days_between_grinds = None
+        roll.num_grinds = 0
+        roll.scrapped = False
+    db.session.commit()
+    return
+        
+def advance_one_year(today):
+    rolls = db.session.query(Roll).all()
+    for roll in rolls:
+        info = db.session.query(Info).filter_by(mill=roll.mill, roll_type=roll.roll_type)[0]
+        day = today
+        while (day <= today + datetime.timedelta(weeks=52) and roll.scrapped == False):
+            diameter_lost = random.randrange(3, 6) * .01
+            newGrind = Grind(roll_num=roll.roll_num, entry_time = day, HS_before = roll.diameter, MD_before = roll.diameter, TS_before = roll.diameter, HS_after = roll.diameter - diameter_lost, MD_after = roll.diameter - diameter_lost, TS_after = roll.diameter - diameter_lost, min_diameter_change = diameter_lost, max_deviation=0, min_deviation = 0, roll_length = 0, crowning_length = 0, crowning_angle = 0, crowning_bevel=0, min_diameter=roll.diameter - diameter_lost)
+            roll.add_grind(newGrind)
+            day = day + datetime.timedelta(days=info.days_between_grinds)
+    db.session.commit()
+    # for roll in rolls:
+    #     print(roll.days_between_grinds)
+
 
 
 if __name__ == "__main__":
     app.run()
+    

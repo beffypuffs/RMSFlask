@@ -9,6 +9,9 @@ table, th, td {
   margin-left: auto; 
   margin-right: auto;
 }
+* {
+        box-sizing: border-box;
+}
 .btn-link {
     border: none;
     outline: none;
@@ -20,6 +23,74 @@ table, th, td {
     font-family: inherit;
     font-size: inherit;
 }
+.openBtn {
+        display: flex;
+        justify-content: left;
+      }
+.openButton {
+	border: none;
+	border-radius: 5px;
+	background-color: #1c87c9;
+	color: white;
+	padding: 14px 20px;
+	cursor: pointer;
+	position: fixed;
+}
+.loginPopup {
+	position: relative;
+	text-align: center;
+	width: 100%;
+}
+.formPopup {
+	display: none;
+	position: fixed;
+	left: 45%;
+	top: 5%;
+	transform: translate(-50%, 5%);
+	border: 3px solid #999999;
+	z-index: 9;
+}
+.formContainer {
+	max-width: 300px;
+	padding: 20px;
+	background-color: #fff;
+}
+.formContainer input[type=text],
+.formContainer input[type=name],
+.formContainer input[type=badgenumber] {
+	width: 100%;
+	padding: 15px;
+	margin: 5px 0 20px 0;
+	border: none;
+	background: #eee;
+}
+.formContainer input[type=text]:focus,
+.formContainer input[type=password]:focus {
+	background-color: #ddd;
+	outline: none;
+}
+.formContainer .btn {
+	padding: 12px 20px;
+	border: none;
+	background-color: #8ebf42;
+	color: #fff;
+	cursor: pointer;
+	width: 100%;
+	margin-bottom: 15px;
+	opacity: 0.8;
+	}
+.formContainer .cancel {
+	background-color: #cc0000;
+}
+.formContainer .btn:hover,
+.openButton:hover {
+	opacity: 1;
+}
+.styled-table {
+    border-collapse: collapse;
+	box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
 </style>
 <head>
 	<link href = "style.css" rel="stylesheet" type="text/css" >
@@ -41,16 +112,40 @@ table, th, td {
 	<main>
 		<br>
 		<br>
+		<div class="formPopup" id="popupForm"> <!--popup form for the add email button-->
+			<form action="http://127.0.0.1:5000/add_roll" class="formContainer" method = "POST">
+			  <h2>Enter Roll Information</h2>
+			  <label for="roll_SN">
+				  <strong>Roll Serial Number</strong>
+			  </label>
+			  <input type = "text" id = "roll_SN" placeholder = "" name = "roll_SN" required>
+			  <label for="start_diameter">
+				<strong>Starting Diameter</strong>
+			</label>
+			<input type="text" id="start_diameter" name="start_diameter" required>
+			  <label for="roll_type">
+				<strong>Roll Type</strong>
+			  </label>
+			  <input type="text" id="roll_type" placeholder="" name="roll_type" required>
+			  <label for="mill">
+				<strong>Mill</strong>
+			  </label>
+			  <input type="text" id="mill" placeholder="" name="mill" required>
+			  <button type="submit" class="btn" >Submit</button>
+			  <button type="button" class="btn cancel" onclick="closeAddForm()">Close</button> <!--already closes the form on click, just needs to be a small x in the corner instead of a giant button-->
+			</form>
+		  </div>
 		<div>
+			
 			<!-- big table with links to roll data and lots of data
 			will need to activate filtering feature
 			maybe a search bar sort of thing?-->
 		<form method="post" action="http://127.0.0.1:5000/roll-view">
-			<table class = "center" style="width:60%">
+			<table class = "styled-table" style="width:60%">
 			<caption><strong>General Roll Information</strong>
 			<!-- seach bar to look for any value in the roll table -->
 			<input type = "text" id = "filter_input" onkeyup ="searchFunction()" placeholder = "Search" title="Type in desired table value ">
-			
+			<button type="button" onclick="openAddForm()">Add Roll</button>
 			<br><br>
 				<!-- Display table headings-->
 				
@@ -104,6 +199,14 @@ table, th, td {
 			}
 		}
 
+	  function openAddForm() {
+        document.getElementById("popupForm").style.display = "block";
+      }
+      function closeAddForm() {
+        document.getElementById("popupForm").style.display = "none";
+      }
+
 	</script>
+	
 </body>
 </html>

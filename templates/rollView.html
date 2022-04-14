@@ -6,10 +6,17 @@
             display: flex;
             flex-direction: column;
         }
+        .graph{
+            text-align:center;
+        }
         .horizontal_container {
             display: flex;
             flex-direction: row;
             justify-content: center;
+        }
+        .styled-table {
+            border-collapse: collapse;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
         }
 
         #date {
@@ -21,8 +28,9 @@
             border:1px solid black;
             margin-left: auto; 
             margin-right: auto;
+            text-align: center;
         }
-
+       
     </style>
     <script>
         document.getElementById("date").innerHTML = Date();
@@ -35,17 +43,32 @@
     </p>
     <main>
         <hr>
-        <!-- Graph -->
+        <h2 style="text-align: center">Roll {{roll.roll_num}}</h2>
+        <h3 style="text-align: center; font-weight: normal">Mill: {{roll.mill}} Type: {{roll.roll_type}} </h3>
+        <h3 style="text-align: center; font-weight: normal">Approximate Scrap Date: {{roll.approx_scrap_date}}</h3>
+        <!-- Graphs -->
         <section class="horizontal_container">
             <div class="graph" id="graph2">
                 <br><br>
-                <img src="static/images/Sample Graph.png" alt="idk what happened here"/>
+                <img src= "static/images/{{roll.roll_num}} Graph.png" alt="graph" width="500" height="400"/>
+            </div>
+            <label for="period" >Period: </label>
+                <select onchange="graph(this.value)" name="period" id="period" >
+                    <option value="3 months">3 months</option>
+                    <option value="6 months">6 months</option>
+                    <option value="12 months" selected>12 months</option>
+                </select>
+            <div class="graph" id="graph3">
+                <br><br>
+                <img src="static/images/{{roll.roll_num}} Graph2.png" alt="graph" width="500" height="400" style="display:none" id="pic1"/>
+                <img src="static/images/{{roll.roll_num}} Graph3.png" alt="graph" width="500" height="400" style="display:none" id="pic2"/>
+                <img src="static/images/{{roll.roll_num}} Graph4.png" alt="graph" width="500" height="400" id="pic3"/>
             </div>
         </section>
         <!-- Data table under graph -->
         <section class="horizontal_container">
             {% if num_grinds > 0 %}
-        <table>
+        <table class = "styled-table">
             <caption>Last Grind</caption>
             <tr>
                 <th></th>
@@ -71,7 +94,7 @@
         </table>
         {% endif %}
         {% if num_grinds > 0 %}
-        <table>
+        <table class = "styled-table">
             <caption>Recent Grinds</caption>
             <tr>
                 <th>Date and Time</th>
@@ -100,9 +123,82 @@
             {% endif %}
         </table>
         {% endif %}
+        <table class = "styled-table"> 
+            <caption>Averages</caption>
+            <tr>
+                <th>Average Grind</th>
+                <th>Days Between Grinds</th>
+                <th>Total Diameter Lost</th>
+            </tr>
+            <tr style="display:none" id="row1">
+                {% if stats3[6] != 0 %}
+                <td >{{stats3[0]|round(2)}}</td>
+                <td>{{stats3[5]}}</td>
+                <td>{{stats3[1]|round(2)}}</td>
+                {% else %}
+                <td>No Grinds</td>
+                <td>No Grinds</td>
+                <td>No Grinds</td>
+                {% endif %}
+            </tr>
+            <tr style="display:none" id="row2">
+                {% if stats2[6] != 0 %}
+                <td >{{stats2[0]|round(2)}}</td>
+                <td>{{stats2[5]}}</td>
+                <td>{{stats2[1]|round(2)}}</td>
+                {% else %}
+                <td>No Grinds</td>
+                <td>No Grinds</td>
+                <td>No Grinds</td>
+                {% endif %}
+            </tr>
+            <tr id="row3">
+                {% if stats1[6] != 0 %}
+                <td >{{stats1[0]|round(2)}}</td>
+                <td>{{stats1[5]}}</td>
+                <td>{{stats1[1]|round(2)}}</td>
+                {% else %}
+                <td>No Grinds</td>
+                <td>No Grinds</td>
+                <td>No Grinds</td>
+                {% endif %}
+            </tr>
+        </table>
      </section>  
     </main>
-
-
 </body>
+<script>
+    function graph(value){
+        if (value === "3 months"){
+            document.getElementById("pic1").style.display = "inline";
+            document.getElementById("row1").style.display = "table-row";
+
+            document.getElementById("pic2").style.display = "none";
+            document.getElementById("row2").style.display = "none";
+
+            document.getElementById("pic3").style.display = "none";
+            document.getElementById("row3").style.display = "none";
+        }
+        else if (value === "6 months"){
+            document.getElementById("pic1").style.display = "none";
+            document.getElementById("row1").style.display = "none";
+
+            document.getElementById("pic2").style.display = "inline";
+            document.getElementById("row2").style.display = "table-row";
+
+            document.getElementById("pic3").style.display = "none";
+            document.getElementById("row3").style.display = "none";
+        }
+        else{
+            document.getElementById("pic1").style.display = "none";
+            document.getElementById("row1").style.display = "none";
+
+            document.getElementById("pic2").style.display = "none";
+            document.getElementById("row2").style.display = "none";
+
+            document.getElementById("pic3").style.display = "inline";
+            document.getElementById("row3").style.display = "table-row";
+        }
+      }
+</script>
 </html>
