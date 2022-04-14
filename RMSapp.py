@@ -156,6 +156,7 @@ def chocks():
 @app.route("/demo_notifications")
 def demo_notifications():
     send_notification_email()
+    home()
 
 @app.route("/notifications")
 def notifications():
