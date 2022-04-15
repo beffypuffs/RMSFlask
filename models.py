@@ -175,8 +175,8 @@ class Roll(db.Model):
                                         cur_day = cur_day + datetime.timedelta(days=self.days_between_grinds)
                                 trend2_y.append(info.scrap_diameter)
                                 trend2_x.append(cur_day)
-                                line2, = plt.plot_date(trend2_x, trend2_y, 'g-')#
-                        line1, = plt.plot_date(trend_x,trend_y,'b-')
+                                line1, = plt.plot_date(trend2_x, trend2_y, 'g-')#
+                        line2, = plt.plot_date(trend_x,trend_y,'b-')
 
                 markers,  = ax.plot_date(x, y, markerfacecolor = 'CornflowerBlue', markeredgecolor = 'Red', zorder=10)
                 line3 = plt.axhline(y=other_diameter, color='y', linestyle='-')
