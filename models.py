@@ -116,20 +116,20 @@ class Roll(db.Model):
                                         cur_day = cur_day + datetime.timedelta(days=self.days_between_grinds)
                                 trend2_y.append(info.scrap_diameter)
                                 trend2_x.append(cur_day)
-                                plt.plot_date(trend2_x, trend2_y, 'g-')#
-                        plt.plot_date(trend_x,trend_y,'b-')
+                                line1, = plt.plot_date(trend2_x, trend2_y, 'g-')#
+                        line2, = plt.plot_date(trend_x,trend_y,'b-')
                         
 
-                ax.plot_date(x, y, markerfacecolor = 'CornflowerBlue', markeredgecolor = 'Red', zorder=10)
-                plt.axhline(y=other_diameter, color='y', linestyle='-')
-                plt.axhline(y=info.scrap_diameter, color='r', linestyle='-')
-
+                markers, = ax.plot_date(x, y, markerfacecolor = 'CornflowerBlue', markeredgecolor = 'Red', zorder=10)
+                line3 = plt.axhline(y=other_diameter, color='y', linestyle='-')
+                line4 = plt.axhline(y=info.scrap_diameter, color='r', linestyle='-')
+                plt.legend([markers, line1, line2, line3, line4], ['Grinds', 'Roll Projection', 'Roll Type Projection', 'One Year Left', 'Scrapped'])
                 fig.autofmt_xdate()
                 ax.title.set_text(f'Diameter Over Time (All Grinds)')
 
                 plt.xlabel('Date')
                 plt.ylabel('Diameter (in.)')
-                plt.savefig(f'static/images/{self.roll_num} Graph.png', dpi=200)
+                plt.savefig(f'static/images/Graphs/{self.roll_num} Graph.png', dpi=200)
                 return plt
         
 
@@ -166,19 +166,26 @@ class Roll(db.Model):
 
                         diameter_proj = self.diameter
                         cur_day = datetime.datetime(x[-1].year, x[-1].month, x[-1].day)
-                        while diameter_proj > info.scrap_diameter: #projection based on specific rolls average grind
-                                trend2_y.append(diameter_proj)
+                        line = None
+                        if (self.avg_grind != None):
+                                while diameter_proj > info.scrap_diameter: #projection based on specific rolls average grind
+                                        trend2_y.append(diameter_proj)
+                                        trend2_x.append(cur_day)
+                                        diameter_proj = diameter_proj - self.avg_grind
+                                        cur_day = cur_day + datetime.timedelta(days=self.days_between_grinds)
+                                trend2_y.append(info.scrap_diameter)
                                 trend2_x.append(cur_day)
-                                diameter_proj = diameter_proj - self.avg_grind
-                                cur_day = cur_day + datetime.timedelta(days=self.days_between_grinds)
-                        trend2_y.append(info.scrap_diameter)
-                        trend2_x.append(cur_day)
-                        plt.plot_date(trend_x,trend_y,'b-')
-                        plt.plot_date(trend2_x, trend2_y, 'g-')#
+                                line2, = plt.plot_date(trend2_x, trend2_y, 'g-')#
+                        line1, = plt.plot_date(trend_x,trend_y,'b-')
 
-                ax.plot_date(x, y, markerfacecolor = 'CornflowerBlue', markeredgecolor = 'Red', zorder=10)
-                plt.axhline(y=other_diameter, color='y', linestyle='-')
-                plt.axhline(y=info.scrap_diameter, color='r', linestyle='-')
+                markers,  = ax.plot_date(x, y, markerfacecolor = 'CornflowerBlue', markeredgecolor = 'Red', zorder=10)
+                line3 = plt.axhline(y=other_diameter, color='y', linestyle='-')
+                line4 = plt.axhline(y=info.scrap_diameter, color='r', linestyle='-')
+        
+                if line2:
+                        plt.legend([markers, line1, line2, line3, line4], ['Grinds', 'Roll Projection', 'Roll Type Projection', 'One Year Left', 'Scrapped'])
+                else:
+                        plt.legend([markers, line1, line3, line4], ['Grinds', 'Roll Type Projection', 'One Year Left', 'Scrapped'])
 
                 fig.autofmt_xdate()
                 days = period.days
@@ -188,11 +195,11 @@ class Roll(db.Model):
                 plt.xlabel('Date')
                 plt.ylabel('Diameter (in.)')
                 if period == datetime.timedelta(weeks=13):
-                        plt.savefig(f'static/images/{self.roll_num} Graph2.png', dpi=200)
+                        plt.savefig(f'static/images/Graphs/{self.roll_num} Graph2.png', dpi=200)
                 elif period == datetime.timedelta(weeks=26):
-                        plt.savefig(f'static/images/{self.roll_num} Graph3.png', dpi=200)
+                        plt.savefig(f'static/images/Graphs/{self.roll_num} Graph3.png', dpi=200)
                 else:
-                        plt.savefig(f'static/images/{self.roll_num} Graph4.png', dpi=200)
+                        plt.savefig(f'static/images/Graphs/{self.roll_num} Graph4.png', dpi=200)
                 return plt
         
         def calculate_12mo_diameter(self, scrap_diameter, days_between, avg_grind):

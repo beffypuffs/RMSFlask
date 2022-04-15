@@ -86,7 +86,7 @@ table, th, td {
 .openButton:hover {
 	opacity: 1;
 }
-.styled-table {
+.styled-table{
     border-collapse: collapse;
 	box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
@@ -148,32 +148,33 @@ table, th, td {
 			<button type="button" onclick="openAddForm()">Add Roll</button>
 			<br><br>
 				<!-- Display table headings-->
-				
-				<tr>
-					{% for header in headings %}
-						<th>{{ header }}</th>
-					{% endfor %}
-				</tr>
-				
+				<thead>
+					<tr>
+						{% for header in headings %}
+							<th>{{ header }}</th>
+						{% endfor %}
+					</tr>
+				</thead>
 				<!-- Display SQL server data to index.html-->
-				
-				{% for row in data %}
-				{% if row.scrapped == False%}
-				{% if row.approx_scrap_date.strftime('%Y-%m-%d') < '2023-08-01'  %}
-				<tr bgcolor="#FF7F7F">
-				{% elif row.approx_scrap_date.strftime('%Y-%m-%d') < '2023-06-08' %}
-				<tr bgcolor="#FFFFE0">
-				{% elif row.approx_scrap_date.strftime('%Y-%m-%d') < '2057-12-31' %}
-				<tr bgcolor="#90EE90">
-				{% endif %}
-				<td style="text-align:center"><button type="submit" name="roll_clicked" value = '{{row.roll_num}}' class="btn-link">{{row.roll_num}}</button></td>
-				<td style="text-align:center">{{row.diameter|round(2)}}</td>
-				<td style="text-align:center">{{row.scrap_diameter}}</td>
-				<td style="text-align:center">{{row.approx_scrap_date}}</td>
-				<td style="text-align:center">{{row.grinds_left}}</td>
-				<td style="text-align:center">{{row.mill}}</td>
-				<td style="text-align:center">{{row.roll_type}}</td>
-				</tr>
+				<tbody>
+					{% for row in data %}
+					{% if row.scrapped == False%}
+					{% if row.approx_scrap_date.strftime('%Y-%m-%d') < '2023-08-01'  %}
+					<tr bgcolor="#FF7F7F">
+					{% elif row.approx_scrap_date.strftime('%Y-%m-%d') < '2023-06-08' %}
+					<tr bgcolor="#FFFFE0">
+					{% elif row.approx_scrap_date.strftime('%Y-%m-%d') < '2057-12-31' %}
+					<tr bgcolor="#90EE90">
+					{% endif %}
+					<td style="text-align:center"><button type="submit" name="roll_clicked" value = '{{row.roll_num}}' class="btn-link">{{row.roll_num}}</button></td>
+					<td style="text-align:center">{{row.diameter|round(2)}}</td>
+					<td style="text-align:center">{{row.scrap_diameter}}</td>
+					<td style="text-align:center">{{row.approx_scrap_date}}</td>
+					<td style="text-align:center">{{row.grinds_left}}</td>
+					<td style="text-align:center">{{row.mill}}</td>
+					<td style="text-align:center">{{row.roll_type}}</td>
+					</tr>
+				</tbody>
 				{% endif %}
 				{% endfor %}
 				
