@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="end">
+<style>
+    table, th, td {
+    border:1px solid black;
+    margin-left: auto; 
+    margin-right: auto;
+    
+    }
+    .styled-table{
+    border-collapse: collapse;
+	box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    }
+</style>
+<head>
+
+</head>
+<body>
+    <header>
+
+        <a href="http://127.0.0.1:5000/"><img src="static/images/logo.png" alt="Kaiser Aluminium Logo"/></a> <!--height="150" width="300" class="logo"-->
+
+    <!-- Navigation links -->
+    <p style="text-align: center">
+        <a href="http://127.0.0.1:5000/">Home Roll Management Page</a>  |  <strong>Chocks and Bearings </strong>  |  <a href="http://127.0.0.1:5000/notifications">Notification Settings</a>  |  <a href="http://127.0.0.1:5000/help">Help</a>
+    </p>
+
+    </header>
+    <form method="post" action="http://127.0.0.1:5000/chocksView">
+		<table class = "styled-table" style="width:33%">
+		<br><br>
+			<!-- Display table headings-->
+			<thead>
+				<tr>
+					<th></th>
+					<th>Entry Time</th>
+						
+				</tr>
+			</thead>
+			<!-- Display SQL server data to index.html-->
+			<tbody>
+				{% for grind in grinds %}
+				<tr bgcolor="#ADD8E6">
+					<td style="text-align:center"><input type="checkbox"></td>
+					<td style="text-align:center">{{grind.entry_time.strftime('%Y-%m-%d %I:%M %p')}}</td>
+					
+				</tr>
+				{% endfor %}
+			</tbody>
+			
+			
+				
+		</table>
+		&nbsp;&nbsp;
+		<div style="text-align: center">
+			<input type="submit" value="Group Selected Grinds" id="submitResponse" name = "submitResponse">
+		</div>
+
+	</form>
+</body>
+</html>

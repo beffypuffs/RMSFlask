@@ -29,6 +29,7 @@
             margin-left: auto; 
             margin-right: auto;
             text-align: center;
+            padding:5px;
         }
        
     </style>
@@ -46,18 +47,54 @@
         <h2 style="text-align: center">Roll {{roll.roll_num}}</h2>
         <h3 style="text-align: center; font-weight: normal">Mill: {{roll.mill}} Type: {{roll.roll_type}} </h3>
         <h3 style="text-align: center; font-weight: normal">Approximate Scrap Date: {{roll.approx_scrap_date}}</h3>
+        <div style="text-align: center">
+            <label for="period" >Period: </label>
+                    <select onchange="graph(this.value)" name="period" id="period" >
+                        <option value="3 months">3 months</option>
+                        <option value="6 months">6 months</option>
+                        <option value="12 months" selected>12 months</option>
+                    </select>
+        </div>
         <!-- Graphs -->
         <section class="horizontal_container">
             <div class="graph" id="graph2">
                 <br><br>
                 <img src= "static/images/Graphs/{{roll.roll_num}} Graph.png" alt="graph" width="500" height="400"/>
             </div>
-            <label for="period" >Period: </label>
-                <select onchange="graph(this.value)" name="period" id="period" >
-                    <option value="3 months">3 months</option>
-                    <option value="6 months">6 months</option>
-                    <option value="12 months" selected>12 months</option>
-                </select>
+            
+            <div class="table" id = "grinds">
+                &nbsp;&nbsp;
+                <form method="post" action="http://127.0.0.1:5000/chocksView"> 
+                <table class = "styled-table"  width=350>
+                    
+                    <br><br>
+                        <!-- Display table headings-->
+                        <thead>
+                            <tr>
+                                <th></th>
+                                {% if num_grinds > 0 %}
+                                    <th>Recent Grinds</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <!-- Display SQL server data to index.html-->
+                        <tbody>
+                            {% for grind in grinds %}
+                            <tr bgcolor="B0E0E6">
+                                <td style="text-align:center"><input type="checkbox"></td>
+                                <td style="text-align:center">{{grind.entry_time.strftime('%Y-%m-%d %I:%M %p')}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    &nbsp;&nbsp;
+                    <div style="text-align: center">
+                        <input type="submit" value="Group Selected Grinds" id="submitResponse" name = "submitResponse">
+                        <input type="submit" value="See All Grinds" id="submitResponse" name = "submitResponse">
+                    </div>
+
+                </form>
+            </div>
             <div class="graph" id="graph3">
                 <br><br>
                 <img src="static/images/Graphs/{{roll.roll_num}} Graph2.png" alt="graph" width="500" height="400" style="display:none" id="pic1"/>
@@ -66,6 +103,7 @@
             </div>
         </section>
         <!-- Data table under graph -->
+        <br><br>
         <section class="horizontal_container">
             {% if num_grinds > 0 %}
         <table class = "styled-table">
@@ -93,38 +131,9 @@
             
         </table>
         {% endif %}
-        {% if num_grinds > 0 %}
-        <table class = "styled-table">
-            <caption>Recent Grinds</caption>
-            <tr>
-                <th>Date and Time</th>
-                <th>Diameter Before</th>
-                <th>Diameter After</th>
-            </tr>            
-            <tr>
-                <td>{{last_grinds[0].entry_time}}</td>
-                <td>{{(last_grinds[0].min_diameter + last_grinds[0].min_diameter_change)|round(2)}}</td>
-                <td>{{last_grinds[0].min_diameter|round(2)}}</td>
-            </tr>
-            
-            {% if num_grinds > 1 %}
-            <tr>
-                <td>{{last_grinds[1].entry_time}}</td>
-                <td>{{(last_grinds[1].min_diameter + last_grinds[0].min_diameter_change)|round(2)}}</td>
-                <td>{{last_grinds[1].min_diameter|round(2)}}</td>
-            </tr>
-            {% endif %}
-            {% if num_grinds > 2 %}
-            <tr>
-                <td>{{last_grinds[2].entry_time}}</td>
-                <td>{{(last_grinds[2].min_diameter + last_grinds[0].min_diameter_change)|round(2)}}</td>
-                <td>{{last_grinds[2].min_diameter|round(2)}}</td>
-            </tr>
-            {% endif %}
-        </table>
-        {% endif %}
+        
         <table class = "styled-table"> 
-            <caption>Averages</caption>
+            <caption>Stats For Selected Period</caption>
             <tr>
                 <th>Average Grind</th>
                 <th>Days Between Grinds</th>
@@ -132,9 +141,9 @@
             </tr>
             <tr style="display:none" id="row1">
                 {% if stats3[6] != 0 %}
-                <td >{{stats3[0]|round(2)}}</td>
+                <td >{{stats3[0]|round(3)}}</td>
                 <td>{{stats3[5]}}</td>
-                <td>{{stats3[1]|round(2)}}</td>
+                <td>{{stats3[1]|round(3)}}</td>
                 {% else %}
                 <td>No Grinds</td>
                 <td>No Grinds</td>
@@ -143,9 +152,9 @@
             </tr>
             <tr style="display:none" id="row2">
                 {% if stats2[6] != 0 %}
-                <td >{{stats2[0]|round(2)}}</td>
+                <td >{{stats2[0]|round(3)}}</td>
                 <td>{{stats2[5]}}</td>
-                <td>{{stats2[1]|round(2)}}</td>
+                <td>{{stats2[1]|round(3)}}</td>
                 {% else %}
                 <td>No Grinds</td>
                 <td>No Grinds</td>
@@ -154,9 +163,9 @@
             </tr>
             <tr id="row3">
                 {% if stats1[6] != 0 %}
-                <td >{{stats1[0]|round(2)}}</td>
+                <td >{{stats1[0]|round(3)}}</td>
                 <td>{{stats1[5]}}</td>
-                <td>{{stats1[1]|round(2)}}</td>
+                <td>{{stats1[1]|round(3)}}</td>
                 {% else %}
                 <td>No Grinds</td>
                 <td>No Grinds</td>

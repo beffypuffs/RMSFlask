@@ -7,6 +7,26 @@
 	.a{
 		font-size: 60px;
 	}
+	table, th, td {
+  		border:1px solid black;
+  		margin-left: auto; 
+  		margin-right: auto;
+	}
+	.styled-table{
+		border-collapse: collapse;
+		box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+	}
+	.btn-link {
+    border: none;
+    outline: none;
+    background: none;
+    cursor: pointer;
+    color: #0000EE;
+    padding: 0;
+    text-decoration: underline;
+    font-family: inherit;
+    font-size: inherit;
+}
 </style>
 <head>
 
@@ -25,8 +45,52 @@
 		</p>
 
 	</header>
-		<a href="http://127.0.0.1:5000/chocks">Fill out Chocks and Bearings forms </a><br>
-		<a href="http://127.0.0.1:5000/chocksView">View previously submitted forms </a>
-		<!--ADD PREVIOUSLY SUBMITTED FORMS-->
+
+	<form method="post" action="http://127.0.0.1:5000/chocksView">
+		<table class = "styled-table" style="width:60%">
+		<caption><strong>Search For Forms</strong>
+		<!-- seach bar to look for any value in the roll table -->
+		<input type = "text" id = "filter_input" onkeyup ="searchFunction()" placeholder = "Search" title="Type in desired table value ">
+		<br><br>
+			<!-- Display table headings-->
+			<thead>
+				<tr>
+					{% for header in headings %}
+						<th>{{ header }}</th>
+					{% endfor %}
+				</tr>
+			</thead>
+			<!-- Display SQL server data to index.html-->
+			<tbody>
+				{% for report in reports %}
+				<tr bgcolor="B0E0E6">
+					<td style="text-align:center"><button type="submit" name="report_clicked" value = '{{report.ID}}' class="btn-link">{{report.ID}}</button></td>
+					<td style="text-align:center">{{report.chock_number}}</td>
+					<td style="text-align:center">{{report.badge_number}}</td>
+					<td style="text-align:center">{{report.date}}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+			
+			
+				
+		</table>
+	</form>
 </body>
-</html>
+<script>
+	function searchFunction() {
+		let tabel, filter, input, tr, td, i;
+		input = document.getElementById("filter_input");
+		filter = input.value.toUpperCase();
+		tabel = document.getElementById("roll_table");
+		tr = document.getElementsByTagName("tr");
+		for (i = 1; i < tr.length; i++) {
+			if (tr[i].textContent.toUpperCase().indexOf(filter) > -1) {
+				tr[i].style.display = "";
+			} else {
+				tr[i].style.display = "none";
+				}
+			}
+		}
+</script>
+</html

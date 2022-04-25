@@ -110,7 +110,25 @@ Chocks and Bearings form
                 <label for="roll_mill">Mill</label> &nbsp;&nbsp;
                 <input type="text" id="roll_mill" name="roll_mill" value={{data.mill}}  > <br>
                 <label for="roll_type">Type of Roll</label>	
-                <input type="text" id=roll_type" name = "roll_type" value= {{data.roll_type}}  > <br>
+                {% if data.roll_type == 'wr' %}
+                <select name = "roll_type" id = "roll_type">
+                    <option value ="wr" selected>Work Roll</option>
+                    <option value = "bu">Back-Up</option>
+                    <option value = "imr">IMR</option>
+                </select>
+                {% elif data.roll_type == 'bu' %}
+                <select name = "roll_type" id = "roll_type">
+                    <option value ="wr" >Work Roll</option>
+                    <option value = "bu" selected>Back-Up</option>
+                    <option value = "imr">IMR</option>
+                </select>
+                {% else %}
+                <select name = "roll_type" id = "roll_type">
+                    <option value ="wr" >Work Roll</option>
+                    <option value = "bu">Back-Up</option>
+                    <option value = "imr" selected>IMR</option>
+                </select>
+                {% endif %}
                 <!--<input type="text" id="roll_id" name="roll-type">--> <br>		
                 <label for="chock-num">Chock No.</label>	
                 <input type="text" id="chock-num" name="chock-num" value= {{data.chock_number}}  > <br>		
@@ -121,12 +139,28 @@ Chocks and Bearings form
             
             <h3>Reasons for D & I</h3>
             <div>
+                {% if data.reason == 'scheduled' %}
                 <select name = "reasons_d_and_i" id = "reasons_d_and_i" value = "">
-                    <option value ="scheduled"  {% if data.reason == 'scheduled' %}selected{% endif %}>Scheduled</option>
-                    <option value = "mill_damage" {% if data.reason == 'mill_damage' %} selected {% endif %}> Mill Damage </option>
-                    <option value = "suspected_damage" {% if data.reason == 'suspected_damage' %} selected {% endif %}>Suspected Damage</option>
+                    <option value ="scheduled"  selected>Scheduled</option>
+                    <option value = "mill_damage"> Mill Damage </option>
+                    <option value = "suspected_damage">Suspected Damage</option>
 
                 </select>
+                {% elif data.reason == 'mill_damage' %}
+                <select name = "reasons_d_and_i" id = "reasons_d_and_i" value = "">
+                    <option value ="scheduled" >Scheduled</option>
+                    <option value = "mill_damage" selected> Mill Damage </option>
+                    <option value = "suspected_damage">Suspected Damage</option>
+
+                </select>
+                {% else %}
+                <select name = "reasons_d_and_i" id = "reasons_d_and_i" value = "">
+                    <option value ="scheduled" >Scheduled</option>
+                    <option value = "mill_damage"> Mill Damage </option>
+                    <option value = "suspected_damage" selected>Suspected Damage</option>
+
+                </select>
+                {% endif %}
                 <br>
                 {% if data.visible_chock_numbers == 'on' %}
                 <input type="checkbox" id="obvi" name="obvi" checked>
@@ -179,7 +213,7 @@ Chocks and Bearings form
                 <br>
                 Inboard Radial Seals: &emsp; <br>
                 <label for="num-rep">No. Replaced:</label> 
-                <input type="text" id="num-rep" name="num-rep" value="{{data.inboard_radials_seals_replaced}}"  > <br>
+                <input type="text" id="num-rep" name="num-rep" value="{{data.inboard_radial_seals_replaced}}"  > <br>
                 <label for="seals1">Inboard Face Seal</label>
                 <input type="text" id="seals1" name="seals1"  value={{data.inboard_face_seal}}  > <br>
                 <label for="mill1">Load Zone From Mill</label>
@@ -379,42 +413,58 @@ Chocks and Bearings form
     
                 Subtract "b" from "a" = The amount of Shims Needed for Zero Clearance 
                 <input type="text" id="droppedDifference" name="droppedDifference" value= "" > <br>
+                {% if data.was_paper_used == 'on' %}
+                <input type="checkbox" id="paper-used" name="paper-used" checked> &nbsp;
+                {% else %}
                 <input type="checkbox" id="paper-used" name="paper-used"  > &nbsp;
+                {% endif %}
                 <label for = "paper-used">Add 15% more Shim Material if Paper is used to allow from Compression <!-- Text entry, but can we automatiacally make the calculation appear when other values entered -->
                     The 112 Mill Work Rolls Drive Side Requires a 0.094 Clearance. </label> <br>
-
-                {% if data.bearing_depth == 'on' %}
+                {% if data.by_hand == 'on' %}
+                <input type="checkbox" id="shim" name="shim" checked> &nbsp;
                 {% else %}
-                {% endif %}
                 <input type="checkbox" id="shim" name="shim"  > &nbsp;
-                <label for="shim">Install Shim/Gasket and Install Cover and Evenly Snug Down all Bolts by Hand</label> <br>
-                {% if data.bearing_depth == 'on' %}
-                {% else %}
                 {% endif %}
-                <input type="checkbox" id="phases" name="phases"  > &nbsp;
+               
+                <label for="shim">Install Shim/Gasket and Install Cover and Evenly Snug Down all Bolts by Hand</label> <br>
+                
+                {% if data.was_torqued == 'on' %}
+                <input type="checkbox" id="phases" name="phases" checked> &nbsp;
+                {% else %}
+                <input type="checkbox" id="phases" name="phases" > &nbsp;
+                {% endif %}
+                
                 <label for="phases">In Four Phases Torque all Bolts in a Crisscross Pattern.
                     After each pass, turn the cones (inner races) one and a half times to sear the rollers.
                     First Torque Light. Second Torque Medium. Third Torque Full. Forth Torque Full.</label> <br>
 
-                {% if data.bearing_depth == 'on' %}
+                {% if data.ancillary_installed == 'on' %}
+                <input type="checkbox" id="ancillary" name="ancillary"  checked> &nbsp;
                 {% else %}
-                {% endif %}
                 <input type="checkbox" id="ancillary" name="ancillary"  > &nbsp;
+                {% endif %}
+                
                 <label for="ancillary">Install all Ancillary Equitment</label> <br>	
-                {% if data.bearing_depth == 'on' %}
+
+                {% if data.grease_pack_sealed == 'on' %}
+                <input type="checkbox" id="greasePack" name="greasePack"  checked> &nbsp;
                 {% else %}
-                {% endif %}
                 <input type="checkbox" id="greasePack" name="greasePack"  > &nbsp;
-                <label for="greasePack">Grease Pack all Seals. Use EP-2 Grease.</label> <br>
-                {% if data.bearing_depth == 'on' %}
-                {% else %}
                 {% endif %}
+                
+                <label for="greasePack">Grease Pack all Seals. Use EP-2 Grease.</label> <br>
+
+                {% if data.chock_ready_for_installation == 'on' %}
+                <input type="checkbox" id="ready" name="ready"  checked> &nbsp;
+                {% else %}
                 <input type="checkbox" id="ready" name="ready"  > &nbsp;
+                {% endif %}
+                
                 <label for="ready">Chock is Completely Ready for installation on a roll.</label> <br>			
             </div>
             <br>
             <h4 style="text-align: left;">Comments:</h4>
-            <textarea id="comments" name="comments" rows="15" cols="100" value = >{{data[50]}}</textarea>
+            <textarea id="comments" name="comments" rows="15" cols="100" value = >{{data.comments}}</textarea>
             <br>
             <br>
             <input type="submit" value="Edit Form" id="submitResponse" name = "submitResponse"> <input type="submit" value= "Remove Form" id ="submitResponse" name = 'submitResponse'>

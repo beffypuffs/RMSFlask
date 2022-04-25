@@ -104,7 +104,7 @@ table, th, td {
 		<!-- Main Kaiser logo and page navigation links -->
 		<img src="static/images/logo.png" alt="Kaiser Aluminium Logo"/>
 		<p style="text-align: center">
-			<strong>Home Roll Management Page</strong>  |  <a href="http://127.0.0.1:5000/chocksMenu">Chocks and Bearings </a>  |  <a href="http://127.0.0.1:5000/notifications">Notification Settings</a>  |  <a href="http://127.0.0.1:5000/help">Help</a>
+			<strong>Home Roll Management Page</strong>  |  <a href="http://127.0.0.1:5000/chocks">Chocks and Bearings </a>  |  <a href="http://127.0.0.1:5000/notifications">Notification Settings</a>  |  <a href="http://127.0.0.1:5000/help">Help</a>
 		</p>
 		<hr>
 	</header>
@@ -159,9 +159,9 @@ table, th, td {
 				<tbody>
 					{% for row in data %}
 					{% if row.scrapped == False%}
-					{% if row.approx_scrap_date.strftime('%Y-%m-%d') < '2023-08-01'  %}
+					{% if row.approx_scrap_date.strftime('%Y-%m-%d') < '2023-04-01'  %}
 					<tr bgcolor="#FF7F7F">
-					{% elif row.approx_scrap_date.strftime('%Y-%m-%d') < '2023-06-08' %}
+					{% elif row.approx_scrap_date.strftime('%Y-%m-%d') < '2023-10-08' %}
 					<tr bgcolor="#FFFFE0">
 					{% elif row.approx_scrap_date.strftime('%Y-%m-%d') < '2057-12-31' %}
 					<tr bgcolor="#90EE90">
@@ -178,36 +178,42 @@ table, th, td {
 				{% endif %}
 				{% endfor %}
 				
+				
 					
 			</table>
 		</form>
 		</div>
+		<br><br>
+		<div style='text-align:center'>
+			<a  href="http://127.0.0.1:5000/grindView">View all grinds</a>
+		</div>
 	</main>
-	<script>
-		//Filtering function for the search function to look through entire table for the value
-		function searchFunction() {
-		let tabel, filter, input, tr, td, i;
-		input = document.getElementById("filter_input");
-		filter = input.value.toUpperCase();
-		tabel = document.getElementById("roll_table");
-		tr = document.getElementsByTagName("tr");
-		for (i = 1; i < tr.length; i++) {
-			if (tr[i].textContent.toUpperCase().indexOf(filter) > -1) {
-				tr[i].style.display = "";
-			} else {
-				tr[i].style.display = "none";
-				}
-			}
-		}
-
-	  function openAddForm() {
-        document.getElementById("popupForm").style.display = "block";
-      }
-      function closeAddForm() {
-        document.getElementById("popupForm").style.display = "none";
-      }
-
-	</script>
+	
 	
 </body>
+<script>
+	//Filtering function for the search function to look through entire table for the value
+	function searchFunction() {
+	let tabel, filter, input, tr, td, i;
+	input = document.getElementById("filter_input");
+	filter = input.value.toUpperCase();
+	tabel = document.getElementById("roll_table");
+	tr = document.getElementsByTagName("tr");
+	for (i = 1; i < tr.length; i++) {
+		if (tr[i].textContent.toUpperCase().indexOf(filter) > -1) {
+			tr[i].style.display = "";
+		} else {
+			tr[i].style.display = "none";
+			}
+		}
+	}
+
+  function openAddForm() {
+	document.getElementById("popupForm").style.display = "block";
+  }
+  function closeAddForm() {
+	document.getElementById("popupForm").style.display = "none";
+  }
+
+</script>
 </html>

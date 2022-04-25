@@ -127,7 +127,11 @@ def add_roll():
 
 @app.route("/chocksMenu")
 def chocksMenu():
-    return render_template('chocks.html')
+    reports = db.session.query(Report).order_by(Report.ID.desc()).limit(80).all()
+    headings = ("ID", "Chock Number", "Badge Number", "Date Submitted")
+    for report in reports:
+        print(report.ID)
+    return render_template('chocksMenu.html', headings=headings, reports=reports)
 
 
 @app.route("/chocksView", methods = ['GET','POST']) 
@@ -161,10 +165,12 @@ def notifications():
 
 @app.route("/")
 def home():
-    # reset_stats()
+    reset_stats()
+    History.translate_history(db, 'grindFiles')
     # global CUR_DAY
     # advance_one_year(CUR_DAY)
     # CUR_DAY = CUR_DAY + datetime.timedelta(weeks=52) ##this is just for demo purposes, wont be used in production
+    make_reports()
     headings = ("Roll ID", "Diameter", "Scrap Diameter", "Approx. Scrap Date", "Grinds Left", "Mill", "Roll Type")
     results = db.session.query(Roll).order_by(Roll.approx_scrap_date)
 
@@ -186,7 +192,7 @@ def add_chock():
                 return render_template('error.html', message = message) #error message
         elif (request.form['submitResponse'] == 'Remove Form'):
             data = Requests.chock_request_data(request)
-            committed, message = Connections.remove_chock(data)
+            committed, message = Connections.remove_chock(data, Report)
             if (committed is True):
                 debug('Chocks & Bearings Form REMOVED successfully')
                 return render_template('successfulRemove.html')
@@ -195,8 +201,8 @@ def add_chock():
                 return render_template('error.html', message = message) #error message
         else:
             data = Requests.chock_request_data(request)
-            i = request.form['form_num']
-            committed, message = Connections.edit_chock(data, i)
+            print("HERE")
+            committed, message = Connections.edit_chock(data, Report)
             if (committed is True):
                 debug('Chocks & Bearings Form EDITED successfully')
                 return render_template('successfulEdit.html')
@@ -232,17 +238,29 @@ def roll_view():
     if request.method == 'POST':
         roll_num = request.form['roll_clicked']
         roll = db.session.query(Roll).filter_by(roll_num=roll_num).first() #since we know this is only going to grab 1 result, we just grab the first item in the initial resulting list. Result is a roll object 
-        grinds = db.session.query(Grind).filter_by(roll_num=roll_num).order_by(Grind.entry_time) #returns list of all grinds 
+        grinds = db.session.query(Grind).filter_by(roll_num=roll_num).order_by(Grind.entry_time).limit(10) #returns  list of the 10 most recent grinds
         info = db.session.query(Info).filter_by(mill=roll.mill, roll_type=roll.roll_type).first() #Returns the first item in the list
         graph = roll.generate_graphs(grinds, info)
+
+
         roll.generate_graphs_2(grinds, info, timedelta(weeks=52), False)
         roll.generate_graphs_2(grinds, info, timedelta(weeks=26), False)
         roll.generate_graphs_2(grinds, info, timedelta(weeks=13), False)
         stats1 = roll.avg_grind_stats(timedelta(weeks=52))
         stats2 = roll.avg_grind_stats(timedelta(weeks=26))
         stats3 = roll.avg_grind_stats(timedelta(weeks=13))
-        return render_template('rollView.html', graph=graph, roll_num = roll_num, last_grinds=grinds, num_grinds=grinds.count(), roll = roll, info=info, stats1=stats1, stats2=stats2, stats3=stats3)
+        return render_template('rollView.html', graph=graph, grinds = grinds, roll_num = roll_num, last_grinds=grinds, num_grinds=grinds.count(), roll = roll, info=info, stats1=stats1, stats2=stats2, stats3=stats3)
 
+
+
+@app.route('/grindView', methods = ['POST', 'GET'])
+def grind_view():
+    if request.method == 'POST':
+        pass
+    else:
+        grinds = db.session.query(Grind).filter_by(roll_num=1304).order_by(Grind.ID.desc()).limit(100).all()
+        headings = ("Entry Time", "Roll ID", "Diameter Change")
+        return render_template('grindView.html', grinds = grinds, headings = headings)
 
 
 def reset_stats():
@@ -274,8 +292,29 @@ def advance_one_year(today):
     # for roll in rolls:
     #     print(roll.days_between_grinds)
 
+def make_reports():
+    db.session.query(Report).delete()
+    badge_number = 57981
+    chock_number = 10
+    date = datetime.date(year=2021, month=12, day = 5)
+    i = 1
+    while i < 15:
+        data = valid_chock_form(date, badge_number, chock_number)
+        date += datetime.timedelta(days=19)
+        newReport = Report(data)
+        newReport.badge_number = badge_number
+        newReport.ID = i
+        db.session.add(newReport)
+        badge_number += 116
+        chock_number += 1
+        i += 1
+        db.session.commit()
 
-
+def valid_chock_form(date, badge_number, chock_number):
+    data = [date, chock_number]
+    for i in range(53):
+        data.append('NOT NULL')
+    return data
 if __name__ == "__main__":
     app.run()
     

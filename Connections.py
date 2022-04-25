@@ -69,20 +69,25 @@ def remove_chock(data, Report):
     date = data[0]
     badge_num = data[52]
     # comments = request.form['comments']
-    db.session.query(Report).filter_by(date=date, badge_number=badge_num)
+    db.session.query(Report).filter_by(date=date, badge_number=badge_num).delete()
+    db.session.commit()
     return True, "Successfully removed"
 
-def edit_chock(data, Report, i): #only works when date and bage_number are not changed, needs work in the future
+def edit_chock(data, Report): #only works when date and bage_number are not changed, needs work in the future
     # committed, message = remove_chock(data, Report)
     # if (committed is True):
     #     committed, message = add_chock(data, Report)
     # return committed, message
-    reports = db.session.query(Report).filter_by(ID=i).all()
-    
+    date = data[0]
+    badge_num = data[52]
+    reports = db.session.query(Report).filter_by(date=date, badge_number=badge_num).all()
     if len(reports) > 1 or len(reports) == 0: #i dont think it will ever be 0 since you hit edit 
         print("Something went wrong")
+        return False, "IDK"
     else:
         reports[0].edit(data)
+        return True, "Successfully Edited"
+
         
 
 # def rolls_order_now(connection):

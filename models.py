@@ -108,8 +108,6 @@ class Roll(db.Model):
                         cur_day = datetime.datetime(x[-1].year, x[-1].month, x[-1].day)
                         if (self.avg_grind != None):
                                 while diameter_proj > info.scrap_diameter: #projection based on specific rolls average grind
-                                        print(cur_day)
-                                        print(self.days_between_grinds)
                                         trend2_y.append(diameter_proj)
                                         trend2_x.append(cur_day)
                                         diameter_proj = diameter_proj - self.avg_grind
@@ -284,6 +282,18 @@ class Grind(db.Model):
         crowning_angle = db.Column(db.Float, nullable=False)
         crowning_bevel = db.Column(db.Float, nullable=False)
         min_diameter = db.Column(db.Float, nullable=False)
+        operator = db.Column(db.String, nullable=False)
+        program_no = db.Column(db.String, nullable=False)
+        shape_no = db.Column(db.String, nullable=False)
+        target_diameter = db.Column(db.Float, nullable=False)
+        TS_Hardness = db.Column(db.Float, nullable=True)
+        MD_Hardness = db.Column(db.Float, nullable=True)
+        HS_Hardness = db.Column(db.Float, nullable=True)
+        TS_Roughness = db.Column(db.Float, nullable=True)
+        MD_Roughness = db.Column(db.Float, nullable=True)
+        HS_Roughness = db.Column(db.Float, nullable=True)
+        formTolerance = db.Column(db.Float, nullable=False)
+
 
 
 class Employee(db.Model):
@@ -305,7 +315,7 @@ class Info(db.Model):
 
 class Report(db.Model):
         __tablename__ = 'report'
-        date = db.Column(db.String, primary_key=True)
+        date = db.Column(db.String, nullable=False)
         chock_number = db.Column(db.String, nullable=False)
         position = db.Column(db.String, nullable=False)
         reason = db.Column(db.String, nullable=False)
@@ -359,6 +369,8 @@ class Report(db.Model):
         mill = db.Column(db.String, nullable=False)
         badge_number = db.Column(db.String, nullable=False)
         roll_type = db.Column(db.String, nullable=False)
+        ID = db.Column(db.Integer, nullable=False, primary_key=True)
+
         def __init__(self, data, **kwargs):
                 super(Report, self).__init__(**kwargs)
                 self.date = data[0]
@@ -471,3 +483,5 @@ class Report(db.Model):
                 self.mill = data[51]
                 self.badge_number = data[52]
                 self.roll_type = data[53]
+
+                db.session.commit()
